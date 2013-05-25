@@ -15,6 +15,10 @@ public class Trap extends Item {
 	// 陷阱建造時間
 	protected float _buildingTime;
 
+	public float getBuildingTime() {
+		return _buildingTime;
+	}
+
 	public Trap() {
 		super();
 	}

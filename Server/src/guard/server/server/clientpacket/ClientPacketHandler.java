@@ -3,7 +3,11 @@ package guard.server.server.clientpacket;
 import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_CreateRoom;
+import static guard.server.server.clientpacket.ClientOpcodes.C_ExitGame;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
+import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterInventory;
 import static guard.server.server.clientpacket.ClientOpcodes.C_JoinRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LeaveRoom;
@@ -18,6 +22,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_RequestRemaingTim
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_SelectPlayerSpawnPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_SwitchPlayerType;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
 import guard.server.server.ClientProcess;
 import guard.server.server.model.GuardWorld;
 import guard.server.server.model.instance.PlayerInstance;
@@ -80,27 +85,39 @@ public class ClientPacketHandler {
 			case C_LoadMapDone:
 				new C_LoadMapDone(_client, packet);
 				break;
+			case C_GameStart:
+				break;
+			case C_ExitGame:
+				break;
+			case C_GameOver:
+				break;
 			case C_Gold:
 				new C_Gold(_client, packet);
 				break;
 			case C_HunterInventory:
 				new C_HunterInventory(_client, packet);
+				break;				
+			case C_HunterFire:
+				new C_HunterFire(_client,packet);
+				break;
+			case C_Trap:
+				new C_Trap(_client,packet);
 				break;
 			}
 		} catch (NumberFormatException nf) {
 			System.out.println("接收到一個null.");
-		} catch (SocketException e) {			
+		} catch (SocketException e) {
 			System.out.println(e);
-			//TODO ConnectionReset 處理，暫用
+			// TODO ConnectionReset 處理，暫用
 			PlayerInstance pc = _client.getActiveChar();
-			//case 房間中
-			if(pc != null){
-				if(pc.isInRoom())					
+			// case 房間中
+			if (pc != null) {
+				if (pc.isInRoom())
 					pc.getRoom().leaveRoom(pc);
 				GuardWorld.getInstance().RemovePlayer(pc);
 			}
-			//case 遊戲中
-		}catch(Exception e){
+			// case 遊戲中
+		} catch (Exception e) {
 			System.out.println(e);
 		}
 	}

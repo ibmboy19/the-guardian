@@ -13,7 +13,7 @@ public class ClientOpcodes {
 	// 加入房間，通知房間其他玩家有別的玩家加入，通知加入的玩家有其他玩家。
 	public static final int C_JoinRoom = 3;
 	// 離開房間，若為Host，則BreakRoom，不為Host則告知其他玩者離開，回傳該玩家離開封包。
-	//Leave Room的Leave Code >>> 0: break up, 1: 自離,2:他人離開
+	// Leave Room的Leave Code >>> 0: break up, 1: 自離,2:他人離開
 	public static final int C_LeaveRoom = 4;
 	// 刷新目前正在準備的房間
 	public static final int C_RefreshRoom = 5;
@@ -35,21 +35,23 @@ public class ClientOpcodes {
 	public static final int C_MoveState = 13;
 	// 刷新當前上線的玩家清單
 	public static final int C_RefreshAllPlayersList = 14;
-	//載入地圖完成
+	// 載入地圖完成
 	public static final int C_LoadMapDone = 15;
-	//開始遊戲 - 載入場景完畢且倒數完畢後，開始遊戲
+	// 開始遊戲 - 載入場景完畢且倒數完畢後，開始遊戲
 	public static final int C_GameStart = 16;
-	//遊戲中 中離 type 0:  ; type 1:
+	// 遊戲中 中離 type 0: ; type 1:
 	public static final int C_ExitGame = 17;
-	//遊戲結束 - 正常的遊戲結束
+	// 遊戲結束 - 正常的遊戲結束
 	public static final int C_GameOver = 18;
-	//金錢更新
+	// 金錢更新
 	public static final int C_Gold = 19;
-	//獵人狀態
+	// 獵人狀態
 	public static final int C_HunterState = 20;
-	//獵人道具欄
+	// 獵人道具欄
 	public static final int C_HunterInventory = 21;
-	//產生物件
-	public static final int C_NewGameObject = 22;
+	//獵人開槍 -> type 0 : 開火 ; type 1 : 命中 ; type 2 : 銷毀
+	public static final int C_HunterFire = 22;
+	//陷阱 -> type 0 : 建造; type 1 : 建造完成  ; 2 : 觸發 ; 3 : 銷毀
+	public static final int C_Trap = 23;
 
 }
