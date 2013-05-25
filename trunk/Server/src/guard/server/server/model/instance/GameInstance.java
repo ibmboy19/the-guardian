@@ -1,18 +1,23 @@
 package guard.server.server.model.instance;
 
 import static guard.server.server.clientpacket.C_Chat.C_Chat_ChatInRoomSystem;
+import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Destroy;
+import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Fire;
 import static guard.server.server.clientpacket.C_LoadMapDone.C_LoadMapDone_Done;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Start;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
+import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import guard.server.server.model.GameMap;
 import guard.server.server.model.GuardWorld;
 import guard.server.server.utils.collections.Lists;
+import guard.server.server.utils.collections.Maps;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,20 +30,61 @@ public class GameInstance extends TimerTask {
 	private Timer timer = new Timer();
 	/** 遊戲秒數 */
 	private float gameTime = 0.0f;
-
+	/** 房間識別碼 */
 	private final String _hostName;
-
 	/** 使用的地圖 */
 	private final GameMap _map;
 
+	/**
+	 * 取得遊戲時間
+	 * 
+	 * @return float
+	 */
+	public float getTime() {
+		return gameTime;
+	}
+
+	/** 取得遊戲地圖 */
 	public GameMap getMap() {
 		return _map;
+	}
+
+	/** 玩家部分 */
+	private List<HunterInstance> _hunterList = Lists.newList();
+	private GuardianInstance _guardian = null;
+
+	/** 陷阱們 */
+	private Map<Long, TrapInstance> _trapList = Maps.newConcurrentMap();
+
+	/** 子彈們 */
+	private Map<Long, BulletInstance> _bulletList = Maps.newConcurrentMap();
+
+	public void HunterFire(PlayerInstance pc, String position, String rotation) {
+		long _bulletID = System.currentTimeMillis();
+		_bulletList.put(_bulletID, new BulletInstance(pc.getAccountName(),
+				_bulletID, gameTime));
+		// TODO BroadCast To All : Fire
+		String _retPacket = String.valueOf(C_HunterFire) + C_PacketSymbol
+				+ String.valueOf(C_HunterFire_Fire) + C_PacketSymbol
+				+ pc.getAccountName() + C_PacketSymbol
+				+ String.valueOf(_bulletID) + C_PacketSymbol + position
+				+ C_PacketSymbol + rotation;
+		GuardWorld
+				.getInstance()
+				.getRoom(
+						GuardWorld.getInstance().getRoom(_hostName)
+								.get_membersList().get(0).getAccountName())
+				.broadcastPacketToRoom(_retPacket);
+	}
+
+	public void HunterFireHit(long bulletID) {
+
 	}
 
 	/**
 	 * 遊戲狀態 -> 0 : 等待玩家, 1 : 倒數, 2 : 遊戲載入中, 3 : 遊戲準備中, 4 : 遊戲開始, 5 : 結束(勝利或失敗)
 	 * */
-	private int gameState;
+	private GameState gameState;
 	private float gameTimeRecord, gamePlayingTime;
 
 	// 遊戲倒數中 - at state 2
@@ -48,22 +94,22 @@ public class GameInstance extends TimerTask {
 	private final float gameStartReadyTime = 20;
 
 	public boolean IsReady() {
-		return gameState == 1;
+		return gameState == GameState.CountDown;
 	}
 
 	private void GameReady() {
-		gameState = 1;
+		gameState = GameState.CountDown;
 		gameTimeRecord = Float.NEGATIVE_INFINITY;
 	}
 
 	private void GameLoading() {
-		gameState = 2;
+		gameState = GameState.Loading;
 		gameTimeRecord = gameTime;
 	}
 
 	// 載入完成呼叫函式,進入遊戲，倒數N秒後開始
 	private void GameStartReady() {
-		gameState = 3;
+		gameState = GameState.GameReady;
 		gameTimeRecord = gameTime;
 		// TODO 廣播開始遊戲封包
 		for (PlayerInstance members : GuardWorld.getInstance()
@@ -75,14 +121,14 @@ public class GameInstance extends TimerTask {
 
 	// 倒數完畢 開始遊戲
 	private void GameStart() {
-		gameState = 4;
+		gameState = GameState.GameStart;
 		gameTimeRecord = gameTime;
 		// TODO 傳送遊戲開始封包
 	}
 
 	// 遊戲時間超過，轉換到遊戲結束狀態
 	private void GameOver() {
-		gameState = 5;
+		gameState = GameState.GameOver;
 		gameTimeRecord = gameTime;
 		// TODO 傳送遊戲結束封包，等待計算中的勝利結果。
 	}
@@ -102,12 +148,9 @@ public class GameInstance extends TimerTask {
 		}
 	}
 
-	/* 玩家部分 */
-	private List<HunterInstance> _hunterList = Lists.newList();
-	private GuardianInstance _guardian = null;
-
 	// 分配玩者
-	public void DispatchPlayer(final List<HunterInstance> hunterList,final GuardianInstance guardian) {
+	public void DispatchPlayer(final List<HunterInstance> hunterList,
+			final GuardianInstance guardian) {
 		this._hunterList = hunterList;
 		this._guardian = guardian;
 	}
@@ -116,9 +159,7 @@ public class GameInstance extends TimerTask {
 	public GameInstance(final String hostName, final GameMap map) {
 		this._hostName = hostName;
 		this._map = map;
-		// this._hunterList = _hunterList;
-		// this._guardian = _guardian;
-		this.gameState = 0;
+		this.gameState = GameState.Waiting;
 		this.gameTimeRecord = Float.NEGATIVE_INFINITY;
 		this.gameCountDown = 5;
 
@@ -128,10 +169,10 @@ public class GameInstance extends TimerTask {
 	public void run() {
 
 		switch (gameState) {
-		case 0:// 等待玩家
+		case Waiting:// 等待玩家
 			GameReady();
 			break;
-		case 1:// 準備室倒數 - 準備開始遊戲
+		case CountDown:// 準備室倒數 - 準備開始遊戲
 			if (gameCountDown >= 0) {
 				if (gameTime - gameTimeRecord > 1) {
 					String _retpacket = String.valueOf(C_Chat) + C_PacketSymbol
@@ -162,16 +203,17 @@ public class GameInstance extends TimerTask {
 						.broadcastPacketToRoom(_retpacket);
 			}
 			break;
-		case 2:// 載入中 - 目前do nothing
+		case Loading:// 載入中 - 目前do nothing
 
 			break;
-		case 3:// 遊戲準備中 - 倒數N秒 暫定20
+		case GameReady:// 遊戲準備中 - 倒數N秒 暫定20
 			if (gameTime - gameTimeRecord > gameStartReadyTime) {
 				GameStart();
 			}
+			CheckAllBulletExpire();
 			break;
-		case 4:// 遊戲開始
-				// TODO 遊戲時間到檢查
+		case GameStart:// 遊戲開始
+			// TODO 遊戲時間到檢查
 			if (gameTime >= _map.getGamePlayTime() + gameTimeRecord) {
 				// TODO 傳送時間到(Time's up)封包
 
@@ -198,9 +240,10 @@ public class GameInstance extends TimerTask {
 
 				gamePlayingTime = gameTime;
 			}
+			CheckAllBulletExpire();
 			break;
-		case 5:// 遊戲結束
-				// TODO 計算勝利結果，傳送封包。
+		case GameOver:// 遊戲結束
+			// TODO 計算勝利結果，傳送封包。
 
 			// TODO 結束遊戲，傳送封包，自行銷毀實體。
 			break;
@@ -208,6 +251,29 @@ public class GameInstance extends TimerTask {
 
 		gameTime += 0.1;
 
+	}
+
+	/** 檢查所有過時子彈 */
+	private void CheckAllBulletExpire() {
+		if(_bulletList.size() == 0)return;
+		for (BulletInstance _bullet : _bulletList.values()) {
+			if (_bullet.CheckTimeExpire(gameTime)) {
+				// TODO 刪除子彈物件
+				String _retPacket = String.valueOf(C_HunterFire)
+						+ C_PacketSymbol + String.valueOf(C_HunterFire_Destroy)
+						+ C_PacketSymbol
+						+ String.valueOf(_bullet.getBulletInstanceID());
+				GuardWorld
+						.getInstance()
+						.getRoom(
+								GuardWorld.getInstance().getRoom(_hostName)
+										.get_membersList().get(0)
+										.getAccountName())
+						.broadcastPacketToRoom(_retPacket);
+				_bulletList.remove(_bullet.getBulletInstanceID());
+			}
+		}
+		System.out.println("所有bullet數量: "+_bulletList.size());
 	}
 
 	/**
@@ -222,14 +288,6 @@ public class GameInstance extends TimerTask {
 	}
 
 	/**
-	 * 取得遊戲時間
-	 * 
-	 * @return float
-	 */
-	public float getTime() {
-		return gameTime;
-	}
-	/**
 	 * 自行銷毀 case 正常結束 case 市長中離 case guardian中離 case 所有hunter中離
 	 * */
 
@@ -238,5 +296,21 @@ public class GameInstance extends TimerTask {
 	 * 
 	 * 
 	 * */
+
+	// 遊戲狀態 -> 0 : 等待玩家, 1 : 倒數, 2 : 遊戲載入中, 3 : 遊戲準備中, 4 : 遊戲開始, 5 : 結束(勝利或失敗)
+	public enum GameState {
+		Waiting(0), CountDown(1), Loading(2), GameReady(3), GameStart(4), GameOver(
+				5);
+
+		private int value;
+
+		GameState(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
+	}
 
 }

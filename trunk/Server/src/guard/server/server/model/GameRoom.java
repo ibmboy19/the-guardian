@@ -33,7 +33,7 @@ public class GameRoom {
 	private String _roomName;
 	/** 遊戲室人數上限 */
 	private int _maxPcCount = 4;
-	
+
 	/** 遊戲實例 */
 	private GameInstance _game;
 
@@ -111,7 +111,7 @@ public class GameRoom {
 					}
 
 				}
-				
+
 			}
 
 			// TODO 回傳分配結果封包
@@ -132,12 +132,13 @@ public class GameRoom {
 	 * playTime,hunterLives) ItemList : (,,,,,);(,,,,,);(,,,,,)...... TrapList :
 	 * (,,,,,);(,,,,,);(,,,,,)......
 	 **/
-	public GameRoom(String _roomName, PlayerInstance _leader, int _maxPcCount,GameMap _map,GameInstance _game) {
+	public GameRoom(String _roomName, PlayerInstance _leader, int _maxPcCount,
+			GameMap _map, GameInstance _game) {
 		this._roomName = _roomName;
 		this._maxPcCount = _maxPcCount;
 		/* 遊戲開始程序 */
 		// TODO 遊戲開始後，產生遊戲物件
-		
+
 		this._game = _game;
 
 		setLeader(_leader);

@@ -178,8 +178,8 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	/** 取得玩者資料 */
 	public String getPlayerModelData() {
 		String _data = String.valueOf(PlayerType_Hunter) + ","
-				+ String.valueOf(_lives) + "," + String.valueOf(_hp) + ","
-				+ String.valueOf(_gold);
+				+ _pc.getAccountName() + "," + String.valueOf(_lives) + ","
+				+ String.valueOf(_hp) + "," + String.valueOf(_gold);
 		return _data;
 	}
 }

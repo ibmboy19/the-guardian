@@ -49,10 +49,13 @@ public class GameMap {
 	public final int getHunterLives() {
 		return _hunterLives;
 	}
+
 	private final int _hunterHP;
-	public final int getHunterHP(){
+
+	public final int getHunterHP() {
 		return _hunterHP;
 	}
+
 	// 獵人擊殺獵人獎勵
 	private final int _hunterSlainedReward;
 
@@ -103,9 +106,10 @@ public class GameMap {
 	// 獵人道具模組
 	private final List<HunterItem> _itemList;
 
-	public HunterItem getItem(int _index) {		
-		HunterItem _item = _index < _itemList.size() ? _itemList.get(_index) : null;
-		
+	public HunterItem getItem(int _index) {
+		HunterItem _item = _index < _itemList.size() ? _itemList.get(_index)
+				: null;
+
 		return _item;
 	}
 
@@ -136,15 +140,16 @@ public class GameMap {
 
 		this._itemList = Lists.newList();
 		this._trapList = Lists.newList();
-		
+
 	}
 
 	public GameMap(String _mapName, String _mapCheckCode, int _gameMode,
-			float _gamePlayTime, int _hunterLives,int _hunterHP, int _hunterInitGold,
-			int _guardianInitGold, int _hunterSlainedReward,
-			int _arriveCheckPointReward, int _guardianReward,
-			float _guardianRewardInterval, int _guardianDmgReward,
-			List<HunterItem> _itemList, List<Trap> _trapList) {
+			float _gamePlayTime, int _hunterLives, int _hunterHP,
+			int _hunterInitGold, int _guardianInitGold,
+			int _hunterSlainedReward, int _arriveCheckPointReward,
+			int _guardianReward, float _guardianRewardInterval,
+			int _guardianDmgReward, List<HunterItem> _itemList,
+			List<Trap> _trapList) {
 		this._mapName = _mapName;
 		this._mapCheckCode = _mapCheckCode;
 
@@ -164,8 +169,6 @@ public class GameMap {
 
 		this._itemList = _itemList;
 		this._trapList = _trapList;
-		
-		
 
 	}
 
