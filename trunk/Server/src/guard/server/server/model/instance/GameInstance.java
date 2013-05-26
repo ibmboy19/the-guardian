@@ -57,12 +57,23 @@ public class GameInstance extends TimerTask {
 	private Map<Long, TrapInstance> _trapList = Maps.newConcurrentMap();
 
 	/** 子彈們 */
-	private Map<Long, BulletInstance> _bulletList = Maps.newConcurrentMap();
+	private int _bulletCounter = 0;
+	private Map<Integer, BulletInstance> _bulletList = Maps.newConcurrentMap();
 
-	public void HunterFire(PlayerInstance pc, String position, String rotation) {
-		long _bulletID = System.currentTimeMillis();
+	public BulletInstance getBullet(int _id) {
+		return _bulletList.get(_id);
+	}
+
+	public synchronized void HunterFire(PlayerInstance pc, String position,
+			String rotation) {
+		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
+		if (!hunter.CanFire())
+			return;
+
+		int _bulletID = _bulletCounter;
 		_bulletList.put(_bulletID, new BulletInstance(pc.getAccountName(),
 				_bulletID, gameTime));
+		hunter.Fire();
 		// TODO BroadCast To All : Fire
 		String _retPacket = String.valueOf(C_HunterFire) + C_PacketSymbol
 				+ String.valueOf(C_HunterFire_Fire) + C_PacketSymbol
@@ -75,9 +86,10 @@ public class GameInstance extends TimerTask {
 						GuardWorld.getInstance().getRoom(_hostName)
 								.get_membersList().get(0).getAccountName())
 				.broadcastPacketToRoom(_retPacket);
+		_bulletCounter++;
 	}
 
-	public void HunterFireHit(long bulletID) {
+	public void HunterFireHit(int bulletID) {
 
 	}
 
@@ -217,13 +229,6 @@ public class GameInstance extends TimerTask {
 			if (gameTime >= _map.getGamePlayTime() + gameTimeRecord) {
 				// TODO 傳送時間到(Time's up)封包
 
-				GuardWorld
-						.getInstance()
-						.getRoom(
-								GuardWorld.getInstance().getRoom(_hostName)
-										.get_membersList().get(0)
-										.getAccountName())
-						.broadcastPacketToRoom("");
 				GameOver();
 			}
 			// TODO //守護神每N秒獎金計算，及其他與時間相關計算
@@ -231,12 +236,6 @@ public class GameInstance extends TimerTask {
 					+ _map._guardianRewardInterval()) {
 
 				_guardian.RewardGold();
-				_guardian.getActiveChar().SendClientPacket(
-						C_Gold
-								+ C_PacketSymbol
-								+ String.valueOf(_guardian.getActiveChar()
-										.getPlayerType()) + C_PacketSymbol
-								+ String.valueOf(_guardian.getGold()));
 
 				gamePlayingTime = gameTime;
 			}
@@ -255,9 +254,10 @@ public class GameInstance extends TimerTask {
 
 	/** 檢查所有過時子彈 */
 	private void CheckAllBulletExpire() {
-		if(_bulletList.size() == 0)return;
+		if (_bulletList.size() == 0)
+			return;
 		for (BulletInstance _bullet : _bulletList.values()) {
-			if (_bullet.CheckTimeExpire(gameTime)) {
+			if (_bullet.CheckExpire(gameTime)) {
 				// TODO 刪除子彈物件
 				String _retPacket = String.valueOf(C_HunterFire)
 						+ C_PacketSymbol + String.valueOf(C_HunterFire_Destroy)
@@ -273,7 +273,7 @@ public class GameInstance extends TimerTask {
 				_bulletList.remove(_bullet.getBulletInstanceID());
 			}
 		}
-		System.out.println("所有bullet數量: "+_bulletList.size());
+		System.out.println("所有bullet數量: " + _bulletList.size());
 	}
 
 	/**
