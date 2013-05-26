@@ -1,7 +1,5 @@
 package guard.server.server.model.instance;
 
-import guard.server.server.model.GameProps.Trap.Trap;
-
 public class TrapInstance {
 	/** 遊戲中，Guardian放置的陷阱模組 */
 
@@ -9,19 +7,28 @@ public class TrapInstance {
 	private TrapState _trapState = TrapState.Building;
 	// 陷阱被產生的時間
 	private final float _trapCreateTime;
+
+	public float getCreateTime() {
+		return _trapCreateTime;
+	}
+
+	private final float _buildTime;
+
+	public float getBuildTime() {
+		return _buildTime;
+	}
+
 	// 在場景中的陷阱的識別碼
 	private final int _trapInstanceID;
-	// 使用的陷阱模型
-	private final Trap _trapModel;
 
 	public int getTrapInstanceID() {
 		return _trapInstanceID;
 	}
 
-	public TrapInstance(int _trapInstanceID, float _gameTime, Trap _trapModel) {
+	public TrapInstance(int _trapInstanceID, float _gameTime, float _buildTime) {
 		this._trapInstanceID = _trapInstanceID;
 		this._trapCreateTime = _gameTime;
-		this._trapModel = _trapModel;
+		this._buildTime = _buildTime;
 		this._trapState = TrapState.Building;
 	}
 
@@ -29,7 +36,7 @@ public class TrapInstance {
 	public void BuildUp(float _gameTime) {
 		if (_trapState != TrapState.Building)
 			return;
-		if (_gameTime - _trapCreateTime < _trapModel.getBuildingTime())
+		if (_gameTime - _trapCreateTime < _buildTime)
 			return;
 		this._trapState = TrapState.BuildUp;
 		// TODO 回傳陷阱狀態

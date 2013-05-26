@@ -16,6 +16,9 @@ public class GameMap {
 		return _mapName;
 	}
 
+	public static final int GameMode_Cooperation = 0;
+	public static final int GameMode_Greedy = 1;
+	
 	// 遊戲模式 0: 合作 ; 1:貪婪
 	private int _gameMode = 0;
 

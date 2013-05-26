@@ -1,5 +1,7 @@
 package guard.server.server.model.instance;
 
+import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
+import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Guardian;
 import guard.server.server.model.GameRoom;
 
@@ -7,7 +9,11 @@ public class GuardianInstance extends WickedRoadPlayerInstance {
 
 	/** 玩者 */
 	private final PlayerInstance _pc;
-	public PlayerInstance getActiveChar(){return _pc;}
+
+	public PlayerInstance getActiveChar() {
+		return _pc;
+	}
+
 	/** 使用的房間 */
 	private final GameRoom _room;
 
@@ -34,6 +40,9 @@ public class GuardianInstance extends WickedRoadPlayerInstance {
 
 	public void RewardGold() {
 		_gold += _room.getMap().getGuardianReward();
+		_pc.SendClientPacket(C_Gold + C_PacketSymbol
+				+ String.valueOf(_pc.getPlayerType()) + C_PacketSymbol
+				+ String.valueOf(getGold()));
 	}
 
 	/** 取得玩者資料 */

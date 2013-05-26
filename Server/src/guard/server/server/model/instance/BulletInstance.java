@@ -7,13 +7,18 @@ public class BulletInstance {
 	// 子彈被產生的時間
 	private final float _bulletCreateTime;
 	// 子彈的識別碼 - 用System.CurrentMills?
-	private final long _bulletInstanceID;
+	private final int _bulletInstanceID;
+	private boolean _isHit;
 
-	public long getBulletInstanceID() {
+	public boolean IsHit() {
+		return _isHit;
+	}
+
+	public int getBulletInstanceID() {
 		return _bulletInstanceID;
 	}
 
-	public BulletInstance(String _bulletBlonger, long _bulletInstanceID,
+	public BulletInstance(String _bulletBlonger, int _bulletInstanceID,
 			float _bulletCreateTime) {
 		this._bulletBlonger = _bulletBlonger;
 		this._bulletInstanceID = _bulletInstanceID;
@@ -21,12 +26,16 @@ public class BulletInstance {
 	}
 
 	// 擊中後 ， 子彈銷毀
-	public void Hit() {
+	public synchronized void Hit(HunterInstance _hunter) {
 		//
+		_isHit = true;
+		_hunter.ApplyHP(-15);
+		//TODO 廣播角色狀態封包
+		
 	}
 
 	// 子彈過時 銷毀
-	public boolean CheckTimeExpire(float _gameTime) {
+	public boolean CheckExpire(float _gameTime) {
 		if (_gameTime - _bulletCreateTime >= 3) {
 			return true;
 		}

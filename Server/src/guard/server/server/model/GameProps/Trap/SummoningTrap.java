@@ -6,7 +6,10 @@ public class SummoningTrap extends Trap {
 	 * */
 
 	private int _hp;// 陷阱的生命值
-	
+
+	public int getHp() {
+		return _hp;
+	}
 
 	public SummoningTrap() {
 		super();

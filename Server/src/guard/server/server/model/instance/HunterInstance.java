@@ -23,6 +23,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		return _room;
 	}
 
+	/** 復活次數 */
 	private int _lives;
 
 	public int getLives() {
@@ -49,6 +50,12 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	}
 
+	/**
+	 * 獵人血量相關
+	 * 
+	 * @param _adjustValue
+	 *            正值:治癒; 負值:傷害
+	 * */
 	public boolean IsDead() {
 		return _hp == 0;
 	}
@@ -59,12 +66,6 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		return _hp;
 	}
 
-	/**
-	 * 獵人血量相關
-	 * 
-	 * @param _adjustValue
-	 *            正值:治癒; 負值:傷害
-	 * */
 	public void ApplyHP(int _adjustValue) {
 		// 死人無作用
 		if (IsDead())
@@ -78,6 +79,24 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		 * TODO Send Packet : C_HunterState
 		 * */
 		// _lives, _hp, IsDead()
+	}
+
+	// 獵人開槍
+	private float _weaponEnergy = 1.0f;
+
+	/** 有足夠的能量? */
+	public boolean CanFire() {
+		return true;
+	}
+
+	/** 消耗能量 */
+	public void Fire() {
+		
+	}
+
+	/** 3秒回滿 ; 0.5秒傳一次封包 */
+	public void RecoveryWeaponEnergy() {
+
 	}
 
 	// 獵人道具欄
@@ -112,12 +131,6 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		//
 		HunterItem _itemToBuy = _room.getMap().getItem(_itemToBuyID);
 
-		/*
-		 * try { _itemToBuy = _room.getMap().getItem(_itemToBuyID);//.clone(); }
-		 * catch (CloneNotSupportedException e) { // TODO Auto-generated catch
-		 * block return; //e.printStackTrace(); }
-		 */
-		// if (_itemToBuy != null) {
 		_hunterInventory.put(_slotKey, _itemToBuy);
 		// 扣除金錢
 		_gold -= _itemToBuy.getPrice();
@@ -156,7 +169,8 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	// 抵達檢查點
 	public void ArriveCheckPoint() {
-
+		_gold += _room.getMap().getArriveCheckPointReward();
+		// TODO Send Packet C_Gold
 	}
 
 	public HunterInstance() {
