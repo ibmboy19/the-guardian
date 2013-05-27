@@ -222,6 +222,9 @@ public class GameInstance extends TimerTask {
 			if (gameTime - gameTimeRecord > gameStartReadyTime) {
 				GameStart();
 			}
+			for(HunterInstance _hunter : _hunterList){
+				_hunter.Update(gameTime);
+			}
 			CheckAllBulletExpire();
 			break;
 		case GameStart:// 遊戲開始
@@ -238,6 +241,9 @@ public class GameInstance extends TimerTask {
 				_guardian.RewardGold();
 
 				gamePlayingTime = gameTime;
+			}
+			for(HunterInstance _hunter : _hunterList){
+				_hunter.Update(gameTime);
 			}
 			CheckAllBulletExpire();
 			break;
@@ -273,7 +279,6 @@ public class GameInstance extends TimerTask {
 				_bulletList.remove(_bullet.getBulletInstanceID());
 			}
 		}
-		System.out.println("所有bullet數量: " + _bulletList.size());
 	}
 
 	/**

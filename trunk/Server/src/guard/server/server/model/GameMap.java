@@ -36,61 +36,74 @@ public class GameMap {
 	// 初始金錢
 	private final int _hunterInitGold;
 
-	public final int getHunterInitGold() {
+	public int getHunterInitGold() {
 		return _hunterInitGold;
 	}
 
 	private final int _guardianInitGold;
 
-	public final int getGuardianInitGold() {
+	public int getGuardianInitGold() {
 		return _guardianInitGold;
 	}
 
+	//獵人傷害值
+	private final int _meleeAttackValue = 10;
+	
+	public int getMeleeAttackValue(){
+		return _meleeAttackValue;
+	}
+	
+	private final int _bulletAttackValue = 15;
+	
+	public int getBulletAttackValue(){
+		return _bulletAttackValue;
+	}
+	
 	// 獵人初始生命次數
 	private final int _hunterLives;
 
-	public final int getHunterLives() {
+	public int getHunterLives() {
 		return _hunterLives;
 	}
 
 	private final int _hunterHP;
 
-	public final int getHunterHP() {
+	public int getHunterHP() {
 		return _hunterHP;
 	}
 
 	// 獵人擊殺獵人獎勵
 	private final int _hunterSlainedReward;
 
-	public final int getHunterSlainedReward() {
+	public int getHunterSlainedReward() {
 		return _hunterSlainedReward;
 	}
 
 	// 到達檢查點獎勵
 	private final int _arriveCheckPointReward;
 
-	public final int getArriveCheckPointReward() {
+	public int getArriveCheckPointReward() {
 		return _arriveCheckPointReward;
 	}
 
 	// 守護神獎勵
 	private final int _guardianReward;
 
-	public final int getGuardianReward() {
+	public int getGuardianReward() {
 		return _guardianReward;
 	}
 
 	// 守護神獎勵間隔
 	private final float _guardianRewardInterval;
 
-	public final float _guardianRewardInterval() {
+	public float _guardianRewardInterval() {
 		return _guardianRewardInterval;
 	}
 
 	// 守護神每1傷害的獎勵
 	private final int _guardianDmgReward;
 
-	public final int getGuardianDmgReward() {
+	public int getGuardianDmgReward() {
 		return _guardianDmgReward;
 	}
 

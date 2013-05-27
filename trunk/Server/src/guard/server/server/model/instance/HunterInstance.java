@@ -2,7 +2,10 @@ package guard.server.server.model.instance;
 
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_BuyItem;
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_UseItem;
+import static guard.server.server.clientpacket.C_MoveState.C_MoveState_SwitchMoveState;
+import static guard.server.server.clientpacket.C_MoveState.C_MoveState_UpdateStamina;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterInventory;
+import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Hunter;
 import guard.server.server.model.GameRoom;
@@ -81,8 +84,95 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// _lives, _hp, IsDead()
 	}
 
-	// 獵人開槍
+	/** 獵人移動相關 */
+	// 預計要以什麼方式移動
+	private boolean _runOrWalk = false;
+	private MoveState _moveState = MoveState.Idle;
+
+	// 切換移動方式
+	public void SwitchRunWalk(boolean _runwalkState) {
+		if (_lockStamina) {
+			if (_runOrWalk) {
+				_runOrWalk = false;
+				// Send Packet
+				_pc.getRoom().broadcastPacketToRoom(
+						String.valueOf(C_MoveState) + C_PacketSymbol
+								+ String.valueOf(C_MoveState_SwitchMoveState)
+								+ C_PacketSymbol + _pc.getAccountName()
+								+ C_PacketSymbol
+								+ String.valueOf(_runOrWalk ? 1 : 0));
+			}
+			return;
+		}
+		if (_runOrWalk != _runwalkState) {
+			this._runOrWalk = _runwalkState;
+			// Send Packet
+			_pc.getRoom().broadcastPacketToRoom(
+					String.valueOf(C_MoveState) + C_PacketSymbol
+							+ String.valueOf(C_MoveState_SwitchMoveState)
+							+ C_PacketSymbol + _pc.getAccountName()
+							+ C_PacketSymbol
+							+ String.valueOf(_runOrWalk ? 1 : 0));
+		}
+	}
+
+	// 更新移動狀態
+	public void UpdateMoveState(int _fb, int _lr) {
+		if (_fb == 0 && _lr == 0) {
+			_moveState = MoveState.Idle;
+		} else if (_runOrWalk && !_lockStamina) {
+			_moveState = MoveState.Run;
+		} else {
+			_moveState = MoveState.Walk;
+		}
+	}
+
+	// 耐力
+	public static final float MIN_Stamina = 0.0f, MAX_Stamina = 1.0f;
+	private float _stamina = 1.0f;
+	// 鎖耐力
+	private boolean _lockStamina = false;
+
+	private void ConsumeStamina() {
+		if (_stamina != MIN_Stamina) {
+			_stamina = MathUtil.Clamp(_stamina - 0.01f, MIN_Stamina,
+					MAX_Stamina);
+			// Send Packet
+			_pc.SendClientPacket(String.valueOf(C_MoveState) + C_PacketSymbol
+					+ C_MoveState_UpdateStamina + C_PacketSymbol
+					+ String.valueOf(_stamina));
+		} else {
+			_lockStamina = true;
+			//auto switch run walk
+			_moveState = MoveState.Walk;
+			_runOrWalk = false;
+			_pc.getRoom().broadcastPacketToRoom(
+					String.valueOf(C_MoveState) + C_PacketSymbol
+							+ String.valueOf(C_MoveState_SwitchMoveState)
+							+ C_PacketSymbol + _pc.getAccountName()
+							+ C_PacketSymbol
+							+ String.valueOf(_runOrWalk ? 1 : 0));
+		}
+	}
+
+	private void RecoveryStamina() {
+		if (_stamina != MAX_Stamina) {
+			_stamina = MathUtil.Clamp(_stamina + 0.03f, MIN_Stamina,
+					MAX_Stamina);
+			if (_lockStamina && _stamina >= .3f) {
+				_lockStamina = false;
+			}
+			// Send Packet
+			_pc.SendClientPacket(String.valueOf(C_MoveState) + C_PacketSymbol
+					+ C_MoveState_UpdateStamina + C_PacketSymbol
+					+ String.valueOf(_stamina));
+		}
+	}
+
+	/** 獵人開火 */
+	public static final float MIN_WeaponEnergy = 0.0f, MAX_WeaponEnergy = 1.0f;
 	private float _weaponEnergy = 1.0f;
+	
 
 	/** 有足夠的能量? */
 	public boolean CanFire() {
@@ -91,11 +181,11 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 消耗能量 */
 	public void Fire() {
-		
+
 	}
 
 	/** 3秒回滿 ; 0.5秒傳一次封包 */
-	public void RecoveryWeaponEnergy() {
+	private void RecoveryWeaponEnergy() {
 
 	}
 
@@ -148,6 +238,20 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	}
 
+	/**
+	 * 主要更新函式
+	 * */
+	public void Update(float gameTime) {
+		switch (_moveState) {
+		case Run:
+			ConsumeStamina();
+			break;
+		default:
+			RecoveryStamina();
+			break;
+		}
+	}
+
 	// 使用道具
 	public void UseItem(int _key) {
 		// 查無物品
@@ -195,5 +299,19 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 				+ _pc.getAccountName() + "," + String.valueOf(_lives) + ","
 				+ String.valueOf(_hp) + "," + String.valueOf(_gold);
 		return _data;
+	}
+
+	public enum MoveState {
+		Run(0), Walk(1), Idle(2);
+
+		private int value;
+
+		MoveState(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
 	}
 }
