@@ -16,6 +16,8 @@ public class C_HunterFire {
 	public static final int C_HunterFire_Hit = 1;
 	// 過時 銷毀
 	public static final int C_HunterFire_Destroy = 2;
+	//回復武器能量
+	public static final int C_HunterFire_WeaponEnergy = 3;
 
 	//
 	public static final int Hit_Player = 0;
