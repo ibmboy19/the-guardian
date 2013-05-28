@@ -16,7 +16,7 @@ public class C_HunterFire {
 	public static final int C_HunterFire_Hit = 1;
 	// 過時 銷毀
 	public static final int C_HunterFire_Destroy = 2;
-	//回復武器能量
+	// 回復武器能量
 	public static final int C_HunterFire_WeaponEnergy = 3;
 
 	//
@@ -49,9 +49,9 @@ public class C_HunterFire {
 			break;
 		case C_HunterFire_Hit:
 			// 發射的子彈打到對象，算傷害 刪除
+			BulletInstance _bullet = null;
 			switch (Integer.parseInt(_packet.split(C_PacketSymbol)[2])) {
 			case Hit_Player:
-				BulletInstance _bullet = null;
 				if ((_bullet = game.getBullet(Integer.valueOf(_packet
 						.split(C_PacketSymbol)[3]))) == null) {
 					return;
@@ -67,6 +67,20 @@ public class C_HunterFire {
 						+ C_PacketSymbol + _packet.split(C_PacketSymbol)[3]);
 				break;
 			case Hit_Jail:
+				if ((_bullet = game.getBullet(Integer.valueOf(_packet
+						.split(C_PacketSymbol)[3]))) == null) {
+					return;
+				}
+				if (_bullet.IsHit()) {
+					return;
+				}
+				//
+				//
+				game.AttackTrapJail(
+						Integer.valueOf(_packet.split(C_PacketSymbol)[3]),
+						Integer.valueOf(_packet.split(C_PacketSymbol)[4]),
+						Integer.valueOf(_packet.split(C_PacketSymbol)[5]));
+
 				break;
 			}
 			break;

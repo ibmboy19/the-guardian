@@ -3,16 +3,24 @@ package guard.server.server.model.instance;
 import static guard.server.server.clientpacket.C_Chat.C_Chat_ChatInRoomSystem;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Destroy;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Fire;
+import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Hit;
+import static guard.server.server.clientpacket.C_HunterFire.Hit_Jail;
 import static guard.server.server.clientpacket.C_LoadMapDone.C_LoadMapDone_Done;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Start;
+import static guard.server.server.clientpacket.C_Trap.C_Trap_BuildUp;
+import static guard.server.server.clientpacket.C_Trap.C_Trap_Destroy;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
-import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
 import guard.server.server.model.GameMap;
 import guard.server.server.model.GuardWorld;
+import guard.server.server.model.TrapSlot;
+import guard.server.server.model.GameProps.Trap.DetonatedTrap;
+import guard.server.server.model.GameProps.Trap.SummoningTrap;
+import guard.server.server.model.GameProps.Trap.TimingTrap;
 import guard.server.server.utils.collections.Lists;
 import guard.server.server.utils.collections.Maps;
 
@@ -54,7 +62,133 @@ public class GameInstance extends TimerTask {
 	private GuardianInstance _guardian = null;
 
 	/** 陷阱們 */
-	private Map<Long, TrapInstance> _trapList = Maps.newConcurrentMap();
+	private Map<Integer, TrapSlot> _allTrapList = Maps.newConcurrentMap();
+
+	public void CheckSlot(String _packet) {
+		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
+		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
+		int _trapID = Integer.valueOf(_packet.split(C_PacketSymbol)[4]);
+		if (!_allTrapList.containsKey(_slot)) {
+			_allTrapList.put(_slot, new TrapSlot());
+		}
+		if (_allTrapList.get(_slot).CheckSlot(_key)) {
+			return;
+		}
+		if (_map.getTrap(_trapID) == null)
+			return;
+		boolean _isBuild = false;
+		if (_map.getTrap(_trapID) instanceof DetonatedTrap) {
+			_allTrapList.get(_slot).PutTrap(
+					_key,
+					new DetonatedTrapInstance(_slot, _key, gameTime, _map
+							.getTrap(_trapID).getBuildingTime()));
+			_isBuild = true;
+		} else if (_map.getTrap(_trapID) instanceof SummoningTrap) {
+			_allTrapList.get(_slot).PutTrap(
+					_key,
+					new SummoningTrapInstance(_slot, _key, gameTime, _map
+							.getTrap(_trapID).getBuildingTime(),
+							((SummoningTrap) _map.getTrap(_trapID)).getHp()));
+			_isBuild = true;
+		} else if (_map.getTrap(_trapID) instanceof TimingTrap) {
+			_allTrapList.get(_slot).PutTrap(
+					_key,
+					new TimingTrapInstance(_slot, _key, gameTime, _map.getTrap(
+							_trapID).getBuildingTime(), ((TimingTrap) _map
+							.getTrap(_trapID)).getLifeTime(),
+							((TimingTrap) _map.getTrap(_trapID))
+									.getEffectInterval()));
+			_isBuild = true;
+		}
+
+		if (_isBuild) {
+			// Send Packet
+			GuardWorld
+					.getInstance()
+					.getRoom(
+							GuardWorld.getInstance().getRoom(_hostName)
+									.get_membersList().get(0).getAccountName())
+					.broadcastPacketToRoom(_packet);
+		}
+	}
+
+	public void TrigTrap(String _packet) {
+		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
+		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
+
+		if (_allTrapList.containsKey(_slot)
+				&& _allTrapList.get(_slot).getTrapList().containsKey(_key)) {
+			if (_allTrapList.get(_slot).getTrapList().get(_key).TrapTrigged()) {
+
+				// Send Packet
+				GuardWorld
+						.getInstance()
+						.getRoom(
+								GuardWorld.getInstance().getRoom(_hostName)
+										.get_membersList().get(0)
+										.getAccountName())
+						.broadcastPacketToRoom(_packet);
+			}
+		}
+	}
+
+	public void AttackTrapJail(int _bulletID,int _slot,int _key){
+		if (_allTrapList.containsKey(_slot)
+				&& _allTrapList.get(_slot).getTrapList().containsKey(_key)) {
+		
+			if(_allTrapList.get(_slot).getTrapList().get(_key) instanceof SummoningTrapInstance){
+				if(((SummoningTrapInstance)_allTrapList.get(_slot).getTrapList().get(_key)).ApplyDamage(_map.getBulletAttackValue())){
+					//TODO Send Packet 陷阱損壞
+					_allTrapList.get(_slot).getTrapList().remove(_key);
+					
+					GuardWorld
+					.getInstance()
+					.getRoom(
+							GuardWorld.getInstance().getRoom(_hostName)
+									.get_membersList().get(0).getAccountName())
+					.broadcastPacketToRoom(String.valueOf(C_Trap)+C_PacketSymbol+
+							String.valueOf(C_Trap_Destroy)+C_PacketSymbol+
+							String.valueOf(_slot)+C_PacketSymbol+
+							String.valueOf(_key));
+					
+				}
+			}
+			
+			
+			GuardWorld
+			.getInstance()
+			.getRoom(
+					GuardWorld.getInstance().getRoom(_hostName)
+							.get_membersList().get(0).getAccountName())
+			.broadcastPacketToRoom(String.valueOf(C_HunterFire)
+					+ C_PacketSymbol + String.valueOf(C_HunterFire_Hit)
+					+ C_PacketSymbol + String.valueOf(Hit_Jail)
+					+ C_PacketSymbol + String.valueOf(_bulletID));
+		}		
+	}
+
+	private void CheckAllTrapBuildUp() {
+		for (TrapSlot _trapSlotList : _allTrapList.values()) {
+			for (TrapInstance _trapInstance : _trapSlotList.getTrapList()
+					.values()) {
+				if (_trapInstance.IsBuildUp(gameTime)) {					
+					// Send Packet
+					String _packet = String.valueOf(C_Trap) + C_PacketSymbol
+							+ String.valueOf(C_Trap_BuildUp) + C_PacketSymbol
+							+ _trapInstance.getSlotID() + C_PacketSymbol
+							+ _trapInstance.getSlotKey();
+
+					GuardWorld
+							.getInstance()
+							.getRoom(
+									GuardWorld.getInstance().getRoom(_hostName)
+											.get_membersList().get(0)
+											.getAccountName())
+							.broadcastPacketToRoom(_packet);
+				}
+			}
+		}
+	}
 
 	/** 子彈們 */
 	private int _bulletCounter = 0;
@@ -69,7 +203,6 @@ public class GameInstance extends TimerTask {
 		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
 		if (!hunter.CanFire())
 			return;
-
 		int _bulletID = _bulletCounter;
 		_bulletList.put(_bulletID, new BulletInstance(pc.getAccountName(),
 				_bulletID, gameTime));
@@ -222,10 +355,11 @@ public class GameInstance extends TimerTask {
 			if (gameTime - gameTimeRecord > gameStartReadyTime) {
 				GameStart();
 			}
-			for(HunterInstance _hunter : _hunterList){
+			for (HunterInstance _hunter : _hunterList) {
 				_hunter.Update(gameTime);
 			}
 			CheckAllBulletExpire();
+			CheckAllTrapBuildUp();
 			break;
 		case GameStart:// 遊戲開始
 			// TODO 遊戲時間到檢查
@@ -242,10 +376,11 @@ public class GameInstance extends TimerTask {
 
 				gamePlayingTime = gameTime;
 			}
-			for(HunterInstance _hunter : _hunterList){
+			for (HunterInstance _hunter : _hunterList) {
 				_hunter.Update(gameTime);
 			}
 			CheckAllBulletExpire();
+			CheckAllTrapBuildUp();
 			break;
 		case GameOver:// 遊戲結束
 			// TODO 計算勝利結果，傳送封包。
