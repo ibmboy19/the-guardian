@@ -1,8 +1,9 @@
 package guard.server.server.clientpacket;
 
+import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
+import static guard.server.server.model.instance.PlayerInstance.PlayerType_Guardian;
 import guard.server.server.ClientProcess;
 import guard.server.server.model.GameRoom;
-import static guard.server.server.model.instance.PlayerInstance.PlayerType_Guardian;
 import guard.server.server.model.instance.PlayerInstance;
 
 public class C_SelectPlayerSpawnPoint {
@@ -18,6 +19,6 @@ public class C_SelectPlayerSpawnPoint {
 		if (room == null)
 			return;
 		
-		room.broadcastPacketToRoom(_packet);
+		room.broadcastPacketToRoom(_packet+C_PacketSymbol+pc.getPlayerModelDataPacket());
 	}
 }

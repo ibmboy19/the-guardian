@@ -3,8 +3,20 @@ package guard.server.server.model.instance;
 public class TrapInstance {
 	/** 遊戲中，Guardian放置的陷阱模組 */
 
+	// 在game中的編號
+	private final int _slotID, _slotKey;
+
+	public int getSlotID() {
+		return _slotID;
+	}
+
+	public int getSlotKey() {
+		return _slotKey;
+	}
+
 	// 陷阱狀態
 	private TrapState _trapState = TrapState.Building;
+
 	// 陷阱被產生的時間
 	private final float _trapCreateTime;
 
@@ -18,35 +30,33 @@ public class TrapInstance {
 		return _buildTime;
 	}
 
-	// 在場景中的陷阱的識別碼
-	private final int _trapInstanceID;
-
-	public int getTrapInstanceID() {
-		return _trapInstanceID;
-	}
-
-	public TrapInstance(int _trapInstanceID, float _gameTime, float _buildTime) {
-		this._trapInstanceID = _trapInstanceID;
+	public TrapInstance(int _slotID, int _slotKey, float _gameTime,
+			float _buildTime) {
+		this._slotID = _slotID;
+		this._slotKey = _slotKey;
 		this._trapCreateTime = _gameTime;
 		this._buildTime = _buildTime;
 		this._trapState = TrapState.Building;
 	}
 
 	// 建造完成
-	public void BuildUp(float _gameTime) {
+	public boolean IsBuildUp(float _gameTime) {
 		if (_trapState != TrapState.Building)
-			return;
+			return false;
 		if (_gameTime - _trapCreateTime < _buildTime)
-			return;
+			return false;
 		this._trapState = TrapState.BuildUp;
+		return true;
 		// TODO 回傳陷阱狀態
+
 	}
 
-	// 被踩到/被打爆
-	public void TrapTrigged() {
+	// 陷阱被觸發
+	public boolean TrapTrigged() {
 		if (this._trapState != TrapState.BuildUp)
-			return;
+			return false;
 		this._trapState = TrapState.Trigged;
+		return true;
 		// TODO 回傳陷阱狀態
 	}
 

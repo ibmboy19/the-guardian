@@ -35,16 +35,15 @@ public class C_LoadMapDone {
 		// TODO 回傳玩家資訊
 		switch (pc.getPlayerType()) {
 		case PlayerType_Hunter:
-			_retpacket += C_PacketSymbol + pc.getPlayerModelDataPacket();
 			break;
 		case PlayerType_Guardian:
-			String _retGuardianPacket = "";
+			/*String _retGuardianPacket = "";
 			for (PlayerInstance _member : _room.getMembers()) {
 				_retGuardianPacket += _member.getPlayerModelDataPacket() + ";";
 			}
 			_retGuardianPacket = _retGuardianPacket.substring(0,
-					_retGuardianPacket.length() - 1);
-			_retpacket += C_PacketSymbol + _retGuardianPacket;
+					_retGuardianPacket.length() - 1);*/
+			_retpacket += C_PacketSymbol + pc.getPlayerModelDataPacket();
 			break;
 		}
 

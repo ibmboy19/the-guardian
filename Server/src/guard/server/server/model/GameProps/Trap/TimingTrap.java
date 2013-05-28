@@ -6,7 +6,16 @@ public class TimingTrap extends DetonatedTrap {
 	 * 持續型陷阱
 	 * */
 	protected float _lifeTime;// 陷阱存活時間
+
+	public float getLifeTime() {
+		return _lifeTime;
+	}
+
 	protected float _effectInterval;// 陷阱作用的間隔
+
+	public float getEffectInterval() {
+		return _effectInterval;
+	}
 
 	public TimingTrap() {
 		super();
