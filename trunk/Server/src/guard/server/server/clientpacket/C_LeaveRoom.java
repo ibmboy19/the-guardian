@@ -19,9 +19,6 @@ public class C_LeaveRoom {
 		if (!pc.isInRoom()) {
 			return;
 		}
-		if (pc.IsReady()) {
-			return;
-		}
 		GameRoom _room = pc.getRoom();
 		if (_room.IsLocked()) {
 			return;

@@ -1,6 +1,8 @@
 package guard.server.server.clientpacket;
 
+import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_PlayerReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
+import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Guardian;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Hunter;
 import guard.server.server.ClientProcess;
@@ -21,6 +23,7 @@ public class C_RoomReady {
 	 * */
 	public static final int C_RoomReady_Ready = 0;
 	public static final int C_RoomReady_Start = 1;
+	public static final int C_RoomReady_PlayerReady = 2;
 
 	public C_RoomReady(ClientProcess _client, String _packet) {
 
@@ -52,6 +55,11 @@ public class C_RoomReady {
 				return;
 			// 玩家準備好
 			pc.Ready();
+
+			_room.broadcastPacketToRoom(String.valueOf(C_RoomReady)
+					+ C_PacketSymbol + String.valueOf(C_RoomReady_PlayerReady)
+					+ C_PacketSymbol + pc.getAccountName());
+
 			// 檢查房間狀態
 			_room.CheckReadyState();
 			break;
@@ -85,7 +93,7 @@ public class C_RoomReady {
 					break;
 				}
 			}
-			_room.getGame().DispatchPlayer(_hunterList,_guardian);
+			_room.getGame().DispatchPlayer(_hunterList, _guardian);
 			_room.getGame().startGameTimer(0);
 			break;
 		}

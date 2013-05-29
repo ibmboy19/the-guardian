@@ -34,6 +34,7 @@ import java.util.TimerTask;
  * 開始遊戲所產生的物件
  */
 public class GameInstance extends TimerTask {
+
 	/** 計時器 */
 	private Timer timer = new Timer();
 	/** 遊戲秒數 */
@@ -306,8 +307,7 @@ public class GameInstance extends TimerTask {
 		this._map = map;
 		this.gameState = GameState.Waiting;
 		this.gameTimeRecord = Float.NEGATIVE_INFINITY;
-		this.gameCountDown = 5;
-
+		this.gameCountDown = 3;
 	}
 
 	@Override
