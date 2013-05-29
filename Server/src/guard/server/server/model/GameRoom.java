@@ -62,8 +62,7 @@ public class GameRoom {
 		}
 		boolean _isRoomReady = true;
 		for (PlayerInstance _member : getMembers()) {
-			_isRoomReady &= _member.IsReady();
-			// System.out.println(_member.getAccountName()+" "+_member.IsReady());
+			_isRoomReady &= _member.IsReady();			
 		}
 		if (_isRoomReady) {
 			LockRoom();
