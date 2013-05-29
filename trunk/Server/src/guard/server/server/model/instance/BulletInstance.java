@@ -30,8 +30,11 @@ public class BulletInstance {
 		//
 		_isHit = true;
 		_hunter.ApplyHP(-15);
-		//TODO 廣播角色狀態封包
 		
+	}
+	//擊中其他
+	public void Hit(){
+		_isHit = true;
 	}
 
 	// 子彈過時 銷毀

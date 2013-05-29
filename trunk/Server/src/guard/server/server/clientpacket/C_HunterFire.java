@@ -74,6 +74,7 @@ public class C_HunterFire {
 				if (_bullet.IsHit()) {
 					return;
 				}
+				_bullet.Hit();
 				//
 				//
 				game.AttackTrapJail(
