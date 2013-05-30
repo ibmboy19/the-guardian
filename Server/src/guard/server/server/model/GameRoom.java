@@ -62,7 +62,7 @@ public class GameRoom {
 		}
 		boolean _isRoomReady = true;
 		for (PlayerInstance _member : getMembers()) {
-			_isRoomReady &= _member.IsReady();			
+			_isRoomReady &= _member.IsReady();
 		}
 		if (_isRoomReady) {
 			LockRoom();
@@ -143,6 +143,7 @@ public class GameRoom {
 		setLeader(_leader);
 		_membersList.add(_leader);
 		_leader.setRoom(this);
+		connectionDetectThread.start();
 		// System.out.println("創造一間" + _maxPcCount + "人的房間");
 	}
 
@@ -261,8 +262,7 @@ public class GameRoom {
 		PlayerInstance[] members = getMembers();
 		for (PlayerInstance member : members) {
 			member.ResetState();
-			member.SendClientPacket(String.valueOf(C_LeaveRoom + C_PacketSymbol
-					+ String.valueOf(C_LeaveRoom_BreakUp)));
+			member.SendClientPacket(String.valueOf(C_LeaveRoom + C_PacketSymbol + String.valueOf(C_LeaveRoom_BreakUp)));
 		}
 
 		GuardWorld.getInstance().RemoveRoom(this);
@@ -354,5 +354,33 @@ public class GameRoom {
 		}
 		return _ret;
 	}
+
+	/**
+	 * 連線偵測執行緒
+	 */
+	private Thread connectionDetectThread = new Thread(new Runnable() {
+
+		@Override
+		public void run() {
+			while (!gameIsOver()) {
+				for (PlayerInstance pc : _membersList) {
+					if (pc.isInRoom() && pc.getNetConnection().get_csocket().isClosed()) {
+						// TODO 斷線處理
+						if(_leader == pc){
+							// 室長斷線
+						} else{
+							// 成員斷線
+						}
+					}
+				}
+				gameIsOver();
+			}
+			connectionDetectThread.interrupt();
+		}
+
+		private boolean gameIsOver() {
+			return _leader.getRoom().getGame().IsGameOver();
+		}
+	});
 
 }
