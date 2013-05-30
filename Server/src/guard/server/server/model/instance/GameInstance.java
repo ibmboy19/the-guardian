@@ -242,6 +242,10 @@ public class GameInstance extends TimerTask {
 	public boolean IsReady() {
 		return gameState == GameState.CountDown;
 	}
+	//Important!!!!!
+	public boolean IsGameOver(){
+		return gameState == GameState.GameOver;
+	}
 
 	private void GameReady() {
 		gameState = GameState.CountDown;
@@ -414,6 +418,7 @@ public class GameInstance extends TimerTask {
 				_bulletList.remove(_bullet.getBulletInstanceID());
 			}
 		}
+		System.out.println("bullet count : "+_bulletList.size());
 	}
 
 	/**
@@ -439,8 +444,7 @@ public class GameInstance extends TimerTask {
 
 	// 遊戲狀態 -> 0 : 等待玩家, 1 : 倒數, 2 : 遊戲載入中, 3 : 遊戲準備中, 4 : 遊戲開始, 5 : 結束(勝利或失敗)
 	public enum GameState {
-		Waiting(0), CountDown(1), Loading(2), GameReady(3), GameStart(4), GameOver(
-				5);
+		Waiting(0), CountDown(1), Loading(2), GameReady(3), GameStart(4), GameOver(5);
 
 		private int value;
 

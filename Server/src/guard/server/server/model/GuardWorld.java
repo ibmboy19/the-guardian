@@ -28,6 +28,12 @@ public class GuardWorld {
 	/**
 	 * 玩家相關
 	 */
+	public boolean CheckAccountExists(String _accountName){
+		if(_allPlayers.containsKey(_accountName)){
+			return true;
+		}
+		return false;
+	}
 	public void StorePlayer(PlayerInstance pc) {
 		if (pc == null) {
 			throw new NullPointerException();
