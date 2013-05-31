@@ -27,6 +27,7 @@ public class C_Logout {
 		}
 		if(game.IsGaming()){
 			room.broadcastPacketToRoom(_packet+C_PacketSymbol+pc.getAccountName());
+			room.leaveRoom(pc);
 		}
 
 	}
