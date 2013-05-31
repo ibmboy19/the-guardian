@@ -12,6 +12,7 @@ import static guard.server.server.clientpacket.C_Trap.C_Trap_Destroy;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
@@ -104,12 +105,7 @@ public class GameInstance extends TimerTask {
 
 		if (_isBuild) {
 			// Send Packet
-			GuardWorld
-					.getInstance()
-					.getRoom(
-							GuardWorld.getInstance().getRoom(_hostName)
-									.get_membersList().get(0).getAccountName())
-					.broadcastPacketToRoom(_packet);
+			BroadcastPacketToRoom(_packet);
 		}
 	}
 
@@ -122,70 +118,49 @@ public class GameInstance extends TimerTask {
 			if (_allTrapList.get(_slot).getTrapList().get(_key).TrapTrigged()) {
 
 				// Send Packet
-				GuardWorld
-						.getInstance()
-						.getRoom(
-								GuardWorld.getInstance().getRoom(_hostName)
-										.get_membersList().get(0)
-										.getAccountName())
-						.broadcastPacketToRoom(_packet);
+				BroadcastPacketToRoom(_packet);
 			}
 		}
 	}
 
-	public void AttackTrapJail(int _bulletID,int _slot,int _key){
+	public void AttackTrapJail(int _bulletID, int _slot, int _key) {
 		if (_allTrapList.containsKey(_slot)
 				&& _allTrapList.get(_slot).getTrapList().containsKey(_key)) {
-		
-			if(_allTrapList.get(_slot).getTrapList().get(_key) instanceof SummoningTrapInstance){
-				if(((SummoningTrapInstance)_allTrapList.get(_slot).getTrapList().get(_key)).ApplyDamage(_map.getBulletAttackValue())){
-					//TODO Send Packet 陷阱損壞
+
+			if (_allTrapList.get(_slot).getTrapList().get(_key) instanceof SummoningTrapInstance) {
+				if (((SummoningTrapInstance) _allTrapList.get(_slot)
+						.getTrapList().get(_key)).ApplyDamage(_map
+						.getBulletAttackValue())) {
+					// TODO Send Packet 陷阱損壞
 					_allTrapList.get(_slot).getTrapList().remove(_key);
-					
-					GuardWorld
-					.getInstance()
-					.getRoom(
-							GuardWorld.getInstance().getRoom(_hostName)
-									.get_membersList().get(0).getAccountName())
-					.broadcastPacketToRoom(String.valueOf(C_Trap)+C_PacketSymbol+
-							String.valueOf(C_Trap_Destroy)+C_PacketSymbol+
-							String.valueOf(_slot)+C_PacketSymbol+
-							String.valueOf(_key));
-					
+
+					BroadcastPacketToRoom(String.valueOf(C_Trap)
+							+ C_PacketSymbol + String.valueOf(C_Trap_Destroy)
+							+ C_PacketSymbol + String.valueOf(_slot)
+							+ C_PacketSymbol + String.valueOf(_key));
+
 				}
 			}
-			
-			
-			GuardWorld
-			.getInstance()
-			.getRoom(
-					GuardWorld.getInstance().getRoom(_hostName)
-							.get_membersList().get(0).getAccountName())
-			.broadcastPacketToRoom(String.valueOf(C_HunterFire)
-					+ C_PacketSymbol + String.valueOf(C_HunterFire_Hit)
-					+ C_PacketSymbol + String.valueOf(Hit_Jail)
-					+ C_PacketSymbol + String.valueOf(_bulletID));
-		}		
+
+			BroadcastPacketToRoom(String.valueOf(C_HunterFire) + C_PacketSymbol
+					+ String.valueOf(C_HunterFire_Hit) + C_PacketSymbol
+					+ String.valueOf(Hit_Jail) + C_PacketSymbol
+					+ String.valueOf(_bulletID));
+		}
 	}
 
 	private void CheckAllTrapBuildUp() {
 		for (TrapSlot _trapSlotList : _allTrapList.values()) {
 			for (TrapInstance _trapInstance : _trapSlotList.getTrapList()
 					.values()) {
-				if (_trapInstance.IsBuildUp(gameTime)) {					
+				if (_trapInstance.IsBuildUp(gameTime)) {
 					// Send Packet
 					String _packet = String.valueOf(C_Trap) + C_PacketSymbol
 							+ String.valueOf(C_Trap_BuildUp) + C_PacketSymbol
 							+ _trapInstance.getSlotID() + C_PacketSymbol
 							+ _trapInstance.getSlotKey();
 
-					GuardWorld
-							.getInstance()
-							.getRoom(
-									GuardWorld.getInstance().getRoom(_hostName)
-											.get_membersList().get(0)
-											.getAccountName())
-							.broadcastPacketToRoom(_packet);
+					BroadcastPacketToRoom(_packet);
 				}
 			}
 		}
@@ -214,12 +189,7 @@ public class GameInstance extends TimerTask {
 				+ pc.getAccountName() + C_PacketSymbol
 				+ String.valueOf(_bulletID) + C_PacketSymbol + position
 				+ C_PacketSymbol + rotation;
-		GuardWorld
-				.getInstance()
-				.getRoom(
-						GuardWorld.getInstance().getRoom(_hostName)
-								.get_membersList().get(0).getAccountName())
-				.broadcastPacketToRoom(_retPacket);
+		BroadcastPacketToRoom(_retPacket);
 		_bulletCounter++;
 	}
 
@@ -242,8 +212,13 @@ public class GameInstance extends TimerTask {
 	public boolean IsReady() {
 		return gameState == GameState.CountDown;
 	}
-	//Important!!!!!
-	public boolean IsGameOver(){
+
+	public boolean IsGaming() {
+		return gameState.value > 1 && gameState.value < 5;
+	}
+
+	// Important!!!!!
+	public boolean IsGameOver() {
 		return gameState == GameState.GameOver;
 	}
 
@@ -328,13 +303,7 @@ public class GameInstance extends TimerTask {
 							+ C_Chat_ChatInRoomSystem + C_PacketSymbol
 							+ String.valueOf(gameCountDown);
 
-					GuardWorld
-							.getInstance()
-							.getRoom(
-									GuardWorld.getInstance().getRoom(_hostName)
-											.get_membersList().get(0)
-											.getAccountName())
-							.broadcastPacketToRoom(_retpacket);
+					BroadcastPacketToRoom(_retpacket);
 					gameCountDown--;
 					gameTimeRecord = gameTime;
 				}
@@ -343,13 +312,7 @@ public class GameInstance extends TimerTask {
 				String _retpacket = String.valueOf(C_RoomReady)
 						+ C_PacketSymbol + String.valueOf(C_RoomReady_Start);
 
-				GuardWorld
-						.getInstance()
-						.getRoom(
-								GuardWorld.getInstance().getRoom(_hostName)
-										.get_membersList().get(0)
-										.getAccountName())
-						.broadcastPacketToRoom(_retpacket);
+				BroadcastPacketToRoom(_retpacket);
 			}
 			break;
 		case Loading:// 載入中 - 目前do nothing
@@ -408,17 +371,11 @@ public class GameInstance extends TimerTask {
 						+ C_PacketSymbol + String.valueOf(C_HunterFire_Destroy)
 						+ C_PacketSymbol
 						+ String.valueOf(_bullet.getBulletInstanceID());
-				GuardWorld
-						.getInstance()
-						.getRoom(
-								GuardWorld.getInstance().getRoom(_hostName)
-										.get_membersList().get(0)
-										.getAccountName())
-						.broadcastPacketToRoom(_retPacket);
+				BroadcastPacketToRoom(_retPacket);
 				_bulletList.remove(_bullet.getBulletInstanceID());
 			}
 		}
-		System.out.println("bullet count : "+_bulletList.size());
+		System.out.println("bullet count : " + _bulletList.size());
 	}
 
 	/**
@@ -430,6 +387,22 @@ public class GameInstance extends TimerTask {
 	public void startGameTimer(int delay) {
 		timer.scheduleAtFixedRate(this, delay, 100);
 		GameReady();
+	}
+
+	// 玩家離開
+	/*public void Logout(PlayerInstance pc,int logoutCode){
+		BroadcastPacketToRoom(String.valueOf(C_Logout)+C_PacketSymbol+
+				String.valueOf(logoutCode)+C_PacketSymbol+
+				pc.getAccountName());
+	}*/
+
+	private void BroadcastPacketToRoom(String _packet) {
+		GuardWorld
+				.getInstance()
+				.getRoom(
+						GuardWorld.getInstance().getRoom(_hostName)
+								.get_membersList().get(0).getAccountName())
+				.broadcastPacketToRoom(_packet);
 	}
 
 	/**
@@ -444,7 +417,8 @@ public class GameInstance extends TimerTask {
 
 	// 遊戲狀態 -> 0 : 等待玩家, 1 : 倒數, 2 : 遊戲載入中, 3 : 遊戲準備中, 4 : 遊戲開始, 5 : 結束(勝利或失敗)
 	public enum GameState {
-		Waiting(0), CountDown(1), Loading(2), GameReady(3), GameStart(4), GameOver(5);
+		Waiting(0), CountDown(1), Loading(2), GameReady(3), GameStart(4), GameOver(
+				5);
 
 		private int value;
 

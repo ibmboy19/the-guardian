@@ -107,16 +107,7 @@ public class ClientPacketHandler {
 		} catch (NumberFormatException nf) {
 			System.out.println("接收到一個null.");
 		} catch (SocketException e) {
-			System.out.println(e);
-			// TODO ConnectionReset 處理，暫用
-			PlayerInstance pc = _client.getActiveChar();
-			// case 房間中
-			if (pc != null) {
-				if (pc.isInRoom())
-					pc.getRoom().leaveRoom(pc);
-				GuardWorld.getInstance().RemovePlayer(pc);
-			}
-			// case 遊戲中
+			System.out.println(e);			
 		} catch (Exception e) {
 			System.out.println(e);
 		}
