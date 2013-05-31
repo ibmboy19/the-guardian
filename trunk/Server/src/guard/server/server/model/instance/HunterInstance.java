@@ -19,6 +19,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 玩者 */
 	private final PlayerInstance _pc;
+
 	/** 使用的房間 */
 	private final GameRoom _room;
 

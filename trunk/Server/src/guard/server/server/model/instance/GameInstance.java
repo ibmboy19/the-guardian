@@ -62,6 +62,10 @@ public class GameInstance extends TimerTask {
 	/** 玩家部分 */
 	private List<HunterInstance> _hunterList = Lists.newList();
 	private GuardianInstance _guardian = null;
+	public void RemoveMember(PlayerInstance pc){
+		
+	}
+	
 
 	/** 陷阱們 */
 	private Map<Integer, TrapSlot> _allTrapList = Maps.newConcurrentMap();
