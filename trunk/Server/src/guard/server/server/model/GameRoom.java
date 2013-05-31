@@ -6,9 +6,11 @@ import static guard.server.server.clientpacket.C_JoinRoom.getJoinFailedPacket;
 import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_BreakUp;
 import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_OtherLeave;
 import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_PCLeave;
+import static guard.server.server.clientpacket.C_Logout.C_Logout_BackToLobby;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Ready;
 import static guard.server.server.clientpacket.ClientOpcodes.C_JoinRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LeaveRoom;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Guardian;
@@ -190,6 +192,7 @@ public class GameRoom {
 		if (!_membersList.contains(pc)) {
 			return;
 		}
+
 		_membersList.remove(pc);
 		pc.ResetState();
 		// TODO Send Leave Room Packet
@@ -259,10 +262,11 @@ public class GameRoom {
 	 */
 	private void breakup() {
 		// 房間即將被銷毀，不必通知他人玩者離開，只回傳一個房間解散訊息。
-		PlayerInstance[] members = getMembers();
-		for (PlayerInstance member : members) {
+		// PlayerInstance[] members = getMembers();
+		for (PlayerInstance member : _membersList) {
 			member.ResetState();
-			member.SendClientPacket(String.valueOf(C_LeaveRoom + C_PacketSymbol + String.valueOf(C_LeaveRoom_BreakUp)));
+			member.SendClientPacket(String.valueOf(C_LeaveRoom + C_PacketSymbol
+					+ String.valueOf(C_LeaveRoom_BreakUp)));
 		}
 
 		GuardWorld.getInstance().RemoveRoom(this);
@@ -287,6 +291,8 @@ public class GameRoom {
 	public void leaveRoom(PlayerInstance pc) {
 		if (isLeader(pc)) {
 			// 如果是房主離開，就解散
+			breakup();
+		} else if (pc.IsGuardian()) {
 			breakup();
 		} else {
 			leaveMenber(pc);
@@ -364,16 +370,31 @@ public class GameRoom {
 		public void run() {
 			while (!gameIsOver()) {
 				for (PlayerInstance pc : _membersList) {
-					if (pc.isInRoom() && pc.getNetConnection().get_csocket().isClosed()) {
+					if (pc.isInRoom()
+							&& pc.getNetConnection().get_csocket().isClosed()) {
 						// TODO 斷線處理
-						if(_leader == pc){
-							// 室長斷線
-						} else{
-							// 成員斷線
+						if (pc.getRoom().getGame().IsGaming()) {
+
+							if (pc == _leader || pc.IsGuardian()) {
+								for (PlayerInstance _member : _membersList) {
+									_member.SendClientPacket(String
+											.valueOf(C_Logout)
+											+ C_PacketSymbol
+											+ String.valueOf(C_Logout_BackToLobby)
+											+ C_PacketSymbol
+											+ pc.getAccountName());// _member.getRoom().getGame().Logout(_member,C_Logout_BackToLobby);
+								}
+								breakup();
+							}
+
+						} else {
+
+							pc.getRoom().leaveRoom(pc);
+
 						}
+
 					}
 				}
-				gameIsOver();
 			}
 			connectionDetectThread.interrupt();
 		}
