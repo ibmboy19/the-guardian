@@ -6,7 +6,16 @@ public class ChronicPotion extends HunterItem {
 	/** 持續性的藥水 */
 
 	protected PotionType _potionType;
+
+	public PotionType getPotionType() {
+		return _potionType;
+	}
+
 	protected float _effectDuration;
+
+	public float getEffectDuration() {
+		return _effectDuration;
+	}
 
 	public ChronicPotion() {
 		super();
@@ -19,16 +28,13 @@ public class ChronicPotion extends HunterItem {
 		this._effectDuration = _effectDuration;
 	}
 
-	public void UseItem(HunterInstance _hunter) {
-		/**
-		 * TODO Send Packet : C_HunterState
-		 * 
-		 * 
-		 * */
-	}
+	/*public void UseItem(HunterInstance _hunter) {
+		_hunter.StaminaMaxmize(_effectDuration, _effectDuration);
+
+	}*/
 
 	public enum PotionType {
 		Stamina, // 耐力藥水
-		Stealth// 隱形藥水
+		Invisible// 隱形藥水
 	}
 }

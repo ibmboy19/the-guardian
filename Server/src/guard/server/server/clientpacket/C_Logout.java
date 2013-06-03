@@ -17,17 +17,20 @@ public class C_Logout {
 		if (pc == null) {
 			return;
 		}
+
 		GameRoom room = pc.getRoom();
-		if (room == null) {
-			return;
-		}
-		GameInstance game = room.getGame();
-		if (game == null) {
-			return;
-		}
-		if(game.IsGaming()){
-			room.broadcastPacketToRoom(_packet+C_PacketSymbol+pc.getAccountName());
-			room.leaveRoom(pc);
+		GameInstance game = null;
+		if (room != null) {
+			game = room.getGame();
+			if (game != null) {
+				if (game.IsGaming()) {
+					room.broadcastPacketToRoom(_packet + C_PacketSymbol
+							+ pc.getAccountName());
+					room.leaveRoom(pc);
+				}
+			}
+		} else {
+			pc.SendClientPacket(_packet + C_PacketSymbol + pc.getAccountName());
 		}
 
 	}

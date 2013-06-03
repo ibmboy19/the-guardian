@@ -370,29 +370,28 @@ public class GameRoom {
 		public void run() {
 			while (!gameIsOver()) {
 				for (PlayerInstance pc : _membersList) {
-					if (pc.isInRoom()
-							&& pc.getNetConnection().get_csocket().isClosed()) {
-						// TODO 斷線處理
-						if (pc.getRoom().getGame().IsGaming()) {
+					if (pc.getNetConnection().get_csocket().isClosed()) {
+						if (pc.isInRoom()) {
+							// TODO 斷線處理
+							if (pc.getRoom().getGame().IsGaming()) {
 
-							if (pc == _leader || pc.IsGuardian()) {
-								for (PlayerInstance _member : _membersList) {
-									_member.SendClientPacket(String
-											.valueOf(C_Logout)
-											+ C_PacketSymbol
-											+ String.valueOf(C_Logout_BackToLobby)
-											+ C_PacketSymbol
-											+ pc.getAccountName());// _member.getRoom().getGame().Logout(_member,C_Logout_BackToLobby);
+								if (pc == _leader || pc.IsGuardian()) {
+									for (PlayerInstance _member : _membersList) {
+										_member.SendClientPacket(String
+												.valueOf(C_Logout)
+												+ C_PacketSymbol
+												+ String.valueOf(C_Logout_BackToLobby)
+												+ C_PacketSymbol
+												+ pc.getAccountName());// _member.getRoom().getGame().Logout(_member,C_Logout_BackToLobby);
+									}
+									breakup();
 								}
-								breakup();
+
+							} else {
+								pc.getRoom().leaveRoom(pc);
 							}
-
-						} else {
-
-							pc.getRoom().leaveRoom(pc);
-
 						}
-
+						GuardWorld.getInstance().RemovePlayer(pc);
 					}
 				}
 			}

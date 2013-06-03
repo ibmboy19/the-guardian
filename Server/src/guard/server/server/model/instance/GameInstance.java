@@ -54,6 +54,16 @@ public class GameInstance extends TimerTask {
 		return gameTime;
 	}
 
+	public float getRemainingGameTime() {
+		switch (gameState) {
+		case GameReady:
+			return gameStartReadyTime - gameTime + gameTimeRecord;
+		case GameStart:
+			return _map.getGamePlayTime() - gameTime + gameTimeRecord;
+		}
+		return 0;
+	}
+
 	/** 取得遊戲地圖 */
 	public GameMap getMap() {
 		return _map;
@@ -62,10 +72,10 @@ public class GameInstance extends TimerTask {
 	/** 玩家部分 */
 	private List<HunterInstance> _hunterList = Lists.newList();
 	private GuardianInstance _guardian = null;
-	public void RemoveMember(PlayerInstance pc){
-		
+
+	public void RemoveMember(PlayerInstance pc) {
+
 	}
-	
 
 	/** 陷阱們 */
 	private Map<Integer, TrapSlot> _allTrapList = Maps.newConcurrentMap();
@@ -181,12 +191,10 @@ public class GameInstance extends TimerTask {
 	public synchronized void HunterFire(PlayerInstance pc, String position,
 			String rotation) {
 		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
-		if (!hunter.CanFire())
-			return;
+
 		int _bulletID = _bulletCounter;
 		_bulletList.put(_bulletID, new BulletInstance(pc.getAccountName(),
 				_bulletID, gameTime));
-		hunter.Fire();
 		// TODO BroadCast To All : Fire
 		String _retPacket = String.valueOf(C_HunterFire) + C_PacketSymbol
 				+ String.valueOf(C_HunterFire_Fire) + C_PacketSymbol
@@ -394,11 +402,11 @@ public class GameInstance extends TimerTask {
 	}
 
 	// 玩家離開
-	/*public void Logout(PlayerInstance pc,int logoutCode){
-		BroadcastPacketToRoom(String.valueOf(C_Logout)+C_PacketSymbol+
-				String.valueOf(logoutCode)+C_PacketSymbol+
-				pc.getAccountName());
-	}*/
+	/*
+	 * public void Logout(PlayerInstance pc,int logoutCode){
+	 * BroadcastPacketToRoom(String.valueOf(C_Logout)+C_PacketSymbol+
+	 * String.valueOf(logoutCode)+C_PacketSymbol+ pc.getAccountName()); }
+	 */
 
 	private void BroadcastPacketToRoom(String _packet) {
 		GuardWorld
