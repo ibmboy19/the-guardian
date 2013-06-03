@@ -5,6 +5,18 @@ import guard.server.server.model.instance.HunterInstance;
 public class InstantPotion extends HunterItem {
 	/** 回復血量的藥水 */
 	protected int _recoveryValue;
+
+	public int getRecoveryValue(int _hunterMaxHP) {
+		switch (_recoveryAmountType) {
+		case Value:
+			return _recoveryValue;
+		case Rate:
+			return (int)(_hunterMaxHP*((float)_recoveryValue/100));
+		default:
+			return _recoveryValue;
+		}
+	}
+
 	protected RecoveryAmountType _recoveryAmountType;
 
 	public InstantPotion() {

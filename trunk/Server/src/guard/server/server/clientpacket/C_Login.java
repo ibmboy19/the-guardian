@@ -22,7 +22,9 @@ public class C_Login {
 		String accountName = packet.split(C_PacketSymbol)[1];// id
 
 		String ip = _client.getIp();
-		if(GuardWorld.getInstance().CheckAccountExists(accountName)){
+		if (GuardWorld.getInstance().CheckAccountExists(accountName)) {
+			_client.SendClientPacket(C_Login + C_PacketSymbol + "false");
+			_client.close();
 			return;
 		}
 		Account account = Account.create(accountName, ip);

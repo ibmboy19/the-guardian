@@ -12,13 +12,9 @@ public class HunterItem extends Item implements Cloneable {
 
 	
 
-	public void UseItem(HunterInstance _hunter) {
-		/**
-		 * TODO Send Packet 
-		 * 
-		 * 
-		 * */
-	}
+	/*public void UseItem(HunterInstance _hunter) {
+		
+	}*/
 	
 	public String toString(){
 		return _itemID+","+_name+","+_iconID+","+_price;

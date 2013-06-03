@@ -1,6 +1,9 @@
 package guard.server.server;
 
+import static guard.server.server.PacketType.C_Packet;
+import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import guard.server.server.clientpacket.ClientPacketHandler;
+import guard.server.server.model.GuardWorld;
 import guard.server.server.model.instance.PlayerInstance;
 import guard.server.server.utils.StreamUtil;
 
@@ -94,6 +97,9 @@ public class ClientProcess implements Runnable {
 		StreamUtil.close(_in, _out);
 		try {
 			_csocket.close();
+			if(getActiveChar() != null && !getActiveChar().isInRoom()){
+				GuardWorld.getInstance().RemovePlayer(getActiveChar());
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -155,5 +161,8 @@ public class ClientProcess implements Runnable {
 
 	public void setActiveChar(PlayerInstance activeChar) {
 		this._activeChar = activeChar;
+	}
+	public void SendClientPacket(String packet){
+		getWr().println(C_Packet + C_PacketSymbol + packet);
 	}
 }

@@ -2,14 +2,19 @@ package guard.server.server.model.instance;
 
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_BuyItem;
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_UseItem;
+import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stamina;
 import static guard.server.server.clientpacket.C_MoveState.C_MoveState_SwitchMoveState;
 import static guard.server.server.clientpacket.C_MoveState.C_MoveState_UpdateStamina;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterInventory;
+import static guard.server.server.clientpacket.ClientOpcodes.C_HunterState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Hunter;
 import guard.server.server.model.GameRoom;
+import guard.server.server.model.GameProps.ChronicPotion;
 import guard.server.server.model.GameProps.HunterItem;
+import guard.server.server.model.GameProps.InstantPotion;
+import guard.server.server.model.GameProps.Projectile;
 import guard.server.server.utils.MathUtil;
 import guard.server.server.utils.collections.Maps;
 
@@ -69,7 +74,8 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public int getHP() {
 		return _hp;
 	}
-
+	
+	//正值: 補血 ;負值: 傷害 ; 死人無作用
 	public void ApplyHP(int _adjustValue) {
 		// 死人無作用
 		if (IsDead())
@@ -80,7 +86,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		this._hp = MathUtil.Clamp(bufferHP, 0, _room.getMap().getHunterHP());
 
 		/**
-		 * TODO Send Packet : C_HunterState
+		 * TODO Send Packet : C_HunterState,C_HunterState_Hp
 		 * */
 		// _lives, _hp, IsDead()
 	}
@@ -133,6 +139,34 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	private float _stamina = 1.0f;
 	// 鎖耐力
 	private boolean _lockStamina = false;
+	// 狀態 - 耐力最大
+	private boolean _staminaMaximize = false;
+	private float _staminaMaximizeDuration, _staminaMaximizeRecordTime;
+
+	private void StaminaMaxmize(float _staminaMaximizeTime,
+			float _staminaMaximizeRecordTime) {
+		this._staminaMaximizeDuration = _staminaMaximizeTime;
+		this._staminaMaximizeRecordTime = _staminaMaximizeRecordTime;
+		_stamina = MAX_Stamina;
+		_staminaMaximize = true;
+		//TODO Send Packet 耐力最大化
+		_pc.SendClientPacket(String.valueOf(C_HunterState)
+				+ C_PacketSymbol
+				+ String.valueOf(C_HunterState_Stamina) + ",1");
+	}
+
+	// 隱形狀態
+	private boolean _invisible = false;
+	private float _invisibleDuration, _invisibleRecordTime;
+
+	private void SetInvisibleState(float _invisibleDuration,
+			float _invisibleRecordTime) {
+		this._invisibleDuration = _invisibleDuration;
+		this._invisibleRecordTime = _invisibleRecordTime;
+		_invisible = true;
+		//TODO Send Packet 隱形狀態
+		
+	}
 
 	private void ConsumeStamina() {
 		if (_stamina != MIN_Stamina) {
@@ -144,7 +178,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					+ String.valueOf(_stamina));
 		} else {
 			_lockStamina = true;
-			//auto switch run walk
+			// auto switch run walk
 			_moveState = MoveState.Walk;
 			_runOrWalk = false;
 			_pc.getRoom().broadcastPacketToRoom(
@@ -168,26 +202,6 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					+ C_MoveState_UpdateStamina + C_PacketSymbol
 					+ String.valueOf(_stamina));
 		}
-	}
-
-	/** 獵人開火 */
-	public static final float MIN_WeaponEnergy = 0.0f, MAX_WeaponEnergy = 1.0f;
-	private float _weaponEnergy = 1.0f;
-	
-
-	/** 有足夠的能量? */
-	public boolean CanFire() {
-		return true;
-	}
-
-	/** 消耗能量 */
-	public void Fire() {
-
-	}
-
-	/** 3秒回滿 ; 0.5秒傳一次封包 */
-	private void RecoveryWeaponEnergy() {
-
 	}
 
 	// 獵人道具欄
@@ -243,13 +257,29 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	 * 主要更新函式
 	 * */
 	public void Update(float gameTime) {
-		switch (_moveState) {
-		case Run:
-			ConsumeStamina();
-			break;
-		default:
-			RecoveryStamina();
-			break;
+		if (!_staminaMaximize){
+			switch (_moveState) {
+			case Run:
+				ConsumeStamina();
+				break;
+			default:
+				RecoveryStamina();
+				break;
+			}
+		}
+		else {
+			if (gameTime - _staminaMaximizeRecordTime > _staminaMaximizeDuration) {
+				_staminaMaximize = false;
+			}
+		}
+		
+		if(_invisible){
+			//Check Time Expire
+			if(gameTime - _invisibleRecordTime > _invisibleDuration){
+				//TODO Send Packet - C_HunterState解除隱形
+				
+				_invisible = false;
+			}
 		}
 	}
 
@@ -258,8 +288,26 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// 查無物品
 		if (!_hunterInventory.containsKey(_key))
 			return;
+		HunterItem _hItem = _hunterInventory.get(_key);
+		// _hunterInventory.get(_key).UseItem(this);
+		if (_hItem instanceof InstantPotion) {
+			ApplyHP(((InstantPotion) _hItem).getRecoveryValue(_room.getMap().getHunterHP()));
+			
+		} else if (_hItem instanceof ChronicPotion) {
+			switch (((ChronicPotion) _hItem).getPotionType()) {
+			case Stamina:// 耐力藥水 - 送封包,設定耐力最大化狀態
+				StaminaMaxmize(((ChronicPotion) _hItem).getEffectDuration(),
+						_pc.getRoom().getGame().getTime());				
+				break;
+			case Invisible:// 隱形藥水 - 送封包,設定隱形狀態
+				SetInvisibleState(((ChronicPotion) _hItem).getEffectDuration(),
+						_pc.getRoom().getGame().getTime());
+				break;
 
-		_hunterInventory.get(_key).UseItem(this);
+			}
+		} else if (_hItem instanceof Projectile) {
+
+		}
 
 		_hunterInventory.remove(_key);
 		/**

@@ -75,6 +75,7 @@ public class ClientPacketHandler {
 			case C_ArriveCheckPoint:
 				break;
 			case C_RequestRemaingTime:
+				new C_RequestRemaingTime(_client,packet);
 				break;
 			case C_MoveState:
 				new C_MoveState(_client, packet);
