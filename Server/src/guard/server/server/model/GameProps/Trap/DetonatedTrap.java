@@ -11,6 +11,10 @@ public class DetonatedTrap extends Trap {
 	protected int _dmgGold;
 	protected int _rubGold;
 	protected int _slowDownMoveSpd;
+	
+	public int getDmgHP(){
+		return _dmgHp;
+	}
 
 	public DetonatedTrap() {
 		super();

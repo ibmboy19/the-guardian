@@ -52,6 +52,9 @@ public class C_HunterFire {
 			BulletInstance _bullet = null;
 			switch (Integer.parseInt(_packet.split(C_PacketSymbol)[2])) {
 			case Hit_Player:
+				if (room.getMap().IsCooperationMode()) {
+					return;
+				}
 				if ((_bullet = game.getBullet(Integer.valueOf(_packet
 						.split(C_PacketSymbol)[3]))) == null) {
 					return;
@@ -59,7 +62,7 @@ public class C_HunterFire {
 				if (_bullet.IsHit()) {
 					return;
 				}
-				_bullet.Hit(hunter);
+				_bullet.Hit(hunter,game.getMap().getBulletDamageValue()>0?-game.getMap().getBulletDamageValue():game.getMap().getBulletDamageValue());
 				// 廣播識別碼的子彈撞到
 				room.broadcastPacketToRoom(String.valueOf(C_HunterFire)
 						+ C_PacketSymbol + String.valueOf(C_HunterFire_Hit)

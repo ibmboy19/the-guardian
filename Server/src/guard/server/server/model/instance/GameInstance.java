@@ -9,10 +9,10 @@ import static guard.server.server.clientpacket.C_LoadMapDone.C_LoadMapDone_Done;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Start;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_BuildUp;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Destroy;
+import static guard.server.server.clientpacket.C_Trap.C_Trap_Disable;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
-import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
@@ -60,8 +60,9 @@ public class GameInstance extends TimerTask {
 			return gameStartReadyTime - gameTime + gameTimeRecord;
 		case GameStart:
 			return _map.getGamePlayTime() - gameTime + gameTimeRecord;
+		default:
+			return 0;
 		}
-		return 0;
 	}
 
 	/** 取得遊戲地圖 */
@@ -80,6 +81,15 @@ public class GameInstance extends TimerTask {
 	/** 陷阱們 */
 	private Map<Integer, TrapSlot> _allTrapList = Maps.newConcurrentMap();
 
+	private TrapInstance getTrapInstance(int _slot, int _key) {
+		if (_allTrapList.containsKey(_slot)
+				&& _allTrapList.get(_slot).getTrapList().containsKey(_key)) {
+			return _allTrapList.get(_slot).getTrapList().get(_key);
+		}
+		return null;
+	}
+
+	// 建造陷阱,確認此格已佔有?
 	public void CheckSlot(String _packet) {
 		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
 		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
@@ -93,28 +103,43 @@ public class GameInstance extends TimerTask {
 		if (_map.getTrap(_trapID) == null)
 			return;
 		boolean _isBuild = false;
-		if (_map.getTrap(_trapID) instanceof DetonatedTrap) {
-			_allTrapList.get(_slot).PutTrap(
-					_key,
-					new DetonatedTrapInstance(_slot, _key, gameTime, _map
-							.getTrap(_trapID).getBuildingTime()));
-			_isBuild = true;
-		} else if (_map.getTrap(_trapID) instanceof SummoningTrap) {
-			_allTrapList.get(_slot).PutTrap(
-					_key,
-					new SummoningTrapInstance(_slot, _key, gameTime, _map
-							.getTrap(_trapID).getBuildingTime(),
-							((SummoningTrap) _map.getTrap(_trapID)).getHp()));
-			_isBuild = true;
-		} else if (_map.getTrap(_trapID) instanceof TimingTrap) {
-			_allTrapList.get(_slot).PutTrap(
-					_key,
-					new TimingTrapInstance(_slot, _key, gameTime, _map.getTrap(
-							_trapID).getBuildingTime(), ((TimingTrap) _map
-							.getTrap(_trapID)).getLifeTime(),
-							((TimingTrap) _map.getTrap(_trapID))
-									.getEffectInterval()));
-			_isBuild = true;
+		if (_guardian.CostGold(_map.getTrap(_trapID).getPrice())) {
+			if (_map.getTrap(_trapID) instanceof DetonatedTrap) {
+				_allTrapList.get(_slot).PutTrap(
+						_key,
+						new DetonatedTrapInstance(_slot, _key, gameTime, _map
+								.getTrap(_trapID).getBuildingTime(),
+								((DetonatedTrap) _map.getTrap(_trapID))
+										.getDmgHP()));
+				_isBuild = true;
+			} else if (_map.getTrap(_trapID) instanceof SummoningTrap) {
+				_allTrapList.get(_slot)
+						.PutTrap(
+								_key,
+								new SummoningTrapInstance(_slot, _key,
+										gameTime, _map.getTrap(_trapID)
+												.getBuildingTime(),
+										((SummoningTrap) _map.getTrap(_trapID))
+												.getHp()));
+				_isBuild = true;
+
+			} else if (_map.getTrap(_trapID) instanceof TimingTrap) {
+				_allTrapList
+						.get(_slot)
+						.PutTrap(
+								_key,
+								new TimingTrapInstance(
+										_slot,
+										_key,
+										gameTime,
+										_map.getTrap(_trapID).getBuildingTime(),
+										((TimingTrap) _map.getTrap(_trapID))
+												.getLifeTime(),
+										((TimingTrap) _map.getTrap(_trapID))
+												.getEffectInterval()));
+				_isBuild = true;
+
+			}
 		}
 
 		if (_isBuild) {
@@ -127,40 +152,60 @@ public class GameInstance extends TimerTask {
 		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
 		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
 
-		if (_allTrapList.containsKey(_slot)
-				&& _allTrapList.get(_slot).getTrapList().containsKey(_key)) {
-			if (_allTrapList.get(_slot).getTrapList().get(_key).TrapTrigged()) {
+		TrapInstance _trap = getTrapInstance(_slot, _key);
+		if (_trap == null)
+			return;
 
-				// Send Packet
-				BroadcastPacketToRoom(_packet);
-			}
+		if (_trap.TrapTrigged()) {
+
+			// Send Packet
+			BroadcastPacketToRoom(_packet);
 		}
+
+	}
+
+	public void ApplyTrapDamage(String _packet, HunterInstance _hunter) {
+		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
+		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
+
+		TrapInstance _trap = getTrapInstance(_slot, _key);
+		if (_trap == null)
+			return;
+
+		if (_trap.TrapTrigged()) {
+			if (_trap instanceof DetonatedTrapInstance) {
+				_hunter.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP());
+			}
+
+		}
+
 	}
 
 	public void AttackTrapJail(int _bulletID, int _slot, int _key) {
-		if (_allTrapList.containsKey(_slot)
-				&& _allTrapList.get(_slot).getTrapList().containsKey(_key)) {
 
-			if (_allTrapList.get(_slot).getTrapList().get(_key) instanceof SummoningTrapInstance) {
-				if (((SummoningTrapInstance) _allTrapList.get(_slot)
-						.getTrapList().get(_key)).ApplyDamage(_map
-						.getBulletAttackValue())) {
-					// TODO Send Packet 陷阱損壞
-					_allTrapList.get(_slot).getTrapList().remove(_key);
+		TrapInstance _trap = getTrapInstance(_slot, _key);
+		if (_trap == null)
+			return;
 
-					BroadcastPacketToRoom(String.valueOf(C_Trap)
-							+ C_PacketSymbol + String.valueOf(C_Trap_Destroy)
-							+ C_PacketSymbol + String.valueOf(_slot)
-							+ C_PacketSymbol + String.valueOf(_key));
+		if (_trap instanceof SummoningTrapInstance) {
+			if (((SummoningTrapInstance) _trap).ApplyDamage(_map
+					.getBulletDamageValue())
+					&& _trap.SetupAutoDestroy(gameTime)) {
+				// TODO Send Packet 陷阱關閉
 
-				}
+				BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
+						+ String.valueOf(C_Trap_Disable) + C_PacketSymbol
+						+ String.valueOf(_slot) + C_PacketSymbol
+						+ String.valueOf(_key));
+
 			}
-
-			BroadcastPacketToRoom(String.valueOf(C_HunterFire) + C_PacketSymbol
-					+ String.valueOf(C_HunterFire_Hit) + C_PacketSymbol
-					+ String.valueOf(Hit_Jail) + C_PacketSymbol
-					+ String.valueOf(_bulletID));
 		}
+
+		BroadcastPacketToRoom(String.valueOf(C_HunterFire) + C_PacketSymbol
+				+ String.valueOf(C_HunterFire_Hit) + C_PacketSymbol
+				+ String.valueOf(Hit_Jail) + C_PacketSymbol
+				+ String.valueOf(_bulletID));
+
 	}
 
 	private void CheckAllTrapBuildUp() {
@@ -180,6 +225,27 @@ public class GameInstance extends TimerTask {
 		}
 	}
 
+	private void CheckAllAutoDestroyTrap() {
+		for (TrapSlot _trapSlotList : _allTrapList.values()) {
+			for (TrapInstance _trapInstance : _trapSlotList.getTrapList()
+					.values()) {
+				if (_trapInstance.CanAutoDestroyTrap(gameTime)) {
+
+					_allTrapList.get(_trapInstance.getSlotID()).getTrapList()
+							.remove(_trapInstance.getSlotKey());
+
+					BroadcastPacketToRoom(String.valueOf(C_Trap)
+							+ C_PacketSymbol + String.valueOf(C_Trap_Destroy)
+							+ C_PacketSymbol
+							+ String.valueOf(_trapInstance.getSlotID())
+							+ C_PacketSymbol
+							+ String.valueOf(_trapInstance.getSlotKey()));
+					System.out.println("Destroy trap auto");
+				}
+			}
+		}
+	}
+
 	/** 子彈們 */
 	private int _bulletCounter = 0;
 	private Map<Integer, BulletInstance> _bulletList = Maps.newConcurrentMap();
@@ -190,7 +256,6 @@ public class GameInstance extends TimerTask {
 
 	public synchronized void HunterFire(PlayerInstance pc, String position,
 			String rotation) {
-		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
 
 		int _bulletID = _bulletCounter;
 		_bulletList.put(_bulletID, new BulletInstance(pc.getAccountName(),
@@ -339,6 +404,7 @@ public class GameInstance extends TimerTask {
 			}
 			CheckAllBulletExpire();
 			CheckAllTrapBuildUp();
+			CheckAllAutoDestroyTrap();
 			break;
 		case GameStart:// 遊戲開始
 			// TODO 遊戲時間到檢查
@@ -360,6 +426,7 @@ public class GameInstance extends TimerTask {
 			}
 			CheckAllBulletExpire();
 			CheckAllTrapBuildUp();
+			CheckAllAutoDestroyTrap();
 			break;
 		case GameOver:// 遊戲結束
 			// TODO 計算勝利結果，傳送封包。

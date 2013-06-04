@@ -29,6 +29,12 @@ public class TrapInstance {
 	public float getBuildTime() {
 		return _buildTime;
 	}
+	//陷阱銷毀
+	private float _trapDestroyTime;
+	
+	public float getTrapDestroyTime(){
+		return _trapDestroyTime;
+	}
 
 	public TrapInstance(int _slotID, int _slotKey, float _gameTime,
 			float _buildTime) {
@@ -59,15 +65,22 @@ public class TrapInstance {
 		return true;
 		// TODO 回傳陷阱狀態
 	}
-
-	/**
-	 * 條件須同時成立 1.陷阱被啟用 2.陷阱被破壞/陷阱超過時間(如沼澤)/陷阱超出飛射範圍
-	 * */
-	public void DestroyTrapInstance() {
-		if (this._trapState != TrapState.Trigged)
-			return;
+	
+	//陷阱若觸發或毀壞，會進入自動銷毀狀態
+	public boolean SetupAutoDestroy(float gameTime) {		
 		// TODO 回傳陷阱狀態
-
+		if(this._trapState == TrapState.Destroy)
+			return false;
+		this._trapState = TrapState.Destroy;
+		_trapDestroyTime = gameTime+5;
+		return true;
+	}
+	//陷阱過期會自動移除
+	public boolean CanAutoDestroyTrap(float gameTime){
+		if(_trapState == TrapState.Destroy && gameTime > _trapDestroyTime){
+			return true;
+		}
+		return false;
 	}
 
 	public enum TrapState {

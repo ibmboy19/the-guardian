@@ -45,6 +45,17 @@ public class GuardianInstance extends WickedRoadPlayerInstance {
 				+ String.valueOf(getGold()));
 	}
 
+	public boolean CostGold(int _gold) {
+		if (this._gold > _gold) {
+			this._gold -= _gold;
+			_pc.SendClientPacket(C_Gold + C_PacketSymbol
+					+ String.valueOf(_pc.getPlayerType()) + C_PacketSymbol
+					+ String.valueOf(getGold()));
+			return true;
+		}
+		return false;
+	}
+
 	/** 取得玩者資料 */
 	public String getPlayerModelData() {
 		String _data = String.valueOf(PlayerType_Guardian) + ","
