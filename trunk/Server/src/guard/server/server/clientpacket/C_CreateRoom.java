@@ -149,14 +149,18 @@ public class C_CreateRoom {
 						.split(_symbol1)[12]), Integer.valueOf(_mapData
 						.split(_symbol1)[13]), Float.valueOf(_mapData
 						.split(_symbol1)[14]), Integer.valueOf(_mapData
-						.split(_symbol1)[15]), _itemList, _trapList);
-		
+						.split(_symbol1)[15]), Integer.valueOf(_mapData
+						.split(_symbol1)[16]), Integer.valueOf(_mapData
+						.split(_symbol1)[17]), Float.valueOf(_mapData
+						.split(_symbol1)[18]), Float.valueOf(_mapData
+						.split(_symbol1)[19]), Float.valueOf(_mapData
+						.split(_symbol1)[20]), _itemList, _trapList);
 
 		// Initial Game Instance
 		GameInstance game = new GameInstance(leader.getAccountName(), _map);
 		// Initial Game Room
 		GameRoom room = new GameRoom(_mapData.split(_symbol1)[0], leader,
-				Integer.valueOf(_mapData.split(_symbol1)[5]),_map,game);
+				Integer.valueOf(_mapData.split(_symbol1)[5]), _map, game);
 		// Restore Room in World
 		GuardWorld.getInstance().StoreRoom(room);
 		// Put PC To Room

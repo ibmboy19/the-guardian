@@ -18,12 +18,20 @@ public class GameMap {
 
 	public static final int GameMode_Cooperation = 0;
 	public static final int GameMode_Greedy = 1;
-	
+
 	// 遊戲模式 0: 合作 ; 1:貪婪
 	private int _gameMode = 0;
 
 	public int getGameMode() {
 		return _gameMode;
+	}
+
+	public boolean IsCooperationMode() {
+		return _gameMode == GameMode_Cooperation;
+	}
+
+	public boolean IsGreedyMode() {
+		return _gameMode == GameMode_Greedy;
 	}
 
 	// 遊戲時間
@@ -46,19 +54,41 @@ public class GameMap {
 		return _guardianInitGold;
 	}
 
-	//獵人傷害值
-	private final int _meleeAttackValue = 10;
-	
-	public int getMeleeAttackValue(){
-		return _meleeAttackValue;
+	// 獵人搏擊傷害值
+	private final int _meleeDamageValue;
+
+	public int getMeleeDamageValue() {
+		return _meleeDamageValue;
 	}
-	
-	private final int _bulletAttackValue = 15;
-	
-	public int getBulletAttackValue(){
-		return _bulletAttackValue;
+
+	// 子彈攻傷害值
+	private final int _bulletDamageValue;
+
+	public int getBulletDamageValue() {
+		return _bulletDamageValue;
 	}
-	
+
+	// 耐力消耗值
+	private final float _staminaConsumValue;
+
+	public float getStaminaConsumValue() {
+		return _staminaConsumValue;
+	}
+
+	// 耐力回復值
+	private final float _staminaRecoveryValue;
+
+	public float getStaminaRecoveryValue() {
+		return _staminaRecoveryValue;
+	}
+
+	// 獵人耐力回復CD
+	private final float _staminaRecoveryCD;
+
+	public float getStaminaRecoveryCD() {
+		return _staminaRecoveryCD;
+	}
+
 	// 獵人初始生命次數
 	private final int _hunterLives;
 
@@ -153,6 +183,12 @@ public class GameMap {
 		this._guardianReward = 0;
 		this._guardianRewardInterval = 0;
 		this._guardianDmgReward = 0;
+		
+		this._meleeDamageValue = 20;
+		this._bulletDamageValue = 15;
+		this._staminaConsumValue = 0.015f;
+		this._staminaRecoveryValue = 0.018f;
+		this._staminaRecoveryCD = 2.5f;
 
 		this._itemList = Lists.newList();
 		this._trapList = Lists.newList();
@@ -164,8 +200,10 @@ public class GameMap {
 			int _hunterInitGold, int _guardianInitGold,
 			int _hunterSlainedReward, int _arriveCheckPointReward,
 			int _guardianReward, float _guardianRewardInterval,
-			int _guardianDmgReward, List<HunterItem> _itemList,
-			List<Trap> _trapList) {
+			int _guardianDmgReward, int _meleeDamageValue,
+			int _bulletDamageValue, float _staminaConsumValue,
+			float _staminaRecoveryValue, float _staminaRecoveryCD,
+			List<HunterItem> _itemList, List<Trap> _trapList) {
 		this._mapName = _mapName;
 		this._mapCheckCode = _mapCheckCode;
 
@@ -182,6 +220,12 @@ public class GameMap {
 		this._guardianReward = _guardianReward;
 		this._guardianRewardInterval = _guardianRewardInterval;
 		this._guardianDmgReward = _guardianDmgReward;
+		
+		this._meleeDamageValue = _meleeDamageValue;
+		this._bulletDamageValue = _bulletDamageValue;
+		this._staminaConsumValue = _staminaConsumValue;
+		this._staminaRecoveryValue = _staminaRecoveryValue;
+		this._staminaRecoveryCD = _staminaRecoveryCD;
 
 		this._itemList = _itemList;
 		this._trapList = _trapList;

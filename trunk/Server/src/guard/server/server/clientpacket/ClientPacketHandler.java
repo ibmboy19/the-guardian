@@ -24,8 +24,6 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_SelectPlayerSpawn
 import static guard.server.server.clientpacket.ClientOpcodes.C_SwitchPlayerType;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
 import guard.server.server.ClientProcess;
-import guard.server.server.model.GuardWorld;
-import guard.server.server.model.instance.PlayerInstance;
 
 import java.net.SocketException;
 
