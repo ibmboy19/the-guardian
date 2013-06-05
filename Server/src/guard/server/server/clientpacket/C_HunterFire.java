@@ -52,13 +52,16 @@ public class C_HunterFire {
 			BulletInstance _bullet = null;
 			switch (Integer.parseInt(_packet.split(C_PacketSymbol)[2])) {
 			case Hit_Player:
+				//合作模式無法攻擊玩家
 				if (room.getMap().IsCooperationMode()) {
 					return;
 				}
+				//沒有該ID子彈
 				if ((_bullet = game.getBullet(Integer.valueOf(_packet
 						.split(C_PacketSymbol)[3]))) == null) {
 					return;
 				}
+				//已擊中過
 				if (_bullet.IsHit()) {
 					return;
 				}

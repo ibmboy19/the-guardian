@@ -15,7 +15,7 @@ public class TrapInstance {
 	}
 
 	// 陷阱狀態
-	private TrapState _trapState = TrapState.Building;
+	protected TrapState _trapState = TrapState.Building;
 
 	// 陷阱被產生的時間
 	private final float _trapCreateTime;
@@ -57,17 +57,22 @@ public class TrapInstance {
 
 	}
 
+	public boolean IsAutoDestroy(){
+		return this._trapState == TrapState.Destroy;
+	}
+	
 	// 陷阱被觸發
 	public boolean TrapTrigged() {
 		if (this._trapState != TrapState.BuildUp)
 			return false;
 		this._trapState = TrapState.Trigged;
+		
 		return true;
 		// TODO 回傳陷阱狀態
 	}
 	
 	//陷阱若觸發或毀壞，會進入自動銷毀狀態
-	public boolean SetupAutoDestroy(float gameTime) {		
+	public boolean SetupAutoDestroy(float gameTime) {
 		// TODO 回傳陷阱狀態
 		if(this._trapState == TrapState.Destroy)
 			return false;

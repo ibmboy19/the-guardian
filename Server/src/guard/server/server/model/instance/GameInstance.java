@@ -156,7 +156,12 @@ public class GameInstance extends TimerTask {
 		if (_trap == null)
 			return;
 
-		if (_trap.TrapTrigged()) {
+		if (_trap instanceof DetonatedTrapInstance) {
+			if (((DetonatedTrapInstance) _trap).TrapTrigged(gameTime)) {
+				// Send Packet
+				BroadcastPacketToRoom(_packet);
+			}
+		} else if (_trap.TrapTrigged()) {
 
 			// Send Packet
 			BroadcastPacketToRoom(_packet);
@@ -172,11 +177,13 @@ public class GameInstance extends TimerTask {
 		if (_trap == null)
 			return;
 
-		if (_trap.TrapTrigged()) {
+		if (_trap.IsAutoDestroy()) {
 			if (_trap instanceof DetonatedTrapInstance) {
-				_hunter.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP());
+				System.out.println("Apply Hunter HP");
+				_hunter.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP() > 0 ? -((DetonatedTrapInstance) _trap)
+						.getDamageHP() : ((DetonatedTrapInstance) _trap)
+						.getDamageHP());
 			}
-
 		}
 
 	}
