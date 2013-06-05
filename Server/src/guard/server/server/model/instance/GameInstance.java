@@ -74,8 +74,62 @@ public class GameInstance extends TimerTask {
 	private List<HunterInstance> _hunterList = Lists.newList();
 	private GuardianInstance _guardian = null;
 
-	public void RemoveMember(PlayerInstance pc) {
+	/** 檢查點 */
+	private Map<Integer, CheckPointInstance> _allCheckPoints = Maps
+			.newConcurrentMap();
 
+	private boolean CanSpawnAtCheckPoint(int _checkPointID, String _accountName) {
+		if (!_allCheckPoints.containsKey(_checkPointID)) {
+			_allCheckPoints.put(_checkPointID, new CheckPointInstance(
+					_checkPointID, _accountName));
+			return true;
+		}
+		// Check Game Mode
+		// Cooperation Mode
+		if (getMap().IsCooperationMode()) {
+			return true;
+		}
+		// Greedy Mode
+		else if (_allCheckPoints.get(_checkPointID).IsBelonger(_accountName)) {
+			return true;
+		}
+
+		return false;
+	}
+	private boolean CanArriveCheckPoint(int _checkPointID,String _accountName){
+		if (!_allCheckPoints.containsKey(_checkPointID)) {
+			_allCheckPoints.put(_checkPointID, new CheckPointInstance(
+					_checkPointID, _accountName));
+			return true;
+		}
+		return false;
+	}
+
+	public void SpawnHunter(String _packet, HunterInstance _hunter) {
+		if (!_hunter.CanRevive())
+			return;
+		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[1]);
+		if (CanSpawnAtCheckPoint(_checkPointID, _hunter.getAccountName())) {
+			BroadcastPacketToRoom(_packet + C_PacketSymbol
+					+ _hunter.getPlayerModelData());
+		}
+	}
+
+	public void ArriveCheckPoint(String _packet, HunterInstance _hunter) {
+		//死人不會到達檢查點
+		if(_hunter.IsDead())
+			return;
+		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[1]);
+		if (CanArriveCheckPoint(_checkPointID, _hunter.getAccountName())) {
+			//增加金錢 - 依據遊戲模式
+			if(getMap().IsCooperationMode()){
+				for(HunterInstance _hunterInst : _hunterList){
+					_hunterInst.ArriveCheckPoint(_checkPointID);
+				}
+			}else {
+				_hunter.ArriveCheckPoint(_checkPointID);
+			}
+		}
 	}
 
 	/** 陷阱們 */

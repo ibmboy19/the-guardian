@@ -7,9 +7,9 @@ import guard.server.server.model.instance.GameInstance;
 import guard.server.server.model.instance.HunterInstance;
 import guard.server.server.model.instance.PlayerInstance;
 
-public class C_SelectPlayerSpawnPoint {
+public class C_ArriveCheckPoint {
 	/** 獵人選擇一個重生點，才可以看到其他玩家或自身 */
-	public C_SelectPlayerSpawnPoint(ClientProcess _client, String _packet) {
+	public C_ArriveCheckPoint(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();
 		if (pc == null)
 			return;
@@ -26,7 +26,7 @@ public class C_SelectPlayerSpawnPoint {
 			return;
 		HunterInstance _hunter = (HunterInstance) pc.getWRPlayerInstance();
 
-		game.SpawnHunter(_packet, _hunter);
+		game.ArriveCheckPoint(_packet, _hunter);
 
 	}
 }
