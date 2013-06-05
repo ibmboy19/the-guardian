@@ -6,7 +6,6 @@ import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Hp;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Invisible;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Life;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stamina;
-import static guard.server.server.clientpacket.C_MoveState.C_MoveState_SwitchMoveState;
 import static guard.server.server.clientpacket.C_MoveState.C_MoveState_UpdateStamina;
 import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
@@ -141,34 +140,20 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	private MoveState _moveState = MoveState.Idle;
 
 	// 切換移動方式
-	public void SwitchRunWalk(boolean _runwalkState) {
+	private void SwitchRunWalk(boolean _runwalkState) {
 		if (_lockStamina) {
 			if (_runOrWalk) {
 				_runOrWalk = false;
-				// Send Packet
-				_pc.getRoom().broadcastPacketToRoom(
-						String.valueOf(C_MoveState) + C_PacketSymbol
-								+ String.valueOf(C_MoveState_SwitchMoveState)
-								+ C_PacketSymbol + _pc.getAccountName()
-								+ C_PacketSymbol
-								+ String.valueOf(_runOrWalk ? 1 : 0));
 			}
 			return;
 		}
 		if (_runOrWalk != _runwalkState) {
 			this._runOrWalk = _runwalkState;
-			// Send Packet
-			_pc.getRoom().broadcastPacketToRoom(
-					String.valueOf(C_MoveState) + C_PacketSymbol
-							+ String.valueOf(C_MoveState_SwitchMoveState)
-							+ C_PacketSymbol + _pc.getAccountName()
-							+ C_PacketSymbol
-							+ String.valueOf(_runOrWalk ? 1 : 0));
 		}
 	}
 
 	// 更新移動狀態
-	public void UpdateMoveState(int _fb, int _lr) {
+	public void UpdateMoveState(int _fb, int _lr, boolean _runwalkState) {
 		if (_fb == 0 && _lr == 0) {
 			_moveState = MoveState.Idle;
 		} else if (_runOrWalk && !_lockStamina) {
@@ -176,6 +161,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		} else {
 			_moveState = MoveState.Walk;
 		}
+		SwitchRunWalk(_runwalkState);
 	}
 
 	// 耐力
@@ -234,12 +220,6 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 			// auto switch run walk
 			_moveState = MoveState.Walk;
 			_runOrWalk = false;
-			_pc.getRoom().broadcastPacketToRoom(
-					String.valueOf(C_MoveState) + C_PacketSymbol
-							+ String.valueOf(C_MoveState_SwitchMoveState)
-							+ C_PacketSymbol + _pc.getAccountName()
-							+ C_PacketSymbol
-							+ String.valueOf(_runOrWalk ? 1 : 0));
 		}
 	}
 
