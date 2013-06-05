@@ -71,6 +71,7 @@ public class ClientPacketHandler {
 				new C_SelectPlayerSpawnPoint(_client, packet);
 				break;
 			case C_ArriveCheckPoint:
+				new C_ArriveCheckPoint(_client,packet);
 				break;
 			case C_RequestRemaingTime:
 				new C_RequestRemaingTime(_client,packet);

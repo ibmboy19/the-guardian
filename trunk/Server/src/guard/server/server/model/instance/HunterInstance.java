@@ -3,10 +3,13 @@ package guard.server.server.model.instance;
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_BuyItem;
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_UseItem;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Hp;
-import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stamina;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Invisible;
+import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Life;
+import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stamina;
 import static guard.server.server.clientpacket.C_MoveState.C_MoveState_SwitchMoveState;
 import static guard.server.server.clientpacket.C_MoveState.C_MoveState_UpdateStamina;
+import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterInventory;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
@@ -26,6 +29,10 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 玩者 */
 	private final PlayerInstance _pc;
+
+	public String getAccountName() {
+		return _pc.getAccountName();
+	}
 
 	/** 使用的房間 */
 	private final GameRoom _room;
@@ -47,14 +54,14 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 復活 */
 	public void Revive() {
-		//活著不能復活
+		// 活著不能復活
 		if (!IsDead())
 			return;
 		if (!CanRevive())
 			return;
 
 		this._hp = _room.getMap().getHunterHP();
-		
+
 		/**
 		 * TODO Send Packet : lives hp isDead
 		 * */
@@ -84,7 +91,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		if (IsDead())
 			return false;
 		// 補血 對於血滿無作用
-		if(_adjustValue > 0){
+		if (_adjustValue > 0) {
 			if (this._hp == _pc.getRoom().getMap().getHunterHP())
 				return false;
 		}
@@ -92,21 +99,29 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		int bufferHP = this._hp + _adjustValue;
 
 		this._hp = MathUtil.Clamp(bufferHP, 0, _room.getMap().getHunterHP());
-		
-		//死亡時 生命減少
-		if(this._hp == 0){
-			_lives--;
-		}
 
 		/**
 		 * TODO Send Packet : C_HunterState,C_HunterState_Hp
 		 * */
-		// _lives, _hp, IsDead()
-		_pc.getRoom().broadcastPacketToRoom(
-				String.valueOf(C_HunterState) + C_PacketSymbol
-						+ _pc.getAccountName() + C_PacketSymbol
-						+ String.valueOf(C_HunterState_Hp) + ","
-						+ String.valueOf(_hp));
+
+		// 死亡時 生命減少
+		if (this._hp == 0) {
+			_lives--;
+			_pc.getRoom().broadcastPacketToRoom(
+					String.valueOf(C_HunterState) + C_PacketSymbol
+							+ _pc.getAccountName() + C_PacketSymbol
+							+ String.valueOf(C_HunterState_Hp) + ","
+							+ String.valueOf(_hp)
+							+ String.valueOf(C_HunterState_Life) + ","
+							+ String.valueOf(_lives));
+
+		} else {
+			_pc.getRoom().broadcastPacketToRoom(
+					String.valueOf(C_HunterState) + C_PacketSymbol
+							+ _pc.getAccountName() + C_PacketSymbol
+							+ String.valueOf(C_HunterState_Hp) + ","
+							+ String.valueOf(_hp));
+		}
 		return true;
 	}
 
@@ -376,9 +391,15 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	}
 
 	// 抵達檢查點
-	public void ArriveCheckPoint() {
+	public void ArriveCheckPoint(int _checkPointID) {
 		_gold += _room.getMap().getArriveCheckPointReward();
 		// TODO Send Packet C_Gold
+		_pc.SendClientPacket(C_Gold + C_PacketSymbol
+				+ String.valueOf(_pc.getPlayerType()) + C_PacketSymbol
+				+ String.valueOf(_gold));
+		// TODO Send Packet Enable CheckPoint
+		_pc.SendClientPacket(String.valueOf(C_ArriveCheckPoint)
+				+ C_PacketSymbol + String.valueOf(_checkPointID));
 	}
 
 	public HunterInstance() {
