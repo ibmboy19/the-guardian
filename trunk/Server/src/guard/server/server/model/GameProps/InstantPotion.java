@@ -6,6 +6,7 @@ public class InstantPotion extends HunterItem {
 	/** 回復血量的藥水 */
 	protected int _recoveryValue;
 
+	/** 取得相對的回覆值 ，依照 比率/值 恢復血量 */
 	public int getRecoveryValue(int _hunterMaxHP) {
 		switch (_recoveryAmountType) {
 		case Value:

@@ -47,13 +47,14 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 復活 */
 	public void Revive() {
+		//活著不能復活
 		if (!IsDead())
 			return;
 		if (!CanRevive())
 			return;
 
 		this._hp = _room.getMap().getHunterHP();
-		_lives--;
+		
 		/**
 		 * TODO Send Packet : lives hp isDead
 		 * */
@@ -82,13 +83,20 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// 死人無作用
 		if (IsDead())
 			return false;
-		// 血滿無作用
-		if (this._hp == _pc.getRoom().getMap().getHunterHP())
-			return false;
+		// 補血 對於血滿無作用
+		if(_adjustValue > 0){
+			if (this._hp == _pc.getRoom().getMap().getHunterHP())
+				return false;
+		}
 
 		int bufferHP = this._hp + _adjustValue;
 
 		this._hp = MathUtil.Clamp(bufferHP, 0, _room.getMap().getHunterHP());
+		
+		//死亡時 生命減少
+		if(this._hp == 0){
+			_lives--;
+		}
 
 		/**
 		 * TODO Send Packet : C_HunterState,C_HunterState_Hp
@@ -336,7 +344,6 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					.getMap().getHunterHP()))) {
 				return;
 			}
-
 		} else if (_hItem instanceof ChronicPotion) {
 			switch (((ChronicPotion) _hItem).getPotionType()) {
 			case Stamina:// 耐力藥水 - 送封包,設定耐力最大化狀態
