@@ -8,9 +8,8 @@ import guard.server.server.model.instance.PlayerInstance;
 
 public class C_MoveState {
 
-	public static final int C_MoveState_SwitchMoveState = 0;// 切換走跑
 	public static final int C_MoveState_Move = 1;// 移動
-	public static final int C_MoveState_UpdateStamina = 2;//耐力值，Client專用
+	public static final int C_MoveState_UpdateStamina = 2;// 耐力值，Client專用
 
 	public C_MoveState(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();
@@ -24,13 +23,11 @@ public class C_MoveState {
 		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
 
 		switch (Integer.valueOf(_packet.split(C_PacketSymbol)[1])) {
-		case C_MoveState_SwitchMoveState:
-			hunter.SwitchRunWalk(Integer.valueOf(_packet.split(C_PacketSymbol)[2]) == 1);
-			break;
 		case C_MoveState_Move:
 			hunter.UpdateMoveState(
 					Integer.valueOf(_packet.split(C_PacketSymbol)[5]),
-					Integer.valueOf(_packet.split(C_PacketSymbol)[6]));
+					Integer.valueOf(_packet.split(C_PacketSymbol)[6]),
+					Integer.valueOf(_packet.split(C_PacketSymbol)[8]) == 1);
 			room.broadcastPacketToRoom(_packet);
 			break;
 		}

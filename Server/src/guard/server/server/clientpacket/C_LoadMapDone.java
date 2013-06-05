@@ -37,12 +37,6 @@ public class C_LoadMapDone {
 		case PlayerType_Hunter:
 			break;
 		case PlayerType_Guardian:
-			/*String _retGuardianPacket = "";
-			for (PlayerInstance _member : _room.getMembers()) {
-				_retGuardianPacket += _member.getPlayerModelDataPacket() + ";";
-			}
-			_retGuardianPacket = _retGuardianPacket.substring(0,
-					_retGuardianPacket.length() - 1);*/
 			_retpacket += C_PacketSymbol + pc.getPlayerModelDataPacket();
 			break;
 		}
