@@ -79,32 +79,31 @@ public class GameInstance extends TimerTask {
 	private Map<Integer, CheckPointInstance> _allCheckPoints = Maps
 			.newConcurrentMap();
 
-	private boolean CanSpawnAtCheckPoint(int _checkPointID, String _accountName,boolean _isStartPoint) {
+	private boolean CanSpawnAtCheckPoint(int _checkPointID,
+			String _accountName, boolean _isStartPoint) {
 		if (!_allCheckPoints.containsKey(_checkPointID)) {
 			_allCheckPoints.put(_checkPointID, new CheckPointInstance(
-					_checkPointID, _accountName,_isStartPoint));
+					_checkPointID, _accountName, _isStartPoint));
 			return true;
 		}
 		// Check Game Mode
 		// Cooperation Mode
-		/*if (getMap().IsCooperationMode()) {
-			return true;
-		}*/
-		// Greedy Mode
-		//else 
-		if(_isStartPoint){
+		if (getMap().IsCooperationMode()) {
 			return true;
 		}
-		if (_allCheckPoints.get(_checkPointID).IsBelonger(_accountName)) {
+		// Greedy Mode
+		else if (_allCheckPoints.get(_checkPointID).IsBelonger(_accountName)) {
 			return true;
 		}
 
 		return false;
 	}
-	private boolean CanArriveCheckPoint(int _checkPointID,String _accountName,boolean _isStartPoint){
+
+	private boolean CanArriveCheckPoint(int _checkPointID, String _accountName,
+			boolean _isStartPoint) {
 		if (!_allCheckPoints.containsKey(_checkPointID)) {
 			_allCheckPoints.put(_checkPointID, new CheckPointInstance(
-					_checkPointID, _accountName,_isStartPoint));
+					_checkPointID, _accountName, _isStartPoint));
 			return true;
 		}
 		return false;
@@ -114,7 +113,9 @@ public class GameInstance extends TimerTask {
 		if (!_hunter.CanRevive())
 			return;
 		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[1]);
-		if (CanSpawnAtCheckPoint(_checkPointID, _hunter.getAccountName(),Integer.valueOf(_packet.split(C_PacketSymbol)[3])==1?true:false)) {
+		if (CanSpawnAtCheckPoint(_checkPointID, _hunter.getAccountName(),
+				Integer.valueOf(_packet.split(C_PacketSymbol)[3]) == 1 ? true
+						: false)) {
 			_hunter.Revive();
 			BroadcastPacketToRoom(_packet + C_PacketSymbol
 					+ _hunter.getPlayerModelData());
@@ -122,17 +123,19 @@ public class GameInstance extends TimerTask {
 	}
 
 	public void ArriveCheckPoint(String _packet, HunterInstance _hunter) {
-		//死人不會到達檢查點
-		if(_hunter.IsDead())
+		// 死人不會到達檢查點
+		if (_hunter.IsDead())
 			return;
 		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[1]);
-		if (CanArriveCheckPoint(_checkPointID, _hunter.getAccountName(),Integer.valueOf(_packet.split(C_PacketSymbol)[3])==1?true:false)) {
-			//增加金錢 - 依據遊戲模式
-			if(getMap().IsCooperationMode()){
-				for(HunterInstance _hunterInst : _hunterList){
+		if (CanArriveCheckPoint(_checkPointID, _hunter.getAccountName(),
+				Integer.valueOf(_packet.split(C_PacketSymbol)[3]) == 1 ? true
+						: false)) {
+			// 增加金錢 - 依據遊戲模式
+			if (getMap().IsCooperationMode()) {
+				for (HunterInstance _hunterInst : _hunterList) {
 					_hunterInst.ArriveCheckPoint(_checkPointID);
 				}
-			}else {
+			} else {
 				_hunter.ArriveCheckPoint(_checkPointID);
 			}
 		}
@@ -240,16 +243,23 @@ public class GameInstance extends TimerTask {
 		if (_trap.IsAutoDestroy()) {
 			if (_trap instanceof DetonatedTrapInstance) {
 				System.out.println("Apply Hunter HP");
-				
-				int _damageValue = _hunter.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP() > 0 ? -((DetonatedTrapInstance) _trap)
-						.getDamageHP() : ((DetonatedTrapInstance) _trap)
-						.getDamageHP());
-				
-				_guardian._gold += Math.abs(_damageValue)*getMap().getGuardianDmgReward();
-				
-				_guardian.getActiveChar().SendClientPacket(C_Gold + C_PacketSymbol
-						+ String.valueOf(_guardian.getActiveChar().getPlayerType()) + C_PacketSymbol
-						+ String.valueOf(_guardian.getActiveChar().getWRPlayerInstance().getGold()));
+
+				int _damageValue = _hunter
+						.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP() > 0 ? -((DetonatedTrapInstance) _trap)
+								.getDamageHP()
+								: ((DetonatedTrapInstance) _trap).getDamageHP());
+
+				_guardian._gold += Math.abs(_damageValue)
+						* getMap().getGuardianDmgReward();
+
+				_guardian.getActiveChar().SendClientPacket(
+						C_Gold
+								+ C_PacketSymbol
+								+ String.valueOf(_guardian.getActiveChar()
+										.getPlayerType())
+								+ C_PacketSymbol
+								+ String.valueOf(_guardian.getActiveChar()
+										.getWRPlayerInstance().getGold()));
 			}
 		}
 
