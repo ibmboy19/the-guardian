@@ -11,6 +11,7 @@ import static guard.server.server.clientpacket.C_Trap.C_Trap_BuildUp;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Destroy;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Disable;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
@@ -78,28 +79,32 @@ public class GameInstance extends TimerTask {
 	private Map<Integer, CheckPointInstance> _allCheckPoints = Maps
 			.newConcurrentMap();
 
-	private boolean CanSpawnAtCheckPoint(int _checkPointID, String _accountName) {
+	private boolean CanSpawnAtCheckPoint(int _checkPointID, String _accountName,boolean _isStartPoint) {
 		if (!_allCheckPoints.containsKey(_checkPointID)) {
 			_allCheckPoints.put(_checkPointID, new CheckPointInstance(
-					_checkPointID, _accountName));
+					_checkPointID, _accountName,_isStartPoint));
 			return true;
 		}
 		// Check Game Mode
 		// Cooperation Mode
-		if (getMap().IsCooperationMode()) {
+		/*if (getMap().IsCooperationMode()) {
+			return true;
+		}*/
+		// Greedy Mode
+		//else 
+		if(_isStartPoint){
 			return true;
 		}
-		// Greedy Mode
-		else if (_allCheckPoints.get(_checkPointID).IsBelonger(_accountName)) {
+		if (_allCheckPoints.get(_checkPointID).IsBelonger(_accountName)) {
 			return true;
 		}
 
 		return false;
 	}
-	private boolean CanArriveCheckPoint(int _checkPointID,String _accountName){
+	private boolean CanArriveCheckPoint(int _checkPointID,String _accountName,boolean _isStartPoint){
 		if (!_allCheckPoints.containsKey(_checkPointID)) {
 			_allCheckPoints.put(_checkPointID, new CheckPointInstance(
-					_checkPointID, _accountName));
+					_checkPointID, _accountName,_isStartPoint));
 			return true;
 		}
 		return false;
@@ -109,7 +114,8 @@ public class GameInstance extends TimerTask {
 		if (!_hunter.CanRevive())
 			return;
 		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[1]);
-		if (CanSpawnAtCheckPoint(_checkPointID, _hunter.getAccountName())) {
+		if (CanSpawnAtCheckPoint(_checkPointID, _hunter.getAccountName(),Integer.valueOf(_packet.split(C_PacketSymbol)[3])==1?true:false)) {
+			_hunter.Revive();
 			BroadcastPacketToRoom(_packet + C_PacketSymbol
 					+ _hunter.getPlayerModelData());
 		}
@@ -120,7 +126,7 @@ public class GameInstance extends TimerTask {
 		if(_hunter.IsDead())
 			return;
 		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[1]);
-		if (CanArriveCheckPoint(_checkPointID, _hunter.getAccountName())) {
+		if (CanArriveCheckPoint(_checkPointID, _hunter.getAccountName(),Integer.valueOf(_packet.split(C_PacketSymbol)[3])==1?true:false)) {
 			//增加金錢 - 依據遊戲模式
 			if(getMap().IsCooperationMode()){
 				for(HunterInstance _hunterInst : _hunterList){
@@ -234,9 +240,16 @@ public class GameInstance extends TimerTask {
 		if (_trap.IsAutoDestroy()) {
 			if (_trap instanceof DetonatedTrapInstance) {
 				System.out.println("Apply Hunter HP");
-				_hunter.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP() > 0 ? -((DetonatedTrapInstance) _trap)
+				
+				int _damageValue = _hunter.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP() > 0 ? -((DetonatedTrapInstance) _trap)
 						.getDamageHP() : ((DetonatedTrapInstance) _trap)
 						.getDamageHP());
+				
+				_guardian._gold += Math.abs(_damageValue)*getMap().getGuardianDmgReward();
+				
+				_guardian.getActiveChar().SendClientPacket(C_Gold + C_PacketSymbol
+						+ String.valueOf(_guardian.getActiveChar().getPlayerType()) + C_PacketSymbol
+						+ String.valueOf(_guardian.getActiveChar().getWRPlayerInstance().getGold()));
 			}
 		}
 

@@ -27,7 +27,13 @@ public class C_Logout {
 					room.broadcastPacketToRoom(_packet + C_PacketSymbol
 							+ pc.getAccountName());
 					room.leaveRoom(pc);
+				} else {
+					room.broadcastPacketToRoom(_packet + C_PacketSymbol
+							+ pc.getAccountName());
 				}
+			} else {
+				room.broadcastPacketToRoom(_packet + C_PacketSymbol
+						+ pc.getAccountName());
 			}
 		} else {
 			pc.SendClientPacket(_packet + C_PacketSymbol + pc.getAccountName());

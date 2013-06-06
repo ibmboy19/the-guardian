@@ -28,6 +28,8 @@ public class BulletInstance {
 	// 擊中後 ， 子彈銷毀
 	public synchronized void Hit(HunterInstance _hunter,int _dmg) {
 		//
+		if(_hunter.getAccountName() == _bulletBlonger)
+			return;
 		_isHit = true;
 		_hunter.ApplyHP(_dmg);
 		
