@@ -1,9 +1,9 @@
 package guard.server.server.clientpacket;
 
+import static guard.server.server.clientpacket.ClientOpcodes.C_ApplyDamage;
 import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_CreateRoom;
-import static guard.server.server.clientpacket.ClientOpcodes.C_ExitGame;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
@@ -16,6 +16,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_Login;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_NetDelay;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Projectile;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RefreshAllPlayersList;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RefreshRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RequestRemaingTime;
@@ -86,8 +87,7 @@ public class ClientPacketHandler {
 				new C_LoadMapDone(_client, packet);
 				break;
 			case C_GameStart:
-				break;
-			case C_ExitGame:
+				
 				break;
 			case C_GameOver:
 				break;
@@ -102,6 +102,12 @@ public class ClientPacketHandler {
 				break;
 			case C_Trap:
 				new C_Trap(_client,packet);
+				break;
+			case C_Projectile:
+				new C_Projectile(_client,packet);
+				break;
+			case C_ApplyDamage:
+				new C_ApplyDamage(_client,packet);
 				break;
 			}
 		} catch (NumberFormatException nf) {

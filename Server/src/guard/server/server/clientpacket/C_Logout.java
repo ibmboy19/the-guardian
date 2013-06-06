@@ -10,6 +10,7 @@ public class C_Logout {
 
 	public static final int C_Logout_BackToLobby = 0;
 	public static final int C_Logout_PlayerExit = 1;
+	public static final int C_Logout_Logout= 2;
 
 	public C_Logout(ClientProcess _client, String _packet) {
 
