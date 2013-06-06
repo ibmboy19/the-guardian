@@ -28,6 +28,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 玩者 */
 	private final PlayerInstance _pc;
+	
 
 	public String getAccountName() {
 		return _pc.getAccountName();
@@ -60,10 +61,14 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 			return;
 
 		this._hp = _room.getMap().getHunterHP();
-
 		/**
 		 * TODO Send Packet : lives hp isDead
 		 * */
+		_pc.getRoom().broadcastPacketToRoom(
+				String.valueOf(C_HunterState) + C_PacketSymbol
+						+ _pc.getAccountName() + C_PacketSymbol
+						+ String.valueOf(C_HunterState_Hp) + ","
+						+ String.valueOf(_hp));
 		// _lives, _hp, IsDead()
 
 	}
@@ -85,20 +90,24 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	}
 
 	// 正值: 補血 ;負值: 傷害 ; 死人無作用
-	public boolean ApplyHP(int _adjustValue) {
+	public int ApplyHP(int _adjustValue) {
 		// 死人無作用
 		if (IsDead())
-			return false;
+			return 0;
 		// 補血 對於血滿無作用
 		if (_adjustValue > 0) {
 			if (this._hp == _pc.getRoom().getMap().getHunterHP())
-				return false;
+				return 0;
 		}
+		
+		int _deltaHP = this._hp;
 
 		int bufferHP = this._hp + _adjustValue;
 
 		this._hp = MathUtil.Clamp(bufferHP, 0, _room.getMap().getHunterHP());
 
+		_deltaHP = this._hp - _deltaHP;
+		
 		/**
 		 * TODO Send Packet : C_HunterState,C_HunterState_Hp
 		 * */
@@ -121,7 +130,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 							+ String.valueOf(C_HunterState_Hp) + ","
 							+ String.valueOf(_hp));
 		}
-		return true;
+		return _deltaHP;
 	}
 
 	public void ApplyCostStamina(float _adjustValue) {
@@ -335,8 +344,8 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		HunterItem _hItem = _hunterInventory.get(_key);
 		// _hunterInventory.get(_key).UseItem(this);
 		if (_hItem instanceof InstantPotion) {
-			if (!ApplyHP(((InstantPotion) _hItem).getRecoveryValue(_room
-					.getMap().getHunterHP()))) {
+			if (ApplyHP(((InstantPotion) _hItem).getRecoveryValue(_room
+					.getMap().getHunterHP())) == 0) {
 				return;
 			}
 		} else if (_hItem instanceof ChronicPotion) {
