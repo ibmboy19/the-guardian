@@ -75,7 +75,8 @@ public class C_CreateRoom {
 						Integer.valueOf(_idata.split(_symbol1)[0]),
 						_idata.split(_symbol1)[2], Integer.valueOf(_idata
 								.split(_symbol1)[3]), Integer.valueOf(_idata
-								.split(_symbol1)[4]));
+								.split(_symbol1)[4]),
+								Integer.valueOf(_idata.split(_symbol1)[5]));
 				break;
 			}
 

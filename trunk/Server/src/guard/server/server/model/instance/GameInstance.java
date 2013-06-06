@@ -11,6 +11,7 @@ import static guard.server.server.clientpacket.C_Trap.C_Trap_BuildUp;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Destroy;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Disable;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
@@ -410,6 +411,7 @@ public class GameInstance extends TimerTask {
 		gameState = GameState.GameStart;
 		gameTimeRecord = gameTime;
 		// TODO 傳送遊戲開始封包
+		BroadcastPacketToRoom(String.valueOf(C_GameStart));
 	}
 
 	// 遊戲時間超過，轉換到遊戲結束狀態

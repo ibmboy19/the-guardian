@@ -39,8 +39,6 @@ public class ClientOpcodes {
 	public static final int C_LoadMapDone = 15;
 	// 開始遊戲 - 載入場景完畢且倒數完畢後，開始遊戲
 	public static final int C_GameStart = 16;
-	// 遊戲中 中離 type 0: ; type 1:
-	public static final int C_ExitGame = 17;
 	// 遊戲結束 - 正常的遊戲結束
 	public static final int C_GameOver = 18;
 	// 金錢更新
@@ -53,5 +51,9 @@ public class ClientOpcodes {
 	public static final int C_HunterFire = 22;
 	//陷阱 -> type 0 : 建造; type 1 : 建造完成  ; 2 : 觸發 ; 3 : 銷毀
 	public static final int C_Trap = 23;
+	//投擲道具
+	public static final int C_Projectile = 24;
+	//一般傷害物件
+	public static final int C_ApplyDamage = 25;
 
 }

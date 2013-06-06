@@ -7,12 +7,14 @@ import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Invis
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Life;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stamina;
 import static guard.server.server.clientpacket.C_MoveState.C_MoveState_UpdateStamina;
+import static guard.server.server.clientpacket.C_Projectile.C_Projectile_Request;
 import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterInventory;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Projectile;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Hunter;
 import guard.server.server.model.GameRoom;
 import guard.server.server.model.GameProps.ChronicPotion;
@@ -28,7 +30,6 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 玩者 */
 	private final PlayerInstance _pc;
-	
 
 	public String getAccountName() {
 		return _pc.getAccountName();
@@ -99,7 +100,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 			if (this._hp == _pc.getRoom().getMap().getHunterHP())
 				return 0;
 		}
-		
+
 		int _deltaHP = this._hp;
 
 		int bufferHP = this._hp + _adjustValue;
@@ -107,7 +108,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		this._hp = MathUtil.Clamp(bufferHP, 0, _room.getMap().getHunterHP());
 
 		_deltaHP = this._hp - _deltaHP;
-		
+
 		/**
 		 * TODO Send Packet : C_HunterState,C_HunterState_Hp
 		 * */
@@ -365,7 +366,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 			}
 		} else if (_hItem instanceof Projectile) {
-
+			_pc.SendClientPacket(String.valueOf(C_Projectile) + C_PacketSymbol
+					+ String.valueOf(C_Projectile_Request) + C_PacketSymbol
+					+ String.valueOf(((Projectile) _hItem).getModelID()));
 		}
 
 		_hunterInventory.remove(_key);
