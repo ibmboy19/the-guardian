@@ -30,6 +30,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 玩者 */
 	private final PlayerInstance _pc;
+	public PlayerInstance getActiveChar(){
+		return _pc;
+	}
 
 	public String getAccountName() {
 		return _pc.getAccountName();
@@ -137,11 +140,17 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public void ApplyCostStamina(float _adjustValue) {
 		if (IsDead())
 			return;
+		if(_adjustValue > 0 && this._stamina == MAX_Stamina){
+			return;
+		}
 		float bufferStamina = this._stamina + _adjustValue;
 
 		this._stamina = MathUtil.Clamp(bufferStamina, MIN_Stamina, MAX_Stamina);
 
 		// TODO Send Packet
+		_pc.SendClientPacket(String.valueOf(C_MoveState) + C_PacketSymbol
+				+ C_MoveState_UpdateStamina + C_PacketSymbol
+				+ String.valueOf(_stamina));
 	}
 
 	/** 獵人移動相關 */
