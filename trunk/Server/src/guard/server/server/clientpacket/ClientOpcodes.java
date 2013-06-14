@@ -47,13 +47,15 @@ public class ClientOpcodes {
 	public static final int C_HunterState = 20;
 	// 獵人道具欄
 	public static final int C_HunterInventory = 21;
-	//獵人開槍 -> type 0 : 開火 ; type 1 : 命中 ; type 2 : 銷毀
+	// 獵人開槍 -> type 0 : 開火 ; type 1 : 命中 ; type 2 : 銷毀
 	public static final int C_HunterFire = 22;
-	//陷阱 -> type 0 : 建造; type 1 : 建造完成  ; 2 : 觸發 ; 3 : 銷毀
+	// 陷阱 -> type 0 : 建造; type 1 : 建造完成 ; 2 : 觸發 ; 3 : 銷毀
 	public static final int C_Trap = 23;
-	//投擲道具
+	// 投擲道具
 	public static final int C_Projectile = 24;
-	//一般傷害物件
+	// 一般傷害物件
 	public static final int C_ApplyDamage = 25;
+	//傳送門
+	public static final int C_Portal = 26;
 
 }

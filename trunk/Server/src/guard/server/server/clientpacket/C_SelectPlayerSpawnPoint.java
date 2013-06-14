@@ -8,6 +8,10 @@ import guard.server.server.model.instance.HunterInstance;
 import guard.server.server.model.instance.PlayerInstance;
 
 public class C_SelectPlayerSpawnPoint {
+
+	public static final int C_SelectPlayerSpawnPoint_Spawn = 0;
+	public static final int C_SelectPlayerSpawnPoint_UpdateCheckPoint = 1;
+
 	/** 獵人選擇一個重生點，才可以看到其他玩家或自身 */
 	public C_SelectPlayerSpawnPoint(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();

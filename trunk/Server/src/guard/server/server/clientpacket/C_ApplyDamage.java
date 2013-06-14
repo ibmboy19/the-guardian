@@ -1,5 +1,6 @@
 package guard.server.server.clientpacket;
 
+import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import guard.server.server.ClientProcess;
 import guard.server.server.model.GameRoom;
 import guard.server.server.model.instance.GameInstance;
@@ -7,7 +8,11 @@ import guard.server.server.model.instance.HunterInstance;
 import guard.server.server.model.instance.PlayerInstance;
 
 public class C_ApplyDamage {
-	public C_ApplyDamage(ClientProcess _client,String _packet){
+
+	public static final int C_ApplyDamage_HP = 0;
+	public static final int C_ApplyDamage_Stamina = 1;
+
+	public C_ApplyDamage(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();
 		if (pc == null) {
 			return;
@@ -23,6 +28,34 @@ public class C_ApplyDamage {
 		if (pc.IsGuardian())
 			return;
 		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
-		
+		// type,p/n,dmg_hp; type,p/n,dmg_stamina
+		System.out.println(_packet);
+		String _applyData = _packet.split(C_PacketSymbol)[1];
+		for (String _data : _applyData.split(";")) {
+			switch (Integer.valueOf(_data.split(",")[0])) {
+			case C_ApplyDamage_HP:
+				// positive
+				if (Integer.valueOf(_data.split(",")[1]) == 1) {
+					hunter.ApplyHP(Math.abs(Integer.valueOf(Integer
+							.valueOf(_data.split(",")[2]))));
+				}
+				// negative
+				else {
+					hunter.ApplyHP(-Math.abs(Integer.valueOf(Integer
+							.valueOf(_data.split(",")[2]))));
+				}
+				break;
+			case C_ApplyDamage_Stamina:
+				if (Integer.valueOf(_data.split(",")[1]) == 1) {
+					hunter.ApplyCostStamina(Math.abs(Float.valueOf(Integer
+							.valueOf(_data.split(",")[2]))));
+				} else {
+					hunter.ApplyCostStamina(-Math.abs(Float.valueOf(Integer
+							.valueOf(_data.split(",")[2]))));
+				}
+				break;
+			}
+		}
+
 	}
 }

@@ -16,6 +16,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_Login;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_NetDelay;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Portal;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Projectile;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RefreshAllPlayersList;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RefreshRoom;
@@ -108,6 +109,9 @@ public class ClientPacketHandler {
 				break;
 			case C_ApplyDamage:
 				new C_ApplyDamage(_client,packet);
+				break;
+			case C_Portal:
+				new C_Portal(_client,packet);
 				break;
 			}
 		} catch (NumberFormatException nf) {

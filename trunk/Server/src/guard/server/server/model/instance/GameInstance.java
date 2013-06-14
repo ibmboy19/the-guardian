@@ -7,16 +7,19 @@ import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Hit;
 import static guard.server.server.clientpacket.C_HunterFire.Hit_Jail;
 import static guard.server.server.clientpacket.C_LoadMapDone.C_LoadMapDone_Done;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Start;
+import static guard.server.server.clientpacket.C_SelectPlayerSpawnPoint.C_SelectPlayerSpawnPoint_UpdateCheckPoint;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_BuildUp;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Destroy;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Disable;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
+import static guard.server.server.clientpacket.ClientOpcodes.C_SelectPlayerSpawnPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
 import guard.server.server.model.GameMap;
 import guard.server.server.model.GuardWorld;
@@ -46,6 +49,8 @@ public class GameInstance extends TimerTask {
 	private final String _hostName;
 	/** 使用的地圖 */
 	private final GameMap _map;
+	/**  */
+	private final TreasureInstance _treasure;
 
 	/**
 	 * 取得遊戲時間
@@ -93,7 +98,7 @@ public class GameInstance extends TimerTask {
 			return true;
 		}
 		// Greedy Mode
-		else if (_allCheckPoints.get(_checkPointID).IsBelonger(_accountName)) {
+		else if (_allCheckPoints.get(_checkPointID).IsOwner(_accountName)) {
 			return true;
 		}
 
@@ -113,10 +118,16 @@ public class GameInstance extends TimerTask {
 	public void SpawnHunter(String _packet, HunterInstance _hunter) {
 		if (!_hunter.CanRevive())
 			return;
-		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[1]);
+		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
 		if (CanSpawnAtCheckPoint(_checkPointID, _hunter.getAccountName(),
-				Integer.valueOf(_packet.split(C_PacketSymbol)[3]) == 1 ? true
+				Integer.valueOf(_packet.split(C_PacketSymbol)[4]) == 1 ? true
 						: false)) {
+			BroadcastPacketToRoom(String.valueOf(C_SelectPlayerSpawnPoint)
+					+ C_PacketSymbol
+					+ String.valueOf(C_SelectPlayerSpawnPoint_UpdateCheckPoint)
+					+ C_PacketSymbol + _checkPointID + C_PacketSymbol
+					+ _hunter.getAccountName() + C_PacketSymbol
+					+ String.valueOf(_map.getGameMode()));
 			_hunter.Revive();
 			BroadcastPacketToRoom(_packet + C_PacketSymbol
 					+ _hunter.getPlayerModelData());
@@ -266,7 +277,36 @@ public class GameInstance extends TimerTask {
 
 	}
 
-	public void AttackTrapJail(int _bulletID, int _slot, int _key) {
+	public void MeleeAttackApplyToHunter(WickedRoadPlayerInstance _wrPlayer) {
+
+		if (_wrPlayer instanceof GuardianInstance)
+			return;
+		HunterInstance _hunter = (HunterInstance) _wrPlayer;
+
+		_hunter.ApplyHP(-_map.getMeleeDamageValue());
+
+	}
+
+	public void MeleeAttackTrapJail(int _slot, int _key) {
+		TrapInstance _trap = getTrapInstance(_slot, _key);
+		if (_trap == null)
+			return;
+		if (_trap instanceof SummoningTrapInstance) {
+			if (((SummoningTrapInstance) _trap).ApplyDamage(_map
+					.getBulletDamageValue())
+					&& _trap.SetupAutoDestroy(gameTime)) {
+				// TODO Send Packet 陷阱關閉
+
+				BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
+						+ String.valueOf(C_Trap_Disable) + C_PacketSymbol
+						+ String.valueOf(_slot) + C_PacketSymbol
+						+ String.valueOf(_key));
+
+			}
+		}
+	}
+
+	public void BulletAttackTrapJail(int _bulletID, int _slot, int _key) {
 
 		TrapInstance _trap = getTrapInstance(_slot, _key);
 		if (_trap == null)
@@ -332,17 +372,14 @@ public class GameInstance extends TimerTask {
 	}
 
 	/** 子彈們 */
-	private int _bulletCounter = 0;
-	private Map<Integer, BulletInstance> _bulletList = Maps.newConcurrentMap();
+	private Map<String, BulletInstance> _bulletList = Maps.newConcurrentMap();
 
-	public BulletInstance getBullet(int _id) {
+	public BulletInstance getBullet(String _id) {
 		return _bulletList.get(_id);
 	}
 
 	public synchronized void HunterFire(PlayerInstance pc, String position,
-			String rotation) {
-
-		int _bulletID = _bulletCounter;
+			String rotation, String _bulletID) {
 		_bulletList.put(_bulletID, new BulletInstance(pc.getAccountName(),
 				_bulletID, gameTime));
 		// TODO BroadCast To All : Fire
@@ -352,7 +389,6 @@ public class GameInstance extends TimerTask {
 				+ String.valueOf(_bulletID) + C_PacketSymbol + position
 				+ C_PacketSymbol + rotation;
 		BroadcastPacketToRoom(_retPacket);
-		_bulletCounter++;
 	}
 
 	public void HunterFireHit(int bulletID) {
@@ -369,7 +405,7 @@ public class GameInstance extends TimerTask {
 	private int gameCountDown;
 
 	// 遊戲載入地圖完畢，準備開始的倒數時間 - at state 3
-	private final float gameStartReadyTime = 20;
+	private final float gameStartReadyTime = 8;
 
 	public boolean IsReady() {
 		return gameState == GameState.CountDown;
@@ -384,20 +420,20 @@ public class GameInstance extends TimerTask {
 		return gameState == GameState.GameOver;
 	}
 
-	private void GameReady() {
-		gameState = GameState.CountDown;
+	private void GameStartCountDown() {
 		gameTimeRecord = Float.NEGATIVE_INFINITY;
+		gameState = GameState.CountDown;
 	}
 
 	private void GameLoading() {
-		gameState = GameState.Loading;
 		gameTimeRecord = gameTime;
+		gameState = GameState.Loading;
 	}
 
 	// 載入完成呼叫函式,進入遊戲，倒數N秒後開始
 	private void GameStartReady() {
-		gameState = GameState.GameReady;
 		gameTimeRecord = gameTime;
+		gameState = GameState.GameReady;
 		// TODO 廣播開始遊戲封包
 		for (PlayerInstance members : GuardWorld.getInstance()
 				.getRoom(_hostName).get_membersList()) {
@@ -408,8 +444,8 @@ public class GameInstance extends TimerTask {
 
 	// 倒數完畢 開始遊戲
 	private void GameStart() {
-		gameState = GameState.GameStart;
 		gameTimeRecord = gameTime;
+		gameState = GameState.GameStart;
 		// TODO 傳送遊戲開始封包
 		BroadcastPacketToRoom(String.valueOf(C_GameStart));
 	}
@@ -450,6 +486,7 @@ public class GameInstance extends TimerTask {
 		this.gameState = GameState.Waiting;
 		this.gameTimeRecord = Float.NEGATIVE_INFINITY;
 		this.gameCountDown = 3;
+		this._treasure = new TreasureInstance(this._guardian);
 	}
 
 	@Override
@@ -457,7 +494,7 @@ public class GameInstance extends TimerTask {
 
 		switch (gameState) {
 		case Waiting:// 等待玩家
-			GameReady();
+			GameStartCountDown();
 			break;
 		case CountDown:// 準備室倒數 - 準備開始遊戲
 			if (gameCountDown >= 0) {
@@ -515,9 +552,13 @@ public class GameInstance extends TimerTask {
 			CheckAllAutoDestroyTrap();
 			break;
 		case GameOver:// 遊戲結束
+
 			// TODO 計算勝利結果，傳送封包。
+			CalcGameResult();
 
 			// TODO 結束遊戲，傳送封包，自行銷毀實體。
+			GuardWorld.getInstance().GameOver(_hostName);
+
 			break;
 		}
 
@@ -540,7 +581,45 @@ public class GameInstance extends TimerTask {
 				_bulletList.remove(_bullet.getBulletInstanceID());
 			}
 		}
-		System.out.println("bullet count : " + _bulletList.size());
+		//System.out.println("bullet count : " + _bulletList.size());
+	}
+
+	/** 計算遊戲結果 */
+	public void CalcGameResult() {
+
+		switch (_map.getGameMode()) {
+		case GameMap.GameMode_Cooperation:
+
+			for (HunterInstance _hunterInst : _hunterList) {
+				_hunterInst
+						.getActiveChar()
+						.SendClientPacket(
+								String.valueOf(C_GameOver)
+										+ C_PacketSymbol
+										+ ((!_treasure.IsOwner(_guardian)) ? "0"
+												: "1"));
+			}
+
+			_guardian.getActiveChar().SendClientPacket(
+					String.valueOf(C_GameOver) + C_PacketSymbol
+							+ (_treasure.IsOwner(_guardian) ? "0" : "1"));
+
+			break;
+		case GameMap.GameMode_Greedy:
+
+			for (HunterInstance _hunterInst : _hunterList) {
+				_hunterInst.getActiveChar().SendClientPacket(
+						String.valueOf(C_GameOver) + C_PacketSymbol
+								+ (_treasure.IsOwner(_hunterInst) ? "1" : "0"));
+			}
+
+			_guardian.getActiveChar().SendClientPacket(
+					String.valueOf(C_GameOver) + C_PacketSymbol
+							+ (_treasure.IsOwner(_guardian) ? "0" : "1"));
+
+			break;
+		}
+
 	}
 
 	/**
@@ -551,7 +630,7 @@ public class GameInstance extends TimerTask {
 	 */
 	public void startGameTimer(int delay) {
 		timer.scheduleAtFixedRate(this, delay, 100);
-		GameReady();
+		GameStartCountDown();
 	}
 
 	// 玩家離開

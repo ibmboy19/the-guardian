@@ -8,6 +8,7 @@ import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_OtherLeav
 import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_PCLeave;
 import static guard.server.server.clientpacket.C_Logout.C_Logout_BackToLobby;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Ready;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_JoinRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LeaveRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
@@ -205,6 +206,14 @@ public class GameRoom {
 					+ String.valueOf(C_LeaveRoom_PCLeave) + C_PacketSymbol
 					+ pc.getAccountName());
 		}
+	}
+	/**
+	 * 遊戲結束
+	 * */
+	public void GameOver(){
+		
+		this.breakup();
+		this._game.cancel();
 	}
 
 	/**
