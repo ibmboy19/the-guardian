@@ -1,5 +1,6 @@
 package guard.server.server.model.instance;
 
+import static guard.server.server.clientpacket.C_Treasure.*;
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_BuyItem;
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_UseItem;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Hp;
@@ -15,6 +16,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_HunterState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Projectile;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Treasure;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Hunter;
 import guard.server.server.model.GameRoom;
 import guard.server.server.model.GameProps.ChronicPotion;
@@ -30,7 +32,8 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 玩者 */
 	private final PlayerInstance _pc;
-	public PlayerInstance getActiveChar(){
+
+	public PlayerInstance getActiveChar() {
 		return _pc;
 	}
 
@@ -117,8 +120,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		 * */
 
 		// 死亡時 生命減少
-		if (this._hp == 0) {
+		if (IsDead()) {
 			_lives--;
+			// 更新狀態
 			_pc.getRoom().broadcastPacketToRoom(
 					String.valueOf(C_HunterState) + C_PacketSymbol
 							+ _pc.getAccountName() + C_PacketSymbol
@@ -126,6 +130,17 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 							+ String.valueOf(_hp)
 							+ String.valueOf(C_HunterState_Life) + ","
 							+ String.valueOf(_lives));
+			// 檢查寶藏擁有者
+			if (_room.getGame().getTreasure().IsOwner(this)) {
+
+				_room.getGame().TreasureReturn();
+
+				// TODO Send Packet 寶藏回歸 封包
+				_room.broadcastPacketToRoom(String.valueOf(C_Treasure)
+						+ C_PacketSymbol
+						+ String.valueOf(C_Treasure_TreasureReturn));
+
+			}
 
 		} else {
 			_pc.getRoom().broadcastPacketToRoom(
@@ -140,7 +155,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public void ApplyCostStamina(float _adjustValue) {
 		if (IsDead())
 			return;
-		if(_adjustValue > 0 && this._stamina == MAX_Stamina){
+		if (_adjustValue > 0 && this._stamina == MAX_Stamina) {
 			return;
 		}
 		float bufferStamina = this._stamina + _adjustValue;

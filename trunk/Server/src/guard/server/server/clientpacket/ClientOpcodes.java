@@ -57,5 +57,9 @@ public class ClientOpcodes {
 	public static final int C_ApplyDamage = 25;
 	//傳送門
 	public static final int C_Portal = 26;
+	//檢查遊玩人數
+	public static final int C_CheckGameActivePlayer = 27;
+	//寶藏
+	public static final int C_Treasure = 28;
 
 }

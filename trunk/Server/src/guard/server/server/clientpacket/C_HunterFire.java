@@ -115,7 +115,6 @@ public class C_HunterFire {
 			}
 			break;
 		case C_HunterFire_MeleeAnim:
-			break;
 		case C_HunterFire_Destroy:
 			room.broadcastPacketToRoom(_packet);
 			break;

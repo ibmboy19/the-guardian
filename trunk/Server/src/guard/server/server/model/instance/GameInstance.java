@@ -51,7 +51,12 @@ public class GameInstance extends TimerTask {
 	private final GameMap _map;
 	/**  */
 	private final TreasureInstance _treasure;
-
+	public TreasureInstance getTreasure(){
+		return _treasure;
+	}
+	public void TreasureReturn(){
+		_treasure.Lost(_guardian);
+	}
 	/**
 	 * 取得遊戲時間
 	 * 
