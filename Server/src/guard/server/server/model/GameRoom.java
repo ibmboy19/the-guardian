@@ -277,7 +277,6 @@ public class GameRoom {
 			member.SendClientPacket(String.valueOf(C_LeaveRoom + C_PacketSymbol
 					+ String.valueOf(C_LeaveRoom_BreakUp)));
 		}
-
 		GuardWorld.getInstance().RemoveRoom(this);
 	}
 
@@ -404,6 +403,7 @@ public class GameRoom {
 					}
 				}
 			}
+			breakup();
 			connectionDetectThread.interrupt();
 		}
 
