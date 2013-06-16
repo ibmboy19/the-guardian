@@ -61,5 +61,7 @@ public class ClientOpcodes {
 	public static final int C_CheckGameActivePlayer = 27;
 	//寶藏
 	public static final int C_Treasure = 28;
+	//GameTime
+	public static final int C_GameTimeAlert = 29;
 
 }
