@@ -75,10 +75,10 @@ public class ClientPacketHandler {
 				new C_SelectPlayerSpawnPoint(_client, packet);
 				break;
 			case C_ArriveCheckPoint:
-				new C_ArriveCheckPoint(_client,packet);
+				new C_ArriveCheckPoint(_client, packet);
 				break;
 			case C_RequestRemaingTime:
-				new C_RequestRemaingTime(_client,packet);
+				new C_RequestRemaingTime(_client, packet);
 				break;
 			case C_MoveState:
 				new C_MoveState(_client, packet);
@@ -90,42 +90,42 @@ public class ClientPacketHandler {
 				new C_LoadMapDone(_client, packet);
 				break;
 			case C_GameStart:
-				
 				break;
 			case C_GameOver:
+				new C_GameOver(_client, packet);
 				break;
 			case C_Gold:
 				new C_Gold(_client, packet);
 				break;
 			case C_HunterInventory:
 				new C_HunterInventory(_client, packet);
-				break;				
+				break;
 			case C_HunterFire:
-				new C_HunterFire(_client,packet);
+				new C_HunterFire(_client, packet);
 				break;
 			case C_Trap:
-				new C_Trap(_client,packet);
+				new C_Trap(_client, packet);
 				break;
 			case C_Projectile:
-				new C_Projectile(_client,packet);
+				new C_Projectile(_client, packet);
 				break;
 			case C_ApplyDamage:
-				new C_ApplyDamage(_client,packet);
+				new C_ApplyDamage(_client, packet);
 				break;
 			case C_Portal:
-				new C_Portal(_client,packet);
+				new C_Portal(_client, packet);
 				break;
 			case C_CheckGameActivePlayer:
-				new C_CheckGameActivePlayer(_client,packet);
+				new C_CheckGameActivePlayer(_client, packet);
 				break;
 			case C_Treasure:
-				new C_Treasure(_client,packet);
+				new C_Treasure(_client, packet);
 				break;
 			}
 		} catch (NumberFormatException nf) {
 			System.out.println("接收到一個null.");
 		} catch (SocketException e) {
-			System.out.println(e);			
+			System.out.println(e);
 		} catch (Exception e) {
 			System.out.println(e);
 		}

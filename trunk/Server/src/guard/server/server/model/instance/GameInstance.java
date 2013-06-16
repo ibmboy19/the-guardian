@@ -1,6 +1,8 @@
 package guard.server.server.model.instance;
 
 import static guard.server.server.clientpacket.C_Chat.C_Chat_ChatInRoomSystem;
+import static guard.server.server.clientpacket.C_GameTimeAlert.C_GameTimeAlert_Over;
+import static guard.server.server.clientpacket.C_GameTimeAlert.C_GameTimeAlert_Start;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Destroy;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Fire;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Hit;
@@ -14,6 +16,7 @@ import static guard.server.server.clientpacket.C_Trap.C_Trap_Disable;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GameTimeAlert;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
@@ -51,12 +54,15 @@ public class GameInstance extends TimerTask {
 	private final GameMap _map;
 	/**  */
 	private final TreasureInstance _treasure;
-	public TreasureInstance getTreasure(){
+
+	public TreasureInstance getTreasure() {
 		return _treasure;
 	}
-	public void TreasureReturn(){
+
+	public void TreasureReturn() {
 		_treasure.Lost(_guardian);
 	}
+
 	/**
 	 * 取得遊戲時間
 	 * 
@@ -436,9 +442,10 @@ public class GameInstance extends TimerTask {
 	}
 
 	// 載入完成呼叫函式,進入遊戲，倒數N秒後開始
-	private void GameStartReady() {
+	private void GameStartReady() {		
 		gameTimeRecord = gameTime;
 		gameState = GameState.GameReady;
+		gameCountDown = (int)gameStartReadyTime;
 		// TODO 廣播開始遊戲封包
 		for (PlayerInstance members : GuardWorld.getInstance()
 				.getRoom(_hostName).get_membersList()) {
@@ -451,12 +458,13 @@ public class GameInstance extends TimerTask {
 	private void GameStart() {
 		gameTimeRecord = gameTime;
 		gameState = GameState.GameStart;
+		gameCountDown = (int)_map.getGamePlayTime();
 		// TODO 傳送遊戲開始封包
 		BroadcastPacketToRoom(String.valueOf(C_GameStart));
 	}
 
 	// 遊戲時間超過，轉換到遊戲結束狀態
-	private void GameOver() {
+	public void GameOver() {
 		gameState = GameState.GameOver;
 		gameTimeRecord = gameTime;
 		// TODO 傳送遊戲結束封包，等待計算中的勝利結果。
@@ -524,7 +532,16 @@ public class GameInstance extends TimerTask {
 
 			break;
 		case GameReady:// 遊戲準備中 - 倒數N秒 暫定20
-			if (gameTime - gameTimeRecord > gameStartReadyTime) {
+			if(gameCountDown >= 0){
+				if (gameTime - gameTimeRecord > 1) {
+					
+					BroadcastPacketToRoom(String.valueOf(C_GameTimeAlert)+C_PacketSymbol+
+							C_GameTimeAlert_Start+C_PacketSymbol+String.valueOf(gameCountDown));
+					
+					gameCountDown--;
+					gameTimeRecord = gameTime;
+				}
+			}else {
 				GameStart();
 			}
 			for (HunterInstance _hunter : _hunterList) {
@@ -536,13 +553,23 @@ public class GameInstance extends TimerTask {
 			break;
 		case GameStart:// 遊戲開始
 			// TODO 遊戲時間到檢查
-			if (gameTime >= _map.getGamePlayTime() + gameTimeRecord) {
-				// TODO 傳送時間到(Time's up)封包
-
+			if(gameCountDown >= 0){
+				if (gameTime - gameTimeRecord > 1) {
+					
+					if(gameCountDown <= 10){
+						BroadcastPacketToRoom(String.valueOf(C_GameTimeAlert)+C_PacketSymbol+
+								C_GameTimeAlert_Over+C_PacketSymbol+String.valueOf(gameCountDown));
+					}
+					
+					gameCountDown--;
+					gameTimeRecord = gameTime;
+				}
+			}else {//Time out
 				GameOver();
 			}
+			
 			// TODO //守護神每N秒獎金計算，及其他與時間相關計算
-			else if (gameTime > gamePlayingTime
+			if (gameTime > gamePlayingTime
 					+ _map._guardianRewardInterval()) {
 
 				_guardian.RewardGold();
@@ -586,7 +613,7 @@ public class GameInstance extends TimerTask {
 				_bulletList.remove(_bullet.getBulletInstanceID());
 			}
 		}
-		//System.out.println("bullet count : " + _bulletList.size());
+		// System.out.println("bullet count : " + _bulletList.size());
 	}
 
 	/** 計算遊戲結果 */
@@ -596,31 +623,55 @@ public class GameInstance extends TimerTask {
 		case GameMap.GameMode_Cooperation:
 
 			for (HunterInstance _hunterInst : _hunterList) {
-				_hunterInst
-						.getActiveChar()
-						.SendClientPacket(
-								String.valueOf(C_GameOver)
-										+ C_PacketSymbol
-										+ ((!_treasure.IsOwner(_guardian)) ? "0"
-												: "1"));
+				_hunterInst.getActiveChar().SendClientPacket(
+						String.valueOf(C_GameOver)
+								+ C_PacketSymbol
+								+ String.valueOf(_map.getGameMode())
+								+ C_PacketSymbol
+								+ String.valueOf(_hunterInst.getActiveChar()
+										.getPlayerType()) + C_PacketSymbol
+								+ ((!_treasure.IsOwner(_guardian)) ? "0" : "1")
+								+ C_PacketSymbol
+								+ (_treasure.IsOwner(_guardian) ? "1" : "0"));
 			}
 
 			_guardian.getActiveChar().SendClientPacket(
-					String.valueOf(C_GameOver) + C_PacketSymbol
-							+ (_treasure.IsOwner(_guardian) ? "0" : "1"));
+					String.valueOf(C_GameOver)
+							+ C_PacketSymbol
+							+ String.valueOf(_map.getGameMode())
+							+ C_PacketSymbol
+							+ String.valueOf(_guardian.getActiveChar()
+									.getPlayerType()) + C_PacketSymbol
+							+ (_treasure.IsOwner(_guardian) ? "0" : "1")
+							+ C_PacketSymbol
+							+ (_treasure.IsOwner(_guardian) ? "1" : "0"));
 
 			break;
 		case GameMap.GameMode_Greedy:
 
 			for (HunterInstance _hunterInst : _hunterList) {
 				_hunterInst.getActiveChar().SendClientPacket(
-						String.valueOf(C_GameOver) + C_PacketSymbol
-								+ (_treasure.IsOwner(_hunterInst) ? "1" : "0"));
+						String.valueOf(C_GameOver)
+								+ C_PacketSymbol
+								+ String.valueOf(_map.getGameMode())
+								+ C_PacketSymbol
+								+ String.valueOf(_hunterInst.getActiveChar()
+										.getPlayerType()) + C_PacketSymbol
+								+ (_treasure.IsOwner(_hunterInst) ? "1" : "0")
+								+ C_PacketSymbol
+								+ (_treasure.IsOwner(_guardian) ? "1" : "0"));
 			}
 
 			_guardian.getActiveChar().SendClientPacket(
-					String.valueOf(C_GameOver) + C_PacketSymbol
-							+ (_treasure.IsOwner(_guardian) ? "0" : "1"));
+					String.valueOf(C_GameOver)
+							+ C_PacketSymbol
+							+ String.valueOf(_map.getGameMode())
+							+ C_PacketSymbol
+							+ String.valueOf(_guardian.getActiveChar()
+									.getPlayerType()) + C_PacketSymbol
+							+ (_treasure.IsOwner(_guardian) ? "0" : "1")
+							+ C_PacketSymbol
+							+ (_treasure.IsOwner(_guardian) ? "1" : "0"));
 
 			break;
 		}
