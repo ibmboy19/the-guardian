@@ -36,7 +36,6 @@ public class GameRoom {
 	private String _roomName;
 	/** 遊戲室人數上限 */
 	private int _maxPcCount = 4;
-
 	/** 遊戲實例 */
 	private GameInstance _game;
 
@@ -175,7 +174,8 @@ public class GameRoom {
 				_packet = String.valueOf(C_JoinRoom) + C_PacketSymbol
 						+ String.valueOf(C_JoinRoom_OtherJoin) + C_PacketSymbol
 						+ pc.getAccountName() + C_PacketSymbol
-						+ pc.getPlayerType();
+						+ pc.getPlayerType() + C_PacketSymbol
+						+ String.valueOf(pc.IsReady());
 			} else {
 				// TODO 傳送加入房間訊息，房間資訊，其他玩者
 				_packet = String.valueOf(C_JoinRoom) + C_PacketSymbol
@@ -207,13 +207,15 @@ public class GameRoom {
 					+ pc.getAccountName());
 		}
 	}
+
 	/**
 	 * 遊戲結束
 	 * */
-	public void GameOver(){
-		
-		this.breakup();
+	public synchronized void GameOver() {
+		this._game.CalcGameResult();
 		this._game.cancel();
+		this.breakup();
+		connectionDetectThread.interrupt();
 	}
 
 	/**
@@ -357,13 +359,15 @@ public class GameRoom {
 				+ C_PacketSymbol + _game.getMap().getHunterLives()
 				+ C_PacketSymbol + _maxPcCount + C_PacketSymbol
 				+ _leader.getAccountName() + C_PacketSymbol
-				+ _leader.getPlayerType();
+				+ _leader.getPlayerType() + C_PacketSymbol
+				+ String.valueOf(_leader.IsReady());
 
 		for (PlayerInstance member : getMembers()) {
 
 			if (member != _leader)
 				_ret += C_PacketSymbol + member.getAccountName()
-						+ C_PacketSymbol + member.getPlayerType();
+						+ C_PacketSymbol + member.getPlayerType()
+						+ C_PacketSymbol + String.valueOf(member.IsReady());
 
 		}
 		return _ret;
@@ -403,8 +407,7 @@ public class GameRoom {
 					}
 				}
 			}
-			breakup();
-			connectionDetectThread.interrupt();
+			GameOver();
 		}
 
 		private boolean gameIsOver() {
