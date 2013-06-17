@@ -87,12 +87,12 @@ public class GuardWorld {
 	public GameRoom getRoom(String id) {
 		return _allRooms.get(id);
 	}
-	public void GameOver(String _roomID){
-		if(!_allRooms.containsKey(_roomID)){
+	public synchronized void GameOver(String id){
+		GameRoom room = getRoom(id);
+		if(room == null){			
 			return;
 		}
-		_allRooms.get(_roomID).GameOver();
-		_allRooms.remove(_roomID);
+		room.GameOver();
 	}
 
 	/**

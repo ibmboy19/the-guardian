@@ -53,7 +53,7 @@ public class GameInstance extends TimerTask {
 	/** 使用的地圖 */
 	private final GameMap _map;
 	/**  */
-	private final TreasureInstance _treasure;
+	private TreasureInstance _treasure;
 
 	public TreasureInstance getTreasure() {
 		return _treasure;
@@ -69,15 +69,16 @@ public class GameInstance extends TimerTask {
 	 * @return float
 	 */
 	public float getTime() {
+		System.out.println(gameTime);
 		return gameTime;
 	}
 
 	public float getRemainingGameTime() {
 		switch (gameState) {
 		case GameReady:
-			return gameStartReadyTime - gameTime + gameTimeRecord;
+			return gameCountDown;
 		case GameStart:
-			return _map.getGamePlayTime() - gameTime + gameTimeRecord;
+			return gameCountDown;
 		default:
 			return 0;
 		}
@@ -442,10 +443,10 @@ public class GameInstance extends TimerTask {
 	}
 
 	// 載入完成呼叫函式,進入遊戲，倒數N秒後開始
-	private void GameStartReady() {		
+	private void GameStartReady() {
 		gameTimeRecord = gameTime;
 		gameState = GameState.GameReady;
-		gameCountDown = (int)gameStartReadyTime;
+		gameCountDown = (int) gameStartReadyTime;
 		// TODO 廣播開始遊戲封包
 		for (PlayerInstance members : GuardWorld.getInstance()
 				.getRoom(_hostName).get_membersList()) {
@@ -458,7 +459,7 @@ public class GameInstance extends TimerTask {
 	private void GameStart() {
 		gameTimeRecord = gameTime;
 		gameState = GameState.GameStart;
-		gameCountDown = (int)_map.getGamePlayTime();
+		gameCountDown = (int) _map.getGamePlayTime();
 		// TODO 傳送遊戲開始封包
 		BroadcastPacketToRoom(String.valueOf(C_GameStart));
 	}
@@ -490,6 +491,7 @@ public class GameInstance extends TimerTask {
 			final GuardianInstance guardian) {
 		this._hunterList = hunterList;
 		this._guardian = guardian;
+		this._treasure = new TreasureInstance(this._guardian);
 	}
 
 	// TODO 初始化各種地圖資訊
@@ -499,7 +501,6 @@ public class GameInstance extends TimerTask {
 		this.gameState = GameState.Waiting;
 		this.gameTimeRecord = Float.NEGATIVE_INFINITY;
 		this.gameCountDown = 3;
-		this._treasure = new TreasureInstance(this._guardian);
 	}
 
 	@Override
@@ -532,16 +533,17 @@ public class GameInstance extends TimerTask {
 
 			break;
 		case GameReady:// 遊戲準備中 - 倒數N秒 暫定20
-			if(gameCountDown >= 0){
+			if (gameCountDown >= 0) {
 				if (gameTime - gameTimeRecord > 1) {
-					
-					BroadcastPacketToRoom(String.valueOf(C_GameTimeAlert)+C_PacketSymbol+
-							C_GameTimeAlert_Start+C_PacketSymbol+String.valueOf(gameCountDown));
-					
+
+					BroadcastPacketToRoom(String.valueOf(C_GameTimeAlert)
+							+ C_PacketSymbol + C_GameTimeAlert_Start
+							+ C_PacketSymbol + String.valueOf(gameCountDown));
+
 					gameCountDown--;
 					gameTimeRecord = gameTime;
 				}
-			}else {
+			} else {
 				GameStart();
 			}
 			for (HunterInstance _hunter : _hunterList) {
@@ -553,24 +555,25 @@ public class GameInstance extends TimerTask {
 			break;
 		case GameStart:// 遊戲開始
 			// TODO 遊戲時間到檢查
-			if(gameCountDown >= 0){
+			if (gameCountDown >= 0) {
 				if (gameTime - gameTimeRecord > 1) {
-					
-					if(gameCountDown <= 10){
-						BroadcastPacketToRoom(String.valueOf(C_GameTimeAlert)+C_PacketSymbol+
-								C_GameTimeAlert_Over+C_PacketSymbol+String.valueOf(gameCountDown));
+
+					if (gameCountDown <= 10) {
+						BroadcastPacketToRoom(String.valueOf(C_GameTimeAlert)
+								+ C_PacketSymbol + C_GameTimeAlert_Over
+								+ C_PacketSymbol
+								+ String.valueOf(gameCountDown));
 					}
-					
+
 					gameCountDown--;
 					gameTimeRecord = gameTime;
 				}
-			}else {//Time out
+			} else {// Time out
 				GameOver();
 			}
-			
+
 			// TODO //守護神每N秒獎金計算，及其他與時間相關計算
-			if (gameTime > gamePlayingTime
-					+ _map._guardianRewardInterval()) {
+			if (gameTime > gamePlayingTime + _map._guardianRewardInterval()) {
 
 				_guardian.RewardGold();
 
@@ -585,11 +588,9 @@ public class GameInstance extends TimerTask {
 			break;
 		case GameOver:// 遊戲結束
 
-			// TODO 計算勝利結果，傳送封包。
-			CalcGameResult();
-
 			// TODO 結束遊戲，傳送封包，自行銷毀實體。
-			GuardWorld.getInstance().GameOver(_hostName);
+			GuardWorld.getInstance().GameOver(GuardWorld.getInstance().getRoom(_hostName)
+					.get_membersList().get(0).getAccountName());
 
 			break;
 		}
@@ -618,60 +619,76 @@ public class GameInstance extends TimerTask {
 
 	/** 計算遊戲結果 */
 	public void CalcGameResult() {
-
+		// TODO 計算勝利結果，傳送封包。
 		switch (_map.getGameMode()) {
 		case GameMap.GameMode_Cooperation:
 
 			for (HunterInstance _hunterInst : _hunterList) {
-				_hunterInst.getActiveChar().SendClientPacket(
-						String.valueOf(C_GameOver)
-								+ C_PacketSymbol
-								+ String.valueOf(_map.getGameMode())
-								+ C_PacketSymbol
-								+ String.valueOf(_hunterInst.getActiveChar()
-										.getPlayerType()) + C_PacketSymbol
-								+ ((!_treasure.IsOwner(_guardian)) ? "0" : "1")
-								+ C_PacketSymbol
-								+ (_treasure.IsOwner(_guardian) ? "1" : "0"));
+				_hunterInst
+						.getActiveChar()
+						.SendClientPacket(
+								String.valueOf(C_GameOver)
+										+ C_PacketSymbol
+										+ String.valueOf(_map.getGameMode())
+										+ C_PacketSymbol
+										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
+										+ C_PacketSymbol
+										+ String.valueOf(!_treasure
+												.IsOwner(_guardian))
+										+ C_PacketSymbol
+										+ String.valueOf(_treasure
+												.IsOwner(_guardian)));
 			}
 
-			_guardian.getActiveChar().SendClientPacket(
-					String.valueOf(C_GameOver)
-							+ C_PacketSymbol
-							+ String.valueOf(_map.getGameMode())
-							+ C_PacketSymbol
-							+ String.valueOf(_guardian.getActiveChar()
-									.getPlayerType()) + C_PacketSymbol
-							+ (_treasure.IsOwner(_guardian) ? "0" : "1")
-							+ C_PacketSymbol
-							+ (_treasure.IsOwner(_guardian) ? "1" : "0"));
+			_guardian
+					.getActiveChar()
+					.SendClientPacket(
+							String.valueOf(C_GameOver)
+									+ C_PacketSymbol
+									+ String.valueOf(_map.getGameMode())
+									+ C_PacketSymbol
+									+ String.valueOf(PlayerInstance.PlayerType_Guardian)
+									+ C_PacketSymbol
+									+ String.valueOf(_treasure
+											.IsOwner(_guardian))
+									+ C_PacketSymbol
+									+ String.valueOf(_treasure
+											.IsOwner(_guardian)));
 
 			break;
 		case GameMap.GameMode_Greedy:
 
 			for (HunterInstance _hunterInst : _hunterList) {
-				_hunterInst.getActiveChar().SendClientPacket(
-						String.valueOf(C_GameOver)
-								+ C_PacketSymbol
-								+ String.valueOf(_map.getGameMode())
-								+ C_PacketSymbol
-								+ String.valueOf(_hunterInst.getActiveChar()
-										.getPlayerType()) + C_PacketSymbol
-								+ (_treasure.IsOwner(_hunterInst) ? "1" : "0")
-								+ C_PacketSymbol
-								+ (_treasure.IsOwner(_guardian) ? "1" : "0"));
+				_hunterInst
+						.getActiveChar()
+						.SendClientPacket(
+								String.valueOf(C_GameOver)
+										+ C_PacketSymbol
+										+ String.valueOf(_map.getGameMode())
+										+ C_PacketSymbol
+										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
+										+ C_PacketSymbol
+										+ String.valueOf(_treasure
+												.IsOwner(_hunterInst))
+										+ C_PacketSymbol
+										+ String.valueOf(_treasure
+												.IsOwner(_guardian)));
 			}
 
-			_guardian.getActiveChar().SendClientPacket(
-					String.valueOf(C_GameOver)
-							+ C_PacketSymbol
-							+ String.valueOf(_map.getGameMode())
-							+ C_PacketSymbol
-							+ String.valueOf(_guardian.getActiveChar()
-									.getPlayerType()) + C_PacketSymbol
-							+ (_treasure.IsOwner(_guardian) ? "0" : "1")
-							+ C_PacketSymbol
-							+ (_treasure.IsOwner(_guardian) ? "1" : "0"));
+			_guardian
+					.getActiveChar()
+					.SendClientPacket(
+							String.valueOf(C_GameOver)
+									+ C_PacketSymbol
+									+ String.valueOf(_map.getGameMode())
+									+ C_PacketSymbol
+									+ String.valueOf(PlayerInstance.PlayerType_Guardian)
+									+ C_PacketSymbol
+									+ String.valueOf(_treasure
+											.IsOwner(_guardian))
+									+ C_PacketSymbol
+									+ String.valueOf(_treasure
+											.IsOwner(_guardian)));
 
 			break;
 		}
