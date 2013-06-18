@@ -127,7 +127,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					String.valueOf(C_HunterState) + C_PacketSymbol
 							+ _pc.getAccountName() + C_PacketSymbol
 							+ String.valueOf(C_HunterState_Hp) + ","
-							+ String.valueOf(_hp)
+							+ String.valueOf(_hp) + ";"
 							+ String.valueOf(C_HunterState_Life) + ","
 							+ String.valueOf(_lives));
 			// 檢查寶藏擁有者

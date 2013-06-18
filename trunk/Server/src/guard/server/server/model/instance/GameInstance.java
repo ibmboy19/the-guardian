@@ -318,7 +318,7 @@ public class GameInstance extends TimerTask {
 		}
 	}
 
-	public void BulletAttackTrapJail(int _bulletID, int _slot, int _key) {
+	public void BulletAttackTrapJail(String _bulletID, int _slot, int _key) {
 
 		TrapInstance _trap = getTrapInstance(_slot, _key);
 		if (_trap == null)
@@ -342,6 +342,8 @@ public class GameInstance extends TimerTask {
 				+ String.valueOf(C_HunterFire_Hit) + C_PacketSymbol
 				+ String.valueOf(Hit_Jail) + C_PacketSymbol
 				+ String.valueOf(_bulletID));
+		
+		
 
 	}
 
