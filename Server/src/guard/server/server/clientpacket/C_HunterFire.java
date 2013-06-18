@@ -91,9 +91,11 @@ public class C_HunterFire {
 				//
 				//
 				game.BulletAttackTrapJail(
-						Integer.valueOf(_packet.split(C_PacketSymbol)[3]),
+						_packet.split(C_PacketSymbol)[3],
 						Integer.valueOf(_packet.split(C_PacketSymbol)[4]),
 						Integer.valueOf(_packet.split(C_PacketSymbol)[5]));
+				
+				
 				break;
 			}
 			break;
