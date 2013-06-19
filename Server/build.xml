@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<project name="The_Guardian" default="all" basedir=".">
+<project name="Wicked Road" default="all" basedir=".">
     <description>
       The Guardian
 
@@ -42,7 +42,7 @@
     <!-- Server 完整編譯(包含除錯訊息) -->
     <target name="compile_server">
         <mkdir dir="${class.dir}" />
-		<javac includeantruntime="true" debug="on" optimize="true" deprecation="true" source="1.6" target="1.6" encoding="UTF-8" destdir="${class.dir}">
+		<javac includeantruntime="true" debug="on" optimize="true" deprecation="true" source="1.7" target="1.7" encoding="UTF-8" destdir="${class.dir}">
 			<src path="${server.src.dir}" />
 			<classpath refid="classpath" />
 			<compilerarg value="-Xlint:unchecked"/>
@@ -52,7 +52,7 @@
      <!-- Server 最簡編譯(不包含任何除錯訊息) -->
     <target name="compile_server_mini">
         <mkdir dir="${class.dir}" />
-		<javac includeantruntime="true" debug="off" optimize="true" deprecation="true" source="1.6" target="1.6" encoding="UTF-8" destdir="${class.dir}">
+		<javac includeantruntime="true" debug="off" optimize="true" deprecation="true" source="1.7" target="1.7" encoding="UTF-8" destdir="${class.dir}">
 			<src path="${server.src.dir}" />
 			<classpath refid="classpath" />
 			<compilerarg value="-Xlint:unchecked"/>
