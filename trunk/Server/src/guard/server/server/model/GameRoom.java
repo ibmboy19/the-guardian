@@ -411,6 +411,9 @@ public class GameRoom {
 		}
 
 		private boolean gameIsOver() {
+			if(_leader == null || _leader.getRoom() == null){
+				return true;
+			}
 			return _leader.getRoom().getGame().IsGameOver();
 		}
 	});
