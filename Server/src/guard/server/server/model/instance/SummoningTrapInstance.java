@@ -18,6 +18,7 @@ public class SummoningTrapInstance extends TrapInstance {
 	private float _lastAttackTime;
 	public boolean CanAttack(float gameTime){
 		if(gameTime - _lastAttackTime > .3f){
+			_lastAttackTime = gameTime;
 			return true;
 		}
 		return false;

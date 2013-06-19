@@ -10,6 +10,7 @@ import static guard.server.server.clientpacket.C_HunterFire.Hit_Jail;
 import static guard.server.server.clientpacket.C_LoadMapDone.C_LoadMapDone_Done;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Start;
 import static guard.server.server.clientpacket.C_SelectPlayerSpawnPoint.C_SelectPlayerSpawnPoint_UpdateCheckPoint;
+import static guard.server.server.clientpacket.C_Trap.C_Trap_BeAttacked;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_BuildUp;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Destroy;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Disable;
@@ -164,7 +165,36 @@ public class GameInstance extends TimerTask {
 			}
 		}
 	}
+	
+	public void EnableFinalGuardian(){
 
+		//TODO Setup Monster Data
+		
+		//TODO Send Packet
+
+	}
+
+	/**醫藥箱*/
+	private List<Integer> _allMedicalBoxID = Lists.newList();
+	public void InitMedicalBox(String _idList){
+		for(String _id : _idList.split(",")){
+			_allMedicalBoxID.add(Integer.valueOf(_id));
+		}
+		PrintMedicalCount();
+	}
+	public void PrintMedicalCount(){
+		System.out.println("init medical box"+_allMedicalBoxID.size());
+	}
+	public boolean CheckMedicalBox(int _id){
+		
+		if(_allMedicalBoxID.contains(_id)){
+			_allMedicalBoxID.remove(_id);
+			return true;
+		}
+		return false;
+	}
+	
+	
 	/** 陷阱們 */
 	private Map<Integer, TrapSlot> _allTrapList = Maps.newConcurrentMap();
 
@@ -288,6 +318,21 @@ public class GameInstance extends TimerTask {
 		}
 
 	}
+	
+	public void SummoningTrapApplyAttack(String _packet, HunterInstance _hunter) {
+		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
+		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
+		
+		TrapInstance _trap = getTrapInstance(_slot, _key);
+		if (_trap == null)
+			return;
+		if (_trap instanceof SummoningTrapInstance) {
+			if(((SummoningTrapInstance)_trap).CanAttack(gameTime)){
+				BroadcastPacketToRoom(_packet);
+			}
+			
+		}
+	}
 
 	public void MeleeAttackApplyToHunter(WickedRoadPlayerInstance _wrPlayer) {
 
@@ -304,6 +349,14 @@ public class GameInstance extends TimerTask {
 		if (_trap == null)
 			return;
 		if (_trap instanceof SummoningTrapInstance) {
+			
+			//TODO Send Packet Hit Trap
+			BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
+					+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
+					+ String.valueOf(_slot) + C_PacketSymbol
+					+ String.valueOf(_key));
+			
+			
 			if (((SummoningTrapInstance) _trap).ApplyDamage(_map
 					.getBulletDamageValue())
 					&& _trap.SetupAutoDestroy(gameTime)) {
@@ -325,6 +378,13 @@ public class GameInstance extends TimerTask {
 			return;
 
 		if (_trap instanceof SummoningTrapInstance) {
+			
+			//TODO Send Packet Hit Trap
+			BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
+					+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
+					+ String.valueOf(_slot) + C_PacketSymbol
+					+ String.valueOf(_key));
+			
 			if (((SummoningTrapInstance) _trap).ApplyDamage(_map
 					.getBulletDamageValue())
 					&& _trap.SetupAutoDestroy(gameTime)) {
@@ -419,7 +479,7 @@ public class GameInstance extends TimerTask {
 	private int gameCountDown;
 
 	// 遊戲載入地圖完畢，準備開始的倒數時間 - at state 3
-	private final float gameStartReadyTime = 8;
+	private final float gameStartReadyTime = 20;
 
 	public boolean IsReady() {
 		return gameState == GameState.CountDown;
