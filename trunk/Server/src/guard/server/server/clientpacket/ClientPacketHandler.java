@@ -15,6 +15,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_LeaveRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Login;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
+import static guard.server.server.clientpacket.ClientOpcodes.C_MedicalBox;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_NetDelay;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Portal;
@@ -24,6 +25,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_RefreshRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RequestRemaingTime;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_SelectPlayerSpawnPoint;
+import static guard.server.server.clientpacket.ClientOpcodes.C_Spawn;
 import static guard.server.server.clientpacket.ClientOpcodes.C_SwitchPlayerType;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Treasure;
@@ -120,6 +122,12 @@ public class ClientPacketHandler {
 				break;
 			case C_Treasure:
 				new C_Treasure(_client, packet);
+				break;
+			case C_Spawn:
+				new C_Spawn(_client,packet);
+				break;
+			case C_MedicalBox:
+				new C_MedicalBox(_client, packet);
 				break;
 			}
 		} catch (NumberFormatException nf) {

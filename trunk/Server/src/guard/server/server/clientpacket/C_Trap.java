@@ -15,6 +15,7 @@ public class C_Trap {
 	public static final int C_Trap_ApplyDamage = 4;//陷阱傷害獵人
 	public static final int C_Trap_Disable = 5;//陷阱銷毀前置作業
 	public static final int C_Trap_TurnAndAttack = 6;//用於召喚型陷阱，攻擊目標時先確認資料
+	public static final int C_Trap_BeAttacked = 7;
 
 	public C_Trap(ClientProcess _client, String _packet) {
 
@@ -50,6 +51,8 @@ public class C_Trap {
 			game.ApplyTrapDamage(_packet,(HunterInstance)pc.getWRPlayerInstance());
 			break;
 		case C_Trap_TurnAndAttack:
+			System.out.println(_packet);
+			game.SummoningTrapApplyAttack(_packet,(HunterInstance)pc.getWRPlayerInstance());
 			break;
 		default:
 			return;

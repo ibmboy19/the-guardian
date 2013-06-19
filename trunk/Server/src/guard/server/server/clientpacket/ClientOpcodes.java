@@ -63,5 +63,9 @@ public class ClientOpcodes {
 	public static final int C_Treasure = 28;
 	//GameTime
 	public static final int C_GameTimeAlert = 29;
+	//Spawn (Monster , Guardian Mask)
+	public static final int C_Spawn = 30;
+	//
+	public static final int C_MedicalBox = 31;
 
 }
