@@ -682,6 +682,9 @@ public class GameInstance extends TimerTask {
 	/** 計算遊戲結果 */
 	public void CalcGameResult() {
 		// TODO 計算勝利結果，傳送封包。
+		if(_hunterList == null || _guardian == null){
+			return;
+		}
 		switch (_map.getGameMode()) {
 		case GameMap.GameMode_Cooperation:
 
