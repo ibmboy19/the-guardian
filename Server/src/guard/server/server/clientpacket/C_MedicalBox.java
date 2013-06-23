@@ -39,10 +39,12 @@ public class C_MedicalBox {
 		case C_MedicalBox_Destroy:
 			if(game.CheckMedicalBox(Integer.valueOf(_packet.split(C_PacketSymbol)[2]))){
 				
-				room.broadcastPacketToRoom(String.valueOf(C_MedicalBox)+C_PacketSymbol+_packet.split(C_PacketSymbol)[2]);
 				new C_ApplyDamage(_client,String.valueOf(C_ApplyDamage)+C_PacketSymbol+_packet.split(C_PacketSymbol)[3]);
 				
+				room.broadcastPacketToRoom(String.valueOf(C_MedicalBox)+C_PacketSymbol+_packet.split(C_PacketSymbol)[2]);
+				
 			}
+			System.out.println("box id = "+_packet.split(C_PacketSymbol)[2]);
 			game.PrintMedicalCount();
 			
 			break;

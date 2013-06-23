@@ -51,7 +51,6 @@ public class C_Trap {
 			game.ApplyTrapDamage(_packet,(HunterInstance)pc.getWRPlayerInstance());
 			break;
 		case C_Trap_TurnAndAttack:
-			System.out.println(_packet);
 			game.SummoningTrapApplyAttack(_packet,(HunterInstance)pc.getWRPlayerInstance());
 			break;
 		default:

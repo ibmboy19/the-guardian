@@ -60,7 +60,7 @@ public class C_HunterFire {
 					return;
 				}
 				// 沒有該ID子彈
-				if ((_bullet = game.getBullet(_packet
+				if ((_bullet = game.getHunterBullets(_packet
 						.split(C_PacketSymbol)[3])) == null) {
 					return;
 				}
@@ -80,7 +80,7 @@ public class C_HunterFire {
 						+ C_PacketSymbol + _packet.split(C_PacketSymbol)[3]);
 				break;
 			case Hit_Jail:
-				if ((_bullet = game.getBullet(_packet
+				if ((_bullet = game.getHunterBullets(_packet
 						.split(C_PacketSymbol)[3])) == null) {
 					return;
 				}

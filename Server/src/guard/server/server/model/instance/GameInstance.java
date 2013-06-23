@@ -21,6 +21,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_GameTimeAlert;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
+import static guard.server.server.clientpacket.ClientOpcodes.C_MonsterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_SelectPlayerSpawnPoint;
@@ -70,7 +71,6 @@ public class GameInstance extends TimerTask {
 	 * @return float
 	 */
 	public float getTime() {
-		System.out.println(gameTime);
 		return gameTime;
 	}
 
@@ -179,6 +179,7 @@ public class GameInstance extends TimerTask {
 	public void InitMedicalBox(String _idList){
 		for(String _id : _idList.split(",")){
 			_allMedicalBoxID.add(Integer.valueOf(_id));
+			System.out.println("init box id = "+_id);
 		}
 		PrintMedicalCount();
 	}
@@ -187,8 +188,8 @@ public class GameInstance extends TimerTask {
 	}
 	public boolean CheckMedicalBox(int _id){
 		
-		if(_allMedicalBoxID.contains(_id)){
-			_allMedicalBoxID.remove(_id);
+		if(_allMedicalBoxID.contains((Object)_id)){
+			_allMedicalBoxID.remove((Object)_id);//cast to object, because of overloading
 			return true;
 		}
 		return false;
@@ -327,8 +328,11 @@ public class GameInstance extends TimerTask {
 		if (_trap == null)
 			return;
 		if (_trap instanceof SummoningTrapInstance) {
+			//Check Attack
 			if(((SummoningTrapInstance)_trap).CanAttack(gameTime)){
-				BroadcastPacketToRoom(_packet);
+				String _mbulletID = String.valueOf(_slot)+String.valueOf(_key)+String.valueOf(gameTime);
+				MonsterFire(_mbulletID);
+				BroadcastPacketToRoom(_packet+C_PacketSymbol+_mbulletID);
 			}
 			
 		}
@@ -445,16 +449,16 @@ public class GameInstance extends TimerTask {
 		}
 	}
 
-	/** 子彈們 */
-	private Map<String, BulletInstance> _bulletList = Maps.newConcurrentMap();
+	/** 玩家子彈們 */
+	private Map<String, BulletInstance> _hunterBullets = Maps.newConcurrentMap();
 
-	public BulletInstance getBullet(String _id) {
-		return _bulletList.get(_id);
+	public BulletInstance getHunterBullets(String _id) {
+		return _hunterBullets.get(_id);
 	}
 
 	public synchronized void HunterFire(PlayerInstance pc, String position,
 			String rotation, String _bulletID) {
-		_bulletList.put(_bulletID, new BulletInstance(pc.getAccountName(),
+		_hunterBullets.put(_bulletID, new BulletInstance(pc.getAccountName(),
 				_bulletID, gameTime));
 		// TODO BroadCast To All : Fire
 		String _retPacket = String.valueOf(C_HunterFire) + C_PacketSymbol
@@ -464,11 +468,18 @@ public class GameInstance extends TimerTask {
 				+ C_PacketSymbol + rotation;
 		BroadcastPacketToRoom(_retPacket);
 	}
+	
+	/** TD子彈 */
+	private Map<String, BulletInstance> _monsterBullets = Maps.newConcurrentMap();
 
-	public void HunterFireHit(int bulletID) {
-
+	public BulletInstance getMonsterBullets(String _id) {
+		return _monsterBullets.get(_id);
 	}
-
+	
+	public synchronized void MonsterFire(String id){
+		_monsterBullets.put(id, new BulletInstance("",id,gameTime));
+	}
+	
 	/**
 	 * 遊戲狀態 -> 0 : 等待玩家, 1 : 倒數, 2 : 遊戲載入中, 3 : 遊戲準備中, 4 : 遊戲開始, 5 : 結束(勝利或失敗)
 	 * */
@@ -611,7 +622,8 @@ public class GameInstance extends TimerTask {
 			for (HunterInstance _hunter : _hunterList) {
 				_hunter.Update(gameTime);
 			}
-			CheckAllBulletExpire();
+			CheckHunterBulletExpire();
+			CheckMonsterBulletExpire();
 			CheckAllTrapBuildUp();
 			CheckAllAutoDestroyTrap();
 			break;
@@ -644,7 +656,8 @@ public class GameInstance extends TimerTask {
 			for (HunterInstance _hunter : _hunterList) {
 				_hunter.Update(gameTime);
 			}
-			CheckAllBulletExpire();
+			CheckHunterBulletExpire();
+			CheckMonsterBulletExpire();
 			CheckAllTrapBuildUp();
 			CheckAllAutoDestroyTrap();
 			break;
@@ -661,11 +674,11 @@ public class GameInstance extends TimerTask {
 
 	}
 
-	/** 檢查所有過時子彈 */
-	private void CheckAllBulletExpire() {
-		if (_bulletList.size() == 0)
+	/** 檢查獵人過時子彈 */
+	private void CheckHunterBulletExpire() {
+		if (_hunterBullets.size() == 0)
 			return;
-		for (BulletInstance _bullet : _bulletList.values()) {
+		for (BulletInstance _bullet : _hunterBullets.values()) {
 			if (_bullet.CheckExpire(gameTime)) {
 				// TODO 刪除子彈物件
 				String _retPacket = String.valueOf(C_HunterFire)
@@ -673,10 +686,23 @@ public class GameInstance extends TimerTask {
 						+ C_PacketSymbol
 						+ String.valueOf(_bullet.getBulletInstanceID());
 				BroadcastPacketToRoom(_retPacket);
-				_bulletList.remove(_bullet.getBulletInstanceID());
+				_hunterBullets.remove(_bullet.getBulletInstanceID());
 			}
 		}
-		// System.out.println("bullet count : " + _bulletList.size());
+	}
+	
+	/** 檢查TD過時子彈 */
+	private void CheckMonsterBulletExpire() {
+		if (this._monsterBullets.size() == 0)
+			return;
+		for (BulletInstance _bullet : _monsterBullets.values()) {
+			if (_bullet.CheckExpire(gameTime)) {
+				// TODO 刪除子彈物件
+				BroadcastPacketToRoom(String.valueOf(C_MonsterFire)
+						+ C_PacketSymbol + _bullet.getBulletInstanceID());
+				_monsterBullets.remove(_bullet.getBulletInstanceID());
+			}
+		}
 	}
 
 	/** 計算遊戲結果 */
@@ -771,13 +797,6 @@ public class GameInstance extends TimerTask {
 		GameStartCountDown();
 	}
 
-	// 玩家離開
-	/*
-	 * public void Logout(PlayerInstance pc,int logoutCode){
-	 * BroadcastPacketToRoom(String.valueOf(C_Logout)+C_PacketSymbol+
-	 * String.valueOf(logoutCode)+C_PacketSymbol+ pc.getAccountName()); }
-	 */
-
 	private void BroadcastPacketToRoom(String _packet) {
 		GuardWorld
 				.getInstance()
@@ -787,15 +806,6 @@ public class GameInstance extends TimerTask {
 				.broadcastPacketToRoom(_packet);
 	}
 
-	/**
-	 * 自行銷毀 case 正常結束 case 市長中離 case guardian中離 case 所有hunter中離
-	 * */
-
-	/**
-	 * 玩家中離
-	 * 
-	 * 
-	 * */
 
 	// 遊戲狀態 -> 0 : 等待玩家, 1 : 倒數, 2 : 遊戲載入中, 3 : 遊戲準備中, 4 : 遊戲開始, 5 : 結束(勝利或失敗)
 	public enum GameState {

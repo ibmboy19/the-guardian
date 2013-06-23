@@ -167,7 +167,7 @@ public class GameMap {
 
 		return _trap;
 	}
-
+	
 	// 地圖中 已放置/未觸發 的陷阱
 
 	public GameMap() {

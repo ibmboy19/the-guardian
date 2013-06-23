@@ -18,9 +18,9 @@ public class BulletInstance {
 		return _bulletInstanceID;
 	}
 
-	public BulletInstance(String _bulletBlonger, String _bulletInstanceID,
+	public BulletInstance(String _bulletOwner, String _bulletInstanceID,
 			float _bulletCreateTime) {
-		this._bulletOwner = _bulletBlonger;
+		this._bulletOwner = _bulletOwner;
 		this._bulletInstanceID = _bulletInstanceID;
 		this._bulletCreateTime = _bulletCreateTime;
 	}
