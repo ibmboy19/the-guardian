@@ -67,5 +67,7 @@ public class ClientOpcodes {
 	public static final int C_Spawn = 30;
 	//
 	public static final int C_MedicalBox = 31;
+	//
+	public static final int C_MonsterFire = 32;
 
 }

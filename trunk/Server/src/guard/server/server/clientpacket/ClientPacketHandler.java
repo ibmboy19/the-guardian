@@ -1,6 +1,6 @@
 package guard.server.server.clientpacket;
 
-import static guard.server.server.clientpacket.ClientOpcodes.C_ApplyDamage;
+import static guard.server.server.clientpacket.ClientOpcodes.*;
 import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_CheckGameActivePlayer;
@@ -128,6 +128,9 @@ public class ClientPacketHandler {
 				break;
 			case C_MedicalBox:
 				new C_MedicalBox(_client, packet);
+				break;
+			case C_MonsterFire:
+				new C_MonsterFire(_client, packet);
 				break;
 			}
 		} catch (NumberFormatException nf) {

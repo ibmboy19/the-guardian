@@ -218,7 +218,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// TODO Send Packet 耐力最大化
 		_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
 				+ _pc.getAccountName() + C_PacketSymbol
-				+ String.valueOf(C_HunterState_Stamina) + ",1");
+				+ String.valueOf(C_HunterState_Stamina) + ",2");
 	}
 
 	// 隱形狀態
@@ -341,10 +341,12 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 				RecoveryStamina(gameTime);
 				break;
 			}
-		} else {
-			if (gameTime - _staminaMaximizeRecordTime > _staminaMaximizeDuration) {
-				_staminaMaximize = false;
-			}
+		} else if (gameTime - _staminaMaximizeRecordTime > _staminaMaximizeDuration) {
+			_staminaMaximize = false;
+			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
+					+ _pc.getAccountName() + C_PacketSymbol
+					+ String.valueOf(C_HunterState_Stamina) + ",-1");
+
 		}
 
 		if (_invisible) {
