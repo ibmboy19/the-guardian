@@ -124,13 +124,19 @@ public class ClientPacketHandler {
 				new C_Treasure(_client, packet);
 				break;
 			case C_Spawn:
-				new C_Spawn(_client,packet);
+				new C_Spawn(_client, packet);
 				break;
 			case C_MedicalBox:
 				new C_MedicalBox(_client, packet);
 				break;
 			case C_MonsterFire:
 				new C_MonsterFire(_client, packet);
+				break;
+			case C_UpgradeObject:
+				new C_UpgradeObject(_client, packet);
+				break;
+			case C_GuardianFire:
+				new C_GuardianFire(_client, packet);
 				break;
 			}
 		} catch (NumberFormatException nf) {
