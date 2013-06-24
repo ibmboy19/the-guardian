@@ -3,6 +3,8 @@ package guard.server.server.model.instance;
 import static guard.server.server.clientpacket.C_Chat.C_Chat_ChatInRoomSystem;
 import static guard.server.server.clientpacket.C_GameTimeAlert.C_GameTimeAlert_Over;
 import static guard.server.server.clientpacket.C_GameTimeAlert.C_GameTimeAlert_Start;
+import static guard.server.server.clientpacket.C_GuardianFire.C_GuardianFire_Destroy;
+import static guard.server.server.clientpacket.C_GuardianFire.C_GuardianFire_Fire;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Destroy;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Fire;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Hit;
@@ -19,6 +21,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameTimeAlert;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GuardianFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MonsterFire;
@@ -165,37 +168,40 @@ public class GameInstance extends TimerTask {
 			}
 		}
 	}
-	
-	public void EnableFinalGuardian(){
 
-		//TODO Setup Monster Data
-		
-		//TODO Send Packet
+	public void EnableFinalGuardian() {
+
+		// TODO Setup Monster Data
+
+		// TODO Send Packet
 
 	}
 
-	/**醫藥箱*/
+	/** 醫藥箱 */
 	private List<Integer> _allMedicalBoxID = Lists.newList();
-	public void InitMedicalBox(String _idList){
-		for(String _id : _idList.split(",")){
+
+	public void InitMedicalBox(String _idList) {
+		for (String _id : _idList.split(",")) {
 			_allMedicalBoxID.add(Integer.valueOf(_id));
-			System.out.println("init box id = "+_id);
+			System.out.println("init box id = " + _id);
 		}
 		PrintMedicalCount();
 	}
-	public void PrintMedicalCount(){
-		System.out.println("init medical box"+_allMedicalBoxID.size());
+
+	public void PrintMedicalCount() {
+		System.out.println("init medical box" + _allMedicalBoxID.size());
 	}
-	public boolean CheckMedicalBox(int _id){
-		
-		if(_allMedicalBoxID.contains((Object)_id)){
-			_allMedicalBoxID.remove((Object)_id);//cast to object, because of overloading
+
+	public boolean CheckMedicalBox(int _id) {
+
+		if (_allMedicalBoxID.contains((Object) _id)) {
+			_allMedicalBoxID.remove((Object) _id);// cast to object, because of
+													// overloading
 			return true;
 		}
 		return false;
 	}
-	
-	
+
 	/** 陷阱們 */
 	private Map<Integer, TrapSlot> _allTrapList = Maps.newConcurrentMap();
 
@@ -319,22 +325,23 @@ public class GameInstance extends TimerTask {
 		}
 
 	}
-	
+
 	public void SummoningTrapApplyAttack(String _packet, HunterInstance _hunter) {
 		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
 		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
-		
+
 		TrapInstance _trap = getTrapInstance(_slot, _key);
 		if (_trap == null)
 			return;
 		if (_trap instanceof SummoningTrapInstance) {
-			//Check Attack
-			if(((SummoningTrapInstance)_trap).CanAttack(gameTime)){
-				String _mbulletID = String.valueOf(_slot)+String.valueOf(_key)+String.valueOf(gameTime);
+			// Check Attack
+			if (((SummoningTrapInstance) _trap).CanAttack(gameTime)) {
+				String _mbulletID = String.valueOf(_slot)
+						+ String.valueOf(_key) + String.valueOf(gameTime);
 				MonsterFire(_mbulletID);
-				BroadcastPacketToRoom(_packet+C_PacketSymbol+_mbulletID);
+				BroadcastPacketToRoom(_packet + C_PacketSymbol + _mbulletID);
 			}
-			
+
 		}
 	}
 
@@ -353,14 +360,13 @@ public class GameInstance extends TimerTask {
 		if (_trap == null)
 			return;
 		if (_trap instanceof SummoningTrapInstance) {
-			
-			//TODO Send Packet Hit Trap
+
+			// TODO Send Packet Hit Trap
 			BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
 					+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
 					+ String.valueOf(_slot) + C_PacketSymbol
 					+ String.valueOf(_key));
-			
-			
+
 			if (((SummoningTrapInstance) _trap).ApplyDamage(_map
 					.getBulletDamageValue())
 					&& _trap.SetupAutoDestroy(gameTime)) {
@@ -382,13 +388,13 @@ public class GameInstance extends TimerTask {
 			return;
 
 		if (_trap instanceof SummoningTrapInstance) {
-			
-			//TODO Send Packet Hit Trap
+
+			// TODO Send Packet Hit Trap
 			BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
 					+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
 					+ String.valueOf(_slot) + C_PacketSymbol
 					+ String.valueOf(_key));
-			
+
 			if (((SummoningTrapInstance) _trap).ApplyDamage(_map
 					.getBulletDamageValue())
 					&& _trap.SetupAutoDestroy(gameTime)) {
@@ -406,8 +412,6 @@ public class GameInstance extends TimerTask {
 				+ String.valueOf(C_HunterFire_Hit) + C_PacketSymbol
 				+ String.valueOf(Hit_Jail) + C_PacketSymbol
 				+ String.valueOf(_bulletID));
-		
-		
 
 	}
 
@@ -450,7 +454,8 @@ public class GameInstance extends TimerTask {
 	}
 
 	/** 玩家子彈們 */
-	private Map<String, BulletInstance> _hunterBullets = Maps.newConcurrentMap();
+	private Map<String, BulletInstance> _hunterBullets = Maps
+			.newConcurrentMap();
 
 	public BulletInstance getHunterBullets(String _id) {
 		return _hunterBullets.get(_id);
@@ -468,18 +473,37 @@ public class GameInstance extends TimerTask {
 				+ C_PacketSymbol + rotation;
 		BroadcastPacketToRoom(_retPacket);
 	}
-	
+
 	/** TD子彈 */
-	private Map<String, BulletInstance> _monsterBullets = Maps.newConcurrentMap();
+	private Map<String, BulletInstance> _monsterBullets = Maps
+			.newConcurrentMap();
 
 	public BulletInstance getMonsterBullets(String _id) {
 		return _monsterBullets.get(_id);
 	}
-	
-	public synchronized void MonsterFire(String id){
-		_monsterBullets.put(id, new BulletInstance("",id,gameTime));
+
+	public synchronized void MonsterFire(String id) {
+		_monsterBullets.put(id, new BulletInstance("", id, gameTime));
 	}
-	
+
+	/** Guardian火球 */
+	private Map<String, BulletInstance> _guardianBullets = Maps
+			.newConcurrentMap();
+
+	public BulletInstance getGuardainBullets(String _id) {
+		return _guardianBullets.get(_id);
+	}
+
+	public synchronized void GuardianFire(String id, String pos, String rot) {
+		if (_guardianBullets.containsKey(id))
+			return;
+		_guardianBullets.put(id, new BulletInstance("", id, gameTime));
+		this.BroadcastPacketToRoom(String.valueOf(C_GuardianFire)
+				+ C_PacketSymbol + String.valueOf(C_GuardianFire_Fire)
+				+ C_PacketSymbol + id + C_PacketSymbol + pos + C_PacketSymbol
+				+ rot);
+	}
+
 	/**
 	 * 遊戲狀態 -> 0 : 等待玩家, 1 : 倒數, 2 : 遊戲載入中, 3 : 遊戲準備中, 4 : 遊戲開始, 5 : 結束(勝利或失敗)
 	 * */
@@ -624,6 +648,7 @@ public class GameInstance extends TimerTask {
 			}
 			CheckHunterBulletExpire();
 			CheckMonsterBulletExpire();
+			CheckGuardianBulletExpire();
 			CheckAllTrapBuildUp();
 			CheckAllAutoDestroyTrap();
 			break;
@@ -658,14 +683,16 @@ public class GameInstance extends TimerTask {
 			}
 			CheckHunterBulletExpire();
 			CheckMonsterBulletExpire();
+			CheckGuardianBulletExpire();
 			CheckAllTrapBuildUp();
 			CheckAllAutoDestroyTrap();
 			break;
 		case GameOver:// 遊戲結束
 
 			// TODO 結束遊戲，傳送封包，自行銷毀實體。
-			GuardWorld.getInstance().GameOver(GuardWorld.getInstance().getRoom(_hostName)
-					.get_membersList().get(0).getAccountName());
+			GuardWorld.getInstance().GameOver(
+					GuardWorld.getInstance().getRoom(_hostName)
+							.get_membersList().get(0).getAccountName());
 
 			break;
 		}
@@ -690,7 +717,7 @@ public class GameInstance extends TimerTask {
 			}
 		}
 	}
-	
+
 	/** 檢查TD過時子彈 */
 	private void CheckMonsterBulletExpire() {
 		if (this._monsterBullets.size() == 0)
@@ -705,10 +732,26 @@ public class GameInstance extends TimerTask {
 		}
 	}
 
+	/** 檢查Guardian過時火球 */
+	private void CheckGuardianBulletExpire() {
+		if (this._guardianBullets.size() == 0)
+			return;
+		for (BulletInstance _bullet : _guardianBullets.values()) {
+			if (_bullet.CheckExpire(gameTime)) {
+				// TODO 刪除子彈物件
+				BroadcastPacketToRoom(String.valueOf(C_GuardianFire)
+						+ C_PacketSymbol
+						+ String.valueOf(C_GuardianFire_Destroy)
+						+ C_PacketSymbol + _bullet.getBulletInstanceID());
+				_guardianBullets.remove(_bullet.getBulletInstanceID());
+			}
+		}
+	}
+
 	/** 計算遊戲結果 */
 	public void CalcGameResult() {
 		// TODO 計算勝利結果，傳送封包。
-		if(_hunterList == null || _guardian == null){
+		if (_hunterList == null || _guardian == null) {
 			return;
 		}
 		switch (_map.getGameMode()) {
@@ -805,7 +848,6 @@ public class GameInstance extends TimerTask {
 								.get_membersList().get(0).getAccountName())
 				.broadcastPacketToRoom(_packet);
 	}
-
 
 	// 遊戲狀態 -> 0 : 等待玩家, 1 : 倒數, 2 : 遊戲載入中, 3 : 遊戲準備中, 4 : 遊戲開始, 5 : 結束(勝利或失敗)
 	public enum GameState {
