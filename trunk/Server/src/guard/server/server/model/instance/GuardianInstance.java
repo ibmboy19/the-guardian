@@ -35,6 +35,9 @@ public class GuardianInstance extends WickedRoadPlayerInstance {
 
 		_gold += _acquireGoldAmount;
 		// Send Packet : Acquire Gold
+		_pc.SendClientPacket(C_Gold + C_PacketSymbol
+				+ String.valueOf(_pc.getPlayerType()) + C_PacketSymbol
+				+ String.valueOf(_pc.getWRPlayerInstance().getGold()));
 
 	}
 
