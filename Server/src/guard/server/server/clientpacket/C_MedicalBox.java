@@ -44,8 +44,8 @@ public class C_MedicalBox {
 				room.broadcastPacketToRoom(String.valueOf(C_MedicalBox)+C_PacketSymbol+_packet.split(C_PacketSymbol)[2]);
 				
 			}
-			System.out.println("box id = "+_packet.split(C_PacketSymbol)[2]);
-			game.PrintMedicalCount();
+			//System.out.println("box id = "+_packet.split(C_PacketSymbol)[2]);
+			//game.PrintMedicalCount();
 			
 			break;
 		}

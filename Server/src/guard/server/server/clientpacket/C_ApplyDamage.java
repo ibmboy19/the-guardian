@@ -41,8 +41,10 @@ public class C_ApplyDamage {
 				}
 				// negative
 				else {
-					hunter.ApplyHP(-Math.abs(Integer.valueOf(Integer
+					int _damageValue = hunter.ApplyHP(-Math.abs(Integer.valueOf(Integer
 							.valueOf(_data.split(",")[2]))));
+					game.getGuardian().AcquireGold(Math.abs(_damageValue), game.getMap()
+							.getGuardianDmgReward());
 				}
 				break;
 			case C_ApplyDamage_Stamina:

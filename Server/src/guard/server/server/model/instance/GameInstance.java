@@ -10,12 +10,14 @@ import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Fire;
 import static guard.server.server.clientpacket.C_HunterFire.C_HunterFire_Hit;
 import static guard.server.server.clientpacket.C_HunterFire.Hit_Jail;
 import static guard.server.server.clientpacket.C_LoadMapDone.C_LoadMapDone_Done;
+import static guard.server.server.clientpacket.C_MonsterFire.C_MonsterFire_Destroy;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Start;
 import static guard.server.server.clientpacket.C_SelectPlayerSpawnPoint.C_SelectPlayerSpawnPoint_UpdateCheckPoint;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_BeAttacked;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_BuildUp;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Destroy;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_Disable;
+import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
@@ -26,6 +28,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MonsterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
+import static guard.server.server.clientpacket.ClientOpcodes.C_RequestRemaingTime;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_SelectPlayerSpawnPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
@@ -96,6 +99,9 @@ public class GameInstance extends TimerTask {
 	/** 玩家部分 */
 	private List<HunterInstance> _hunterList = Lists.newList();
 	private GuardianInstance _guardian = null;
+	public GuardianInstance getGuardian(){
+		return _guardian;
+	}
 
 	/** 檢查點 */
 	private Map<Integer, CheckPointInstance> _allCheckPoints = Maps
@@ -155,17 +161,28 @@ public class GameInstance extends TimerTask {
 		if (_hunter.IsDead())
 			return;
 		int _checkPointID = Integer.valueOf(_packet.split(C_PacketSymbol)[1]);
+		int _checkPointIndex = Integer
+				.valueOf(_packet.split(C_PacketSymbol)[4]);
 		if (CanArriveCheckPoint(_checkPointID, _hunter.getAccountName(),
 				Integer.valueOf(_packet.split(C_PacketSymbol)[3]) == 1 ? true
 						: false)) {
+
 			// 增加金錢 - 依據遊戲模式
 			if (getMap().IsCooperationMode()) {
 				for (HunterInstance _hunterInst : _hunterList) {
-					_hunterInst.ArriveCheckPoint(_checkPointID);
+					_hunterInst.ArriveCheckPoint(_checkPointID,
+							_checkPointIndex);
 				}
 			} else {
-				_hunter.ArriveCheckPoint(_checkPointID);
+				_hunter.ArriveCheckPoint(_checkPointID, _checkPointIndex);
 			}
+
+			// TODO Send Packet Enable CheckPoint
+			this.BroadcastPacketToRoom(String.valueOf(C_ArriveCheckPoint)
+					+ C_PacketSymbol + _hunter.getAccountName()
+					+ C_PacketSymbol + String.valueOf(_checkPointID)
+					+ C_PacketSymbol + String.valueOf(_checkPointIndex));
+
 		}
 	}
 
@@ -228,7 +245,23 @@ public class GameInstance extends TimerTask {
 			return;
 		boolean _isBuild = false;
 		if (_guardian.CostGold(_map.getTrap(_trapID).getPrice())) {
-			if (_map.getTrap(_trapID) instanceof DetonatedTrap) {
+			if (_map.getTrap(_trapID) instanceof TimingTrap) {
+				_allTrapList
+						.get(_slot)
+						.PutTrap(
+								_key,
+								new TimingTrapInstance(
+										_slot,
+										_key,
+										gameTime,
+										_map.getTrap(_trapID).getBuildingTime(),
+										((TimingTrap) _map.getTrap(_trapID))
+												.getLifeTime(),
+										((TimingTrap) _map.getTrap(_trapID))
+												.getEffectInterval()));
+				_isBuild = true;
+
+			} else if (_map.getTrap(_trapID) instanceof DetonatedTrap) {
 				_allTrapList.get(_slot).PutTrap(
 						_key,
 						new DetonatedTrapInstance(_slot, _key, gameTime, _map
@@ -245,22 +278,6 @@ public class GameInstance extends TimerTask {
 												.getBuildingTime(),
 										((SummoningTrap) _map.getTrap(_trapID))
 												.getHp()));
-				_isBuild = true;
-
-			} else if (_map.getTrap(_trapID) instanceof TimingTrap) {
-				_allTrapList
-						.get(_slot)
-						.PutTrap(
-								_key,
-								new TimingTrapInstance(
-										_slot,
-										_key,
-										gameTime,
-										_map.getTrap(_trapID).getBuildingTime(),
-										((TimingTrap) _map.getTrap(_trapID))
-												.getLifeTime(),
-										((TimingTrap) _map.getTrap(_trapID))
-												.getEffectInterval()));
 				_isBuild = true;
 
 			}
@@ -303,24 +320,17 @@ public class GameInstance extends TimerTask {
 
 		if (_trap.IsAutoDestroy()) {
 			if (_trap instanceof DetonatedTrapInstance) {
-				System.out.println("Apply Hunter HP");
+				// System.out.println("Apply Hunter HP");
 
+				//Calc Guardian Gold
 				int _damageValue = _hunter
 						.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP() > 0 ? -((DetonatedTrapInstance) _trap)
 								.getDamageHP()
 								: ((DetonatedTrapInstance) _trap).getDamageHP());
 
-				_guardian._gold += Math.abs(_damageValue)
-						* getMap().getGuardianDmgReward();
+				_guardian.AcquireGold(Math.abs(_damageValue), getMap()
+						.getGuardianDmgReward());
 
-				_guardian.getActiveChar().SendClientPacket(
-						C_Gold
-								+ C_PacketSymbol
-								+ String.valueOf(_guardian.getActiveChar()
-										.getPlayerType())
-								+ C_PacketSymbol
-								+ String.valueOf(_guardian.getActiveChar()
-										.getWRPlayerInstance().getGold()));
 			}
 		}
 
@@ -436,7 +446,25 @@ public class GameInstance extends TimerTask {
 		for (TrapSlot _trapSlotList : _allTrapList.values()) {
 			for (TrapInstance _trapInstance : _trapSlotList.getTrapList()
 					.values()) {
-				if (_trapInstance.CanAutoDestroyTrap(gameTime)) {
+
+				if (_trapInstance instanceof TimingTrapInstance) {
+					if (((TimingTrapInstance) _trapInstance)
+							.CheckExpire(gameTime)) {
+
+						_allTrapList.get(_trapInstance.getSlotID())
+								.getTrapList()
+								.remove(_trapInstance.getSlotKey());
+
+						BroadcastPacketToRoom(String.valueOf(C_Trap)
+								+ C_PacketSymbol
+								+ String.valueOf(C_Trap_Destroy)
+								+ C_PacketSymbol
+								+ String.valueOf(_trapInstance.getSlotID())
+								+ C_PacketSymbol
+								+ String.valueOf(_trapInstance.getSlotKey()));
+						// System.out.println("Destroy trap auto");
+					}
+				} else if (_trapInstance.CanAutoDestroyTrap(gameTime)) {
 
 					_allTrapList.get(_trapInstance.getSlotID()).getTrapList()
 							.remove(_trapInstance.getSlotKey());
@@ -447,7 +475,7 @@ public class GameInstance extends TimerTask {
 							+ String.valueOf(_trapInstance.getSlotID())
 							+ C_PacketSymbol
 							+ String.valueOf(_trapInstance.getSlotKey()));
-					System.out.println("Destroy trap auto");
+					// System.out.println("Destroy trap auto");
 				}
 			}
 		}
@@ -550,6 +578,10 @@ public class GameInstance extends TimerTask {
 			members.SendClientPacket(String.valueOf(C_LoadMapDone)
 					+ C_PacketSymbol + String.valueOf(C_LoadMapDone_Done));
 		}
+		// 更新guardian時間
+		this._guardian.getActiveChar().SendClientPacket(
+				String.valueOf(C_RequestRemaingTime) + C_PacketSymbol
+						+ String.valueOf(getRemainingGameTime()));
 	}
 
 	// 倒數完畢 開始遊戲
@@ -559,6 +591,10 @@ public class GameInstance extends TimerTask {
 		gameCountDown = (int) _map.getGamePlayTime();
 		// TODO 傳送遊戲開始封包
 		BroadcastPacketToRoom(String.valueOf(C_GameStart));
+		// 更新guardian時間
+		this._guardian.getActiveChar().SendClientPacket(
+				String.valueOf(C_RequestRemaingTime) + C_PacketSymbol
+						+ String.valueOf(getRemainingGameTime()));
 	}
 
 	// 遊戲時間超過，轉換到遊戲結束狀態
@@ -657,7 +693,7 @@ public class GameInstance extends TimerTask {
 			if (gameCountDown >= 0) {
 				if (gameTime - gameTimeRecord > 1) {
 
-					if (gameCountDown <= 10) {
+					if (gameCountDown <= 20) {
 						BroadcastPacketToRoom(String.valueOf(C_GameTimeAlert)
 								+ C_PacketSymbol + C_GameTimeAlert_Over
 								+ C_PacketSymbol
@@ -726,6 +762,8 @@ public class GameInstance extends TimerTask {
 			if (_bullet.CheckExpire(gameTime)) {
 				// TODO 刪除子彈物件
 				BroadcastPacketToRoom(String.valueOf(C_MonsterFire)
+						+ C_PacketSymbol
+						+ String.valueOf(C_MonsterFire_Destroy)
 						+ C_PacketSymbol + _bullet.getBulletInstanceID());
 				_monsterBullets.remove(_bullet.getBulletInstanceID());
 			}

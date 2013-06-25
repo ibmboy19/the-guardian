@@ -15,7 +15,7 @@ public class TimingTrapInstance extends TrapInstance {
 	public TimingTrapInstance(int _slotID,int _key,float _gameTime, float _buildTime,
 			float _lifeTime, float _effectInterval) {
 		super(_slotID,_key,_gameTime, _buildTime);
-		this._lifeTime = _lifeTime;
+		this._lifeTime = _lifeTime+5;
 		this._effectInterval = _effectInterval;
 	}
 }

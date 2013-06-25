@@ -31,7 +31,7 @@ public class BulletInstance {
 		if(_hunter.getAccountName() == _bulletOwner)
 			return;
 		_isHit = true;
-		_hunter.ApplyHP(_dmg);
+		_hunter.ApplyHP(_dmg);		
 		
 	}
 	//擊中其他

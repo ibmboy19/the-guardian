@@ -11,6 +11,10 @@ import guard.server.server.model.instance.HunterInstance;
 import guard.server.server.model.instance.PlayerInstance;
 
 public class C_MonsterFire {
+
+	public static final int C_MonsterFire_Fire = 0;
+	public static final int C_MonsterFire_Destroy = 1;
+
 	/** 處理TD子彈銷毀碰撞銷毀 */
 	public C_MonsterFire(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();
@@ -29,19 +33,37 @@ public class C_MonsterFire {
 			return;
 		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
 
-		BulletInstance bullet = null;
-		String bulletID = _packet.split(C_PacketSymbol)[1];
-		bullet = game.getMonsterBullets(bulletID);
-		if (bullet == null)
-			return;
+		switch (Integer.valueOf(_packet.split(C_PacketSymbol)[1])) {
+		case C_MonsterFire_Fire:
 
-		if (bullet.IsHit())
-			return;
-		// Damage
-		bullet.Hit(hunter, Integer.valueOf(_packet.split(C_PacketSymbol)[2]));
-		// Destroy
-		room.broadcastPacketToRoom(String.valueOf(C_MonsterFire)
-				+ C_PacketSymbol + bulletID);
+			BulletInstance bullet = null;
+			String bulletID = _packet.split(C_PacketSymbol)[2];
+
+			bullet = game.getMonsterBullets(bulletID);
+			if (bullet == null)
+				return;
+
+			if (bullet.IsHit())
+				return;
+			
+			int dmg = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
+			
+			// Damage			
+			bullet.Hit(hunter, dmg);
+			//Calc Guardian Gold
+			if (dmg < 0) {
+				game.getGuardian().AcquireGold(Math.abs(dmg),
+						game.getMap().getGuardianDmgReward());
+			}
+			// Destroy
+			room.broadcastPacketToRoom(String.valueOf(C_MonsterFire)
+					+ C_PacketSymbol + String.valueOf(C_MonsterFire_Destroy)
+					+ C_PacketSymbol + bulletID);
+			break;
+		case C_MonsterFire_Destroy:
+			room.broadcastPacketToRoom(_packet);
+			break;
+		}
 
 	}
 }
