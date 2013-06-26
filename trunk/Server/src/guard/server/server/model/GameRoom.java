@@ -29,7 +29,6 @@ import java.util.Random;
 public class GameRoom {
 	/** 房間成員清單 */
 	private List<PlayerInstance> _membersList = Lists.newList();
-	
 
 	/** 室長 */
 	private PlayerInstance _leader = null;
@@ -55,15 +54,23 @@ public class GameRoom {
 		_isLock = true;
 	}
 
-	public void CheckReadyState() {
+	private void UnLockRoom() {
+		_isLock = false;
+	}
+
+	public boolean CheckReadyState() {
 		/**
 		 * @purpose :檢查準備狀態
 		 * @Condition :，若所有成員都為Ready且房間人數已滿。 TODO 鎖房間，準備開始
 		 * */
-		if (isVacancy()) {// 人數不滿，return
-			return;
-		}
+		/*
+		 * if (isVacancy()) {// 人數不滿，return return; }
+		 */
+		if (_membersList.size() == 1)
+			return false;
+
 		boolean _isRoomReady = true;
+
 		for (PlayerInstance _member : getMembers()) {
 			_isRoomReady &= _member.IsReady();
 		}
@@ -125,7 +132,10 @@ public class GameRoom {
 						+ String.valueOf(_member.getPlayerType());
 			}
 			broadcastPacketToRoom(_packet);
+		} else {
+			UnLockRoom();
 		}
+		return _isRoomReady;
 	}
 
 	/**
@@ -154,6 +164,7 @@ public class GameRoom {
 	 * 加入遊戲房
 	 */
 	public void joinRoom(PlayerInstance pc) {
+		UnLockRoom();
 		String _packet = "";
 		if (pc == null) {
 			throw new NullPointerException();
@@ -203,9 +214,11 @@ public class GameRoom {
 				+ String.valueOf(C_LeaveRoom_OtherLeave));
 		// 告知剩餘成員，有一個PC離開
 		for (PlayerInstance member : getMembers()) {
-			member.SendClientPacket(C_LeaveRoom + C_PacketSymbol
-					+ String.valueOf(C_LeaveRoom_PCLeave) + C_PacketSymbol
-					+ pc.getAccountName());
+			if (member != pc) {
+				member.SendClientPacket(C_LeaveRoom + C_PacketSymbol
+						+ String.valueOf(C_LeaveRoom_PCLeave) + C_PacketSymbol
+						+ pc.getAccountName());
+			}
 		}
 	}
 
@@ -383,7 +396,8 @@ public class GameRoom {
 		public void run() {
 			while (!gameIsOver()) {
 				for (PlayerInstance pc : _membersList) {
-					if (pc.getNetConnection().get_csocket().isClosed()) {
+					if (pc != null
+							&& pc.getNetConnection().get_csocket().isClosed()) {
 						if (pc.isInRoom()) {
 							// TODO 斷線處理
 							if (pc.getRoom().getGame().IsGaming()) {
@@ -412,7 +426,7 @@ public class GameRoom {
 		}
 
 		private boolean gameIsOver() {
-			if(_leader == null || _leader.getRoom() == null){
+			if (_leader == null || _leader.getRoom() == null) {
 				return true;
 			}
 			return _leader.getRoom().getGame().IsGameOver();

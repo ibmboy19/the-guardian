@@ -332,6 +332,8 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	 * 主要更新函式
 	 * */
 	public void Update(float gameTime) {
+		if(this.IsDead())
+			return;
 		if (!_staminaMaximize) {
 			switch (_moveState) {
 			case Run:

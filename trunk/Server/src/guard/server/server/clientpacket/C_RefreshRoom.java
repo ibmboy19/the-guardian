@@ -9,11 +9,11 @@ import guard.server.server.model.GuardWorld;
 public class C_RefreshRoom {
 	public C_RefreshRoom(ClientProcess _client, String _packet) {
 		// TODO 回傳所有人數未滿的房間給該玩家
-		/** 不顯示的房間 : 1.鎖住的,2.人數滿的 */
+		/** 不顯示的房間 : 1.人數滿的 */
 		String _retPacket = String.valueOf(C_RefreshRoom);
 		String _roomInfoPacket = "";
 		for (GameRoom _room : GuardWorld.getInstance().getAllRooms()) {
-			if (_room.isVacancy() && !_room.IsLocked()) {
+			if (_room.isVacancy()) {
 				_roomInfoPacket += _room.getGameRoomInfoPacket()+";";
 			}
 		}

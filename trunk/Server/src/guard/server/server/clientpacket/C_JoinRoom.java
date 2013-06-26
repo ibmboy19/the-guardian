@@ -30,8 +30,8 @@ public class C_JoinRoom {
 		GameRoom _room = GuardWorld.getInstance().getRoom(
 				_packet.split(C_PacketSymbol)[1]);
 		// 不存在的房間 或 房間正準備開始
-		if (_room == null || _room.IsLocked()) {
-			// 不存在或上鎖的房間，回傳加入失敗訊息
+		if (_room == null) {
+			// 不存在的房間，回傳加入失敗訊息
 			pc.SendClientPacket(getJoinFailedPacket());
 			return;
 		}
