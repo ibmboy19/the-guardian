@@ -16,13 +16,15 @@ public class C_LeaveRoom {
 	public C_LeaveRoom(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();
 		// Check IN ROOM
-		if (!pc.isInRoom()) {
+		
+		GameRoom room = pc.getRoom();
+		if(room == null)
+			return;
+		
+		if (room.IsLocked()) {
 			return;
 		}
-		GameRoom _room = pc.getRoom();
-		if (_room.IsLocked()) {
-			return;
-		}
-		_room.leaveRoom(pc);
+		
+		room.leaveRoom(pc);
 	}
 }

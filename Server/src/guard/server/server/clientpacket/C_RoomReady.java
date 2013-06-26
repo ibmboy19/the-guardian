@@ -60,7 +60,6 @@ public class C_RoomReady {
 					+ C_PacketSymbol + String.valueOf(C_RoomReady_PlayerReady)
 					+ C_PacketSymbol + pc.getAccountName());
 
-			// 檢查房間狀態
 			_room.CheckReadyState();
 			break;
 		case C_RoomReady_Start://
@@ -73,6 +72,11 @@ public class C_RoomReady {
 			 * 傳送Start封包，遊戲使用的模組給玩家
 			 * 
 			 * */
+			// 檢查房間狀態
+			if(!_room.CheckReadyState()){
+				return;
+			}
+			
 			if (_room.getGame() != null && _room.getGame().IsReady())
 				return;
 
@@ -93,6 +97,7 @@ public class C_RoomReady {
 					break;
 				}
 			}
+			//Dispatch And Spawn Player - Guardian or Hunter
 			_room.getGame().DispatchPlayer(_hunterList, _guardian);
 			_room.getGame().startGameTimer(0);
 			break;
