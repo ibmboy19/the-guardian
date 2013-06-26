@@ -4,6 +4,7 @@ public class BulletInstance {
 
 	// 開槍的玩者
 	private final String _bulletOwner;
+	public String getOwner(){return _bulletOwner;}
 	// 子彈被產生的時間
 	private final float _bulletCreateTime;
 	// 子彈的識別碼 - 用System.CurrentMills?
@@ -31,7 +32,7 @@ public class BulletInstance {
 		if(_hunter.getAccountName() == _bulletOwner)
 			return;
 		_isHit = true;
-		_hunter.ApplyHP(_dmg);		
+		_hunter.ApplyHP(_dmg);
 		
 	}
 	//擊中其他

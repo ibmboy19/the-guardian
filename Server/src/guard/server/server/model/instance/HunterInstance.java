@@ -43,6 +43,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	/** 使用的房間 */
 	private final GameRoom _room;
+	private final GameInstance _game;
 
 	public GameRoom getRoom() {
 		return _room;
@@ -122,8 +123,10 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// 死亡時 生命減少
 		if (IsDead()) {
 			_lives--;
+			
+			
 			// 更新狀態
-			_pc.getRoom().broadcastPacketToRoom(
+			_room.broadcastPacketToRoom(
 					String.valueOf(C_HunterState) + C_PacketSymbol
 							+ _pc.getAccountName() + C_PacketSymbol
 							+ String.valueOf(C_HunterState_Hp) + ","
@@ -131,9 +134,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 							+ String.valueOf(C_HunterState_Life) + ","
 							+ String.valueOf(_lives));
 			// 檢查寶藏擁有者
-			if (_room.getGame().getTreasure().IsOwner(this)) {
+			if (_game.getTreasure().IsOwner(this)) {
 
-				_room.getGame().TreasureReturn();
+				_game.TreasureReturn();
 
 				// TODO Send Packet 寶藏回歸 封包
 				_room.broadcastPacketToRoom(String.valueOf(C_Treasure)
@@ -141,14 +144,21 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 						+ String.valueOf(C_Treasure_TreasureReturn));
 
 			}
+			//若玩者死亡且不能復活 偵測遊戲是否結束
+			if(_lives == 0){
+				_game.DetecteGameIsOver();
+			}
 
 		} else {
-			_pc.getRoom().broadcastPacketToRoom(
+			_room.broadcastPacketToRoom(
 					String.valueOf(C_HunterState) + C_PacketSymbol
 							+ _pc.getAccountName() + C_PacketSymbol
 							+ String.valueOf(C_HunterState_Hp) + ","
 							+ String.valueOf(_hp));
+				
 		}
+		
+		
 		return _deltaHP;
 	}
 
@@ -418,17 +428,27 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 				+ String.valueOf(C_Gold_Normal) + C_PacketSymbol
 				+ String.valueOf(_gold));		
 	}
+	
+	public void AquireGold(int _gold){
+		this._gold += _gold;
+		//TODO Send Packet C_Gold
+		_pc.SendClientPacket(C_Gold + C_PacketSymbol
+				+ String.valueOf(C_Gold_Normal) + C_PacketSymbol
+				+ String.valueOf(_gold));
+	}
 
 	public HunterInstance() {
 		super();
 		_room = null;
 		_pc = null;
+		_game = null;
 		_hunterInventory = Maps.newConcurrentMap();
 	}
 
 	public HunterInstance(GameRoom _room, PlayerInstance _pc) {
 		super(_room.getMap().getHunterInitGold());
 		this._room = _room;
+		this._game = _room.getGame();
 		this._pc = _pc;
 		this._lives = _room.getMap().getHunterLives();
 		this._hp = _room.getMap().getHunterHP();
