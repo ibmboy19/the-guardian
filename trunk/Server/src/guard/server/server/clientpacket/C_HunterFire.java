@@ -73,6 +73,15 @@ public class C_HunterFire {
 						game.getMap().getBulletDamageValue() > 0 ? -game
 								.getMap().getBulletDamageValue() : game
 								.getMap().getBulletDamageValue());
+				if(hunter.IsDead()){
+					PlayerInstance _bulletOwner = GuardWorld.getInstance().getPlayer(_bullet.getOwner());
+					if(_bulletOwner.IsHunter()){
+						HunterInstance _bulletOwnerHunter = (HunterInstance)_bulletOwner.getWRPlayerInstance();
+						
+						_bulletOwnerHunter.AquireGold(game.getMap().getHunterSlainedReward());
+						
+					}
+				}
 				// 廣播識別碼的子彈撞到
 				room.broadcastPacketToRoom(String.valueOf(C_HunterFire)
 						+ C_PacketSymbol + String.valueOf(C_HunterFire_Hit)

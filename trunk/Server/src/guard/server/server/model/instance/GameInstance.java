@@ -98,8 +98,23 @@ public class GameInstance extends TimerTask {
 
 	/** 玩家部分 */
 	private List<HunterInstance> _hunterList = Lists.newList();
+
+	public void DetecteGameIsOver() {
+		boolean _isAllDead = true;
+		for (HunterInstance hunter : _hunterList) {
+			_isAllDead &= (hunter.getLives() == 0);
+		}
+		if (_isAllDead) {
+			GuardWorld.getInstance().GameOver(
+					GuardWorld.getInstance().getRoom(_hostName)
+							.get_membersList().get(0).getAccountName());
+		}
+
+	}
+
 	private GuardianInstance _guardian = null;
-	public GuardianInstance getGuardian(){
+
+	public GuardianInstance getGuardian() {
 		return _guardian;
 	}
 
@@ -322,7 +337,7 @@ public class GameInstance extends TimerTask {
 			if (_trap instanceof DetonatedTrapInstance) {
 				// System.out.println("Apply Hunter HP");
 
-				//Calc Guardian Gold
+				// Calc Guardian Gold
 				int _damageValue = _hunter
 						.ApplyHP(((DetonatedTrapInstance) _trap).getDamageHP() > 0 ? -((DetonatedTrapInstance) _trap)
 								.getDamageHP()
