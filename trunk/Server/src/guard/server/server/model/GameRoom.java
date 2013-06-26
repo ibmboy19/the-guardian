@@ -29,6 +29,7 @@ import java.util.Random;
 public class GameRoom {
 	/** 房間成員清單 */
 	private List<PlayerInstance> _membersList = Lists.newList();
+	
 
 	/** 室長 */
 	private PlayerInstance _leader = null;

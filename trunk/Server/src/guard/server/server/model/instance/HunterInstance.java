@@ -1,5 +1,6 @@
 package guard.server.server.model.instance;
 
+import static guard.server.server.clientpacket.C_Gold.C_Gold_Normal;
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_BuyItem;
 import static guard.server.server.clientpacket.C_HunterInventory.C_HunterInventory_UseItem;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Hp;
@@ -9,7 +10,6 @@ import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stami
 import static guard.server.server.clientpacket.C_MoveState.C_MoveState_UpdateStamina;
 import static guard.server.server.clientpacket.C_Projectile.C_Projectile_Request;
 import static guard.server.server.clientpacket.C_Treasure.C_Treasure_TreasureReturn;
-import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterInventory;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterState;
@@ -408,12 +408,12 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 				+ String.valueOf(_key));
 	}
 
-	// 抵達檢查點
+	// 抵達檢查點 - 獵人only
 	public void ArriveCheckPoint(int _checkPointID, int _checkPointIndex) {
 		_gold += _room.getMap().getArriveCheckPointReward();
 		// TODO Send Packet C_Gold
 		_pc.SendClientPacket(C_Gold + C_PacketSymbol
-				+ String.valueOf(_pc.getPlayerType()) + C_PacketSymbol
+				+ String.valueOf(C_Gold_Normal) + C_PacketSymbol
 				+ String.valueOf(_gold));		
 	}
 

@@ -138,6 +138,9 @@ public class ClientPacketHandler {
 			case C_GuardianFire:
 				new C_GuardianFire(_client, packet);
 				break;
+			case C_SwapPosition:
+				new C_SwapPosition(_client,packet);
+				break;
 			}
 		} catch (NumberFormatException nf) {
 			System.out.println("接收到一個null.");

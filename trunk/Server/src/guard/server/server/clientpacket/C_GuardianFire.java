@@ -11,9 +11,10 @@ import guard.server.server.model.instance.PlayerInstance;
 
 public class C_GuardianFire {
 
-	public static final int C_GuardianFire_Fire = 0;
-	public static final int C_GuardianFire_Hit = 1;
-	public static final int C_GuardianFire_Destroy = 2;
+	public static final int C_GuardianFire_Init = 0;
+	public static final int C_GuardianFire_Fire = 1;
+	public static final int C_GuardianFire_Hit = 2;
+	public static final int C_GuardianFire_Destroy = 3;
 
 	public C_GuardianFire(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();

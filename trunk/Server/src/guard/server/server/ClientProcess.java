@@ -84,7 +84,7 @@ public class ClientProcess implements Runnable {
 				quite();
 				e.printStackTrace();
 			}
-			_handler.handlePacket(op, packet);			
+			_handler.handlePacket(op, packet);
 		}
 		quite();
 
