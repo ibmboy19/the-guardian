@@ -65,14 +65,16 @@ public class ClientOpcodes {
 	public static final int C_GameTimeAlert = 29;
 	//Spawn (Monster , Guardian Mask)
 	public static final int C_Spawn = 30;
-	//
+	//醫藥箱 - 場上存在
 	public static final int C_MedicalBox = 31;
-	//
+	//TD怪物
 	public static final int C_MonsterFire = 32;
-	//
+	//場景機關升級
 	public static final int C_UpgradeObject = 33;
-	//
+	//神 變身
 	public static final int C_GuardianFire = 34;
+	//交換位置
+	public static final int C_SwapPosition = 35;
 	
 
 }
