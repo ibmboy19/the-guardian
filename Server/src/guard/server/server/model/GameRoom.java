@@ -66,7 +66,8 @@ public class GameRoom {
 		/*
 		 * if (isVacancy()) {// 人數不滿，return return; }
 		 */
-		if (_membersList.size() == 1)
+		
+		if (_membersList.size() < 2)
 			return false;
 
 		boolean _isRoomReady = true;
@@ -94,7 +95,7 @@ public class GameRoom {
 				// 隨機挑選
 				if (_gCount == 0) {
 					Random _rand = new Random();
-					int _index = _rand.nextInt(_maxPcCount);
+					int _index = _rand.nextInt(_membersList.size());
 					_membersList.get(_index).SwitchPlayerType(
 							PlayerType_Guardian);
 
@@ -396,8 +397,7 @@ public class GameRoom {
 		public void run() {
 			while (!gameIsOver()) {
 				for (PlayerInstance pc : _membersList) {
-					if (pc != null
-							&& pc.getNetConnection().get_csocket().isClosed()) {
+					if (pc.getNetConnection().get_csocket().isClosed()) {
 						if (pc.isInRoom()) {
 							// TODO 斷線處理
 							if (pc.getRoom().getGame().IsGaming()) {

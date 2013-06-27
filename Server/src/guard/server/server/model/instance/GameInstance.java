@@ -213,9 +213,9 @@ public class GameInstance extends TimerTask {
 	private List<Integer> _allMedicalBoxID = Lists.newList();
 
 	public void InitMedicalBox(String _idList) {
-		for (String _id : _idList.split(",")) {
-			_allMedicalBoxID.add(Integer.valueOf(_id));
-			System.out.println("init box id = " + _id);
+		for (String _id : _idList.split(";")) {
+			_allMedicalBoxID.add(Integer.valueOf(_id.split("@")[0]));
+			System.out.println("init box id = " + _id.split("@")[0]);
 		}
 		PrintMedicalCount();
 	}
@@ -250,15 +250,21 @@ public class GameInstance extends TimerTask {
 		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
 		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
 		int _trapID = Integer.valueOf(_packet.split(C_PacketSymbol)[4]);
+		// System.out.println("Spawn Trap "+_trapID);
 		if (!_allTrapList.containsKey(_slot)) {
 			_allTrapList.put(_slot, new TrapSlot());
+			// System.out.println("no slot");
 		}
 		if (_allTrapList.get(_slot).CheckSlot(_key)) {
+			// System.out.println("no key");
 			return;
 		}
-		if (_map.getTrap(_trapID) == null)
+		if (_map.getTrap(_trapID) == null) {
+			// System.out.println("trap not found");
 			return;
+		}
 		boolean _isBuild = false;
+
 		if (_guardian.CostGold(_map.getTrap(_trapID).getPrice())) {
 			if (_map.getTrap(_trapID) instanceof TimingTrap) {
 				_allTrapList
@@ -557,7 +563,7 @@ public class GameInstance extends TimerTask {
 	private int gameCountDown;
 
 	// 遊戲載入地圖完畢，準備開始的倒數時間 - at state 3
-	private final float gameStartReadyTime = 20;
+	private final float gameStartReadyTime = 25;
 
 	public boolean IsReady() {
 		return gameState == GameState.CountDown;

@@ -75,8 +75,8 @@ public class C_CreateRoom {
 						Integer.valueOf(_idata.split(_symbol1)[0]),
 						_idata.split(_symbol1)[2], Integer.valueOf(_idata
 								.split(_symbol1)[3]), Integer.valueOf(_idata
-								.split(_symbol1)[4]),
-								Integer.valueOf(_idata.split(_symbol1)[5]));
+								.split(_symbol1)[4]), Integer.valueOf(_idata
+								.split(_symbol1)[5]));
 				break;
 			}
 
@@ -135,7 +135,7 @@ public class C_CreateRoom {
 			_trapList.add(_trap);
 		}
 		// System.out.println("Item List Size :"+_itemList.size());
-		// System.out.println("Trap List Size :"+_trapList.size());
+		System.out.println("Trap List Size :" + _trapList.size());
 
 		// Initial Game Map
 		GameMap _map = new GameMap(_mapData.split(_symbol1)[2],

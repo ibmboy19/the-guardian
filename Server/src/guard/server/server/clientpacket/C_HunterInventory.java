@@ -14,7 +14,7 @@ public class C_HunterInventory {
 		PlayerInstance _pc = _client.getActiveChar();
 		if (_pc == null)
 			return;
-		if(_pc.getRoom() == null)
+		if (_pc.getRoom() == null)
 			return;
 		if (_pc.IsGuardian())
 			return;

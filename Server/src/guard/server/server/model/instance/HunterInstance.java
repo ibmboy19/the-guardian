@@ -7,13 +7,11 @@ import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Hp;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Invisible;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Life;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stamina;
-import static guard.server.server.clientpacket.C_MoveState.C_MoveState_UpdateStamina;
 import static guard.server.server.clientpacket.C_Projectile.C_Projectile_Request;
 import static guard.server.server.clientpacket.C_Treasure.C_Treasure_TreasureReturn;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterInventory;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterState;
-import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Projectile;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Treasure;
@@ -77,7 +75,6 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 						+ _pc.getAccountName() + C_PacketSymbol
 						+ String.valueOf(C_HunterState_Hp) + ","
 						+ String.valueOf(_hp));
-		// _lives, _hp, IsDead()
 
 	}
 
@@ -123,16 +120,14 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// 死亡時 生命減少
 		if (IsDead()) {
 			_lives--;
-			
-			
+
 			// 更新狀態
-			_room.broadcastPacketToRoom(
-					String.valueOf(C_HunterState) + C_PacketSymbol
-							+ _pc.getAccountName() + C_PacketSymbol
-							+ String.valueOf(C_HunterState_Hp) + ","
-							+ String.valueOf(_hp) + ";"
-							+ String.valueOf(C_HunterState_Life) + ","
-							+ String.valueOf(_lives));
+			_room.broadcastPacketToRoom(String.valueOf(C_HunterState)
+					+ C_PacketSymbol + _pc.getAccountName() + C_PacketSymbol
+					+ String.valueOf(C_HunterState_Hp) + ","
+					+ String.valueOf(_hp) + ";"
+					+ String.valueOf(C_HunterState_Life) + ","
+					+ String.valueOf(_lives));
 			// 檢查寶藏擁有者
 			if (_game.getTreasure().IsOwner(this)) {
 
@@ -144,21 +139,19 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 						+ String.valueOf(C_Treasure_TreasureReturn));
 
 			}
-			//若玩者死亡且不能復活 偵測遊戲是否結束
-			if(_lives == 0){
+			// 若玩者死亡且不能復活 偵測遊戲是否結束
+			if (_lives == 0) {
 				_game.DetecteGameIsOver();
 			}
 
 		} else {
-			_room.broadcastPacketToRoom(
-					String.valueOf(C_HunterState) + C_PacketSymbol
-							+ _pc.getAccountName() + C_PacketSymbol
-							+ String.valueOf(C_HunterState_Hp) + ","
-							+ String.valueOf(_hp));
-				
+			_room.broadcastPacketToRoom(String.valueOf(C_HunterState)
+					+ C_PacketSymbol + _pc.getAccountName() + C_PacketSymbol
+					+ String.valueOf(C_HunterState_Hp) + ","
+					+ String.valueOf(_hp));
+
 		}
-		
-		
+
 		return _deltaHP;
 	}
 
@@ -173,9 +166,11 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		this._stamina = MathUtil.Clamp(bufferStamina, MIN_Stamina, MAX_Stamina);
 
 		// TODO Send Packet
-		_pc.SendClientPacket(String.valueOf(C_MoveState) + C_PacketSymbol
-				+ C_MoveState_UpdateStamina + C_PacketSymbol
+		_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
+				+ _pc.getAccountName() + C_PacketSymbol
+				+ String.valueOf(C_HunterState_Stamina) + ","
 				+ String.valueOf(_stamina));
+
 	}
 
 	/** 獵人移動相關 */
@@ -256,8 +251,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 			_staminaConsumeFlag = true;
 			_staminaConsumeTime = gameTime;
 			// Send Packet
-			_pc.SendClientPacket(String.valueOf(C_MoveState) + C_PacketSymbol
-					+ C_MoveState_UpdateStamina + C_PacketSymbol
+			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
+					+ _pc.getAccountName() + C_PacketSymbol
+					+ String.valueOf(C_HunterState_Stamina) + ","
 					+ String.valueOf(_stamina));
 		} else {
 			_lockStamina = true;
@@ -282,8 +278,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 			}
 
 			// Send Packet
-			_pc.SendClientPacket(String.valueOf(C_MoveState) + C_PacketSymbol
-					+ C_MoveState_UpdateStamina + C_PacketSymbol
+			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
+					+ _pc.getAccountName() + C_PacketSymbol
+					+ String.valueOf(C_HunterState_Stamina) + ","
 					+ String.valueOf(_stamina));
 
 		}
@@ -342,7 +339,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	 * 主要更新函式
 	 * */
 	public void Update(float gameTime) {
-		if(this.IsDead())
+		if (this.IsDead())
 			return;
 		if (!_staminaMaximize) {
 			switch (_moveState) {
@@ -426,12 +423,12 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// TODO Send Packet C_Gold
 		_pc.SendClientPacket(C_Gold + C_PacketSymbol
 				+ String.valueOf(C_Gold_Normal) + C_PacketSymbol
-				+ String.valueOf(_gold));		
+				+ String.valueOf(_gold));
 	}
-	
-	public void AquireGold(int _gold){
+
+	public void AquireGold(int _gold) {
 		this._gold += _gold;
-		//TODO Send Packet C_Gold
+		// TODO Send Packet C_Gold
 		_pc.SendClientPacket(C_Gold + C_PacketSymbol
 				+ String.valueOf(C_Gold_Normal) + C_PacketSymbol
 				+ String.valueOf(_gold));

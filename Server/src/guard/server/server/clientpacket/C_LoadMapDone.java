@@ -31,8 +31,8 @@ public class C_LoadMapDone {
 		pc.LoadMapDone();
 
 		String _retpacket = String.valueOf(C_LoadMapDone) + C_PacketSymbol
-				+ String.valueOf(C_LoadMapDone_Init)+C_PacketSymbol+
-				String.valueOf(_game.getMap().getGameMode());
+				+ String.valueOf(C_LoadMapDone_Init) + C_PacketSymbol
+				+ String.valueOf(_game.getMap().getGameMode());
 		// TODO 回傳玩家資訊
 		switch (pc.getPlayerType()) {
 		case PlayerType_Hunter:

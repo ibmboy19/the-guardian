@@ -55,26 +55,25 @@ public class ClientOpcodes {
 	public static final int C_Projectile = 24;
 	// 一般傷害物件
 	public static final int C_ApplyDamage = 25;
-	//傳送門
+	// 傳送門
 	public static final int C_Portal = 26;
-	//檢查遊玩人數
+	// 檢查遊玩人數
 	public static final int C_CheckGameActivePlayer = 27;
-	//寶藏
+	// 寶藏
 	public static final int C_Treasure = 28;
-	//GameTime
+	// GameTime
 	public static final int C_GameTimeAlert = 29;
-	//Spawn (Monster , Guardian Mask)
+	// Spawn (Monster , Guardian Mask)
 	public static final int C_Spawn = 30;
-	//醫藥箱 - 場上存在
+	// 醫藥箱 - 場上存在
 	public static final int C_MedicalBox = 31;
-	//TD怪物
+	// TD怪物
 	public static final int C_MonsterFire = 32;
-	//場景機關升級
+	// 場景機關升級
 	public static final int C_UpgradeObject = 33;
-	//神 變身
+	// 神 變身
 	public static final int C_GuardianFire = 34;
-	//交換位置
+	// 交換位置
 	public static final int C_SwapPosition = 35;
-	
 
 }
