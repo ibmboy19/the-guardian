@@ -21,7 +21,7 @@ public class C_HunterFire {
 	public static final int C_HunterFire_MeleeAnim = 3;
 	// 過時 銷毀
 	public static final int C_HunterFire_Destroy = 4;
-	
+
 	//
 	public static final int Hit_Player = 0;
 	public static final int Hit_Jail = 1;
@@ -47,8 +47,9 @@ public class C_HunterFire {
 			// 玩家開火 產生子彈
 
 			game.HunterFire(pc, _packet.split(C_PacketSymbol)[2],
-					_packet.split(C_PacketSymbol)[3],_packet.split(C_PacketSymbol)[4]);
-			
+					_packet.split(C_PacketSymbol)[3],
+					_packet.split(C_PacketSymbol)[4]);
+
 			break;
 		case C_HunterFire_Hit:
 			// 發射的子彈打到對象，算傷害 刪除
@@ -73,13 +74,16 @@ public class C_HunterFire {
 						game.getMap().getBulletDamageValue() > 0 ? -game
 								.getMap().getBulletDamageValue() : game
 								.getMap().getBulletDamageValue());
-				if(hunter.IsDead()){
-					PlayerInstance _bulletOwner = GuardWorld.getInstance().getPlayer(_bullet.getOwner());
-					if(_bulletOwner.IsHunter()){
-						HunterInstance _bulletOwnerHunter = (HunterInstance)_bulletOwner.getWRPlayerInstance();
-						
-						_bulletOwnerHunter.AquireGold(game.getMap().getHunterSlainedReward());
-						
+				if (hunter.IsDead()) {
+					PlayerInstance _bulletOwner = GuardWorld.getInstance()
+							.getPlayer(_bullet.getOwner());
+					if (_bulletOwner.IsHunter()) {
+						HunterInstance _bulletOwnerHunter = (HunterInstance) _bulletOwner
+								.getWRPlayerInstance();
+
+						_bulletOwnerHunter.AquireGold(game.getMap()
+								.getHunterSlainedReward());
+
 					}
 				}
 				// 廣播識別碼的子彈撞到
@@ -99,12 +103,10 @@ public class C_HunterFire {
 				_bullet.Hit();
 				//
 				//
-				game.BulletAttackTrapJail(
-						_packet.split(C_PacketSymbol)[3],
+				game.BulletAttackTrapJail(_packet.split(C_PacketSymbol)[3],
 						Integer.valueOf(_packet.split(C_PacketSymbol)[4]),
 						Integer.valueOf(_packet.split(C_PacketSymbol)[5]));
-				
-				
+
 				break;
 			}
 			break;

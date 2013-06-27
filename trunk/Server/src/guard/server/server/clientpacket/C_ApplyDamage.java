@@ -29,7 +29,7 @@ public class C_ApplyDamage {
 			return;
 		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
 		// type,p/n,dmg_hp; type,p/n,dmg_stamina
-		System.out.println(_packet);
+		// System.out.println(_packet);
 		String _applyData = _packet.split(C_PacketSymbol)[1];
 		for (String _data : _applyData.split(";")) {
 			switch (Integer.valueOf(_data.split(",")[0])) {
@@ -41,16 +41,16 @@ public class C_ApplyDamage {
 				}
 				// negative
 				else {
-					int _damageValue = hunter.ApplyHP(-Math.abs(Integer.valueOf(Integer
-							.valueOf(_data.split(",")[2]))));
-					game.getGuardian().AcquireGold(Math.abs(_damageValue), game.getMap()
-							.getGuardianDmgReward());
+					int _damageValue = hunter.ApplyHP(-Math.abs(Integer
+							.valueOf(Integer.valueOf(_data.split(",")[2]))));
+					game.getGuardian().AcquireGold(Math.abs(_damageValue),
+							game.getMap().getGuardianDmgReward());
 				}
 				break;
 			case C_ApplyDamage_Stamina:
-				if (Integer.valueOf(_data.split(",")[1]) == 1) {
+				if (Float.valueOf(_data.split(",")[0]) == 1) {
 					hunter.ApplyCostStamina(Math.abs(Float.valueOf(Integer
-							.valueOf(_data.split(",")[2]))));
+							.valueOf(_data.split(",")[1]))));
 				} else {
 					hunter.ApplyCostStamina(-Math.abs(Float.valueOf(Integer
 							.valueOf(_data.split(",")[2]))));

@@ -139,7 +139,7 @@ public class ClientPacketHandler {
 				new C_GuardianFire(_client, packet);
 				break;
 			case C_SwapPosition:
-				new C_SwapPosition(_client,packet);
+				new C_SwapPosition(_client, packet);
 				break;
 			}
 		} catch (NumberFormatException nf) {

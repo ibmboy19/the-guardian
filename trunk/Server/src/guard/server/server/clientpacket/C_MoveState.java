@@ -9,7 +9,6 @@ import guard.server.server.model.instance.PlayerInstance;
 public class C_MoveState {
 
 	public static final int C_MoveState_Move = 1;// 移動
-	public static final int C_MoveState_UpdateStamina = 2;// 耐力值，Client專用
 
 	public C_MoveState(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();

@@ -9,13 +9,11 @@ import guard.server.server.model.instance.GameInstance;
 import guard.server.server.model.instance.PlayerInstance;
 
 public class C_MedicalBox {
-	
+
 	public static final int C_MedicalBox_Init = 0;
 	public static final int C_MedicalBox_Destroy = 1;
-	
+
 	public C_MedicalBox(ClientProcess _client, String _packet) {
-		
-		
 
 		PlayerInstance pc = _client.getActiveChar();
 		if (pc == null) {
@@ -27,29 +25,33 @@ public class C_MedicalBox {
 			return;
 		}
 
-		GameInstance game = room.getGame();		
+		GameInstance game = room.getGame();
 		if (game == null) {
 			return;
 		}
-		
-		switch(Integer.valueOf(_packet.split(C_PacketSymbol)[1])){
+
+		switch (Integer.valueOf(_packet.split(C_PacketSymbol)[1])) {
 		case C_MedicalBox_Init:
+			// System.out.println(_packet);
 			game.InitMedicalBox(_packet.split(C_PacketSymbol)[2]);
+			// boreadcast and spawn Medical Box
+			room.broadcastPacketToRoom(_packet);
 			break;
 		case C_MedicalBox_Destroy:
-			if(game.CheckMedicalBox(Integer.valueOf(_packet.split(C_PacketSymbol)[2]))){
-				
-				new C_ApplyDamage(_client,String.valueOf(C_ApplyDamage)+C_PacketSymbol+_packet.split(C_PacketSymbol)[3]);
-				
-				room.broadcastPacketToRoom(String.valueOf(C_MedicalBox)+C_PacketSymbol+_packet.split(C_PacketSymbol)[2]);
-				
+			// System.out.println("destroy med box :"+_packet);
+			if (game.CheckMedicalBox(Integer.valueOf(_packet
+					.split(C_PacketSymbol)[2]))) {
+
+				new C_ApplyDamage(_client, String.valueOf(C_ApplyDamage)
+						+ C_PacketSymbol + _packet.split(C_PacketSymbol)[3]);
+
+				room.broadcastPacketToRoom(String.valueOf(C_MedicalBox)
+						+ C_PacketSymbol + String.valueOf(C_MedicalBox_Destroy)
+						+ C_PacketSymbol + _packet.split(C_PacketSymbol)[2]);
+
 			}
-			//System.out.println("box id = "+_packet.split(C_PacketSymbol)[2]);
-			//game.PrintMedicalCount();
-			
 			break;
 		}
-		
-		
+
 	}
 }

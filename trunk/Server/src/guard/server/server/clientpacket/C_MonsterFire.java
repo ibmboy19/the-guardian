@@ -45,12 +45,12 @@ public class C_MonsterFire {
 
 			if (bullet.IsHit())
 				return;
-			
+
 			int dmg = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
-			
-			// Damage			
+
+			// Damage
 			bullet.Hit(hunter, dmg);
-			//Calc Guardian Gold
+			// Calc Guardian Gold
 			if (dmg < 0) {
 				game.getGuardian().AcquireGold(Math.abs(dmg),
 						game.getMap().getGuardianDmgReward());

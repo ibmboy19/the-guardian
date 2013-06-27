@@ -26,7 +26,7 @@ public class C_UpgradeObject {
 		
 		GuardianInstance guardian = (GuardianInstance)pc.getWRPlayerInstance();
 		
-		guardian.CostGold(Integer.valueOf(_packet.split(C_PacketSymbol)[3]));
+		guardian.CostGold(Integer.valueOf(_packet.split(C_PacketSymbol)[4]));
 		
 		room.broadcastPacketToRoom(_packet);
 		

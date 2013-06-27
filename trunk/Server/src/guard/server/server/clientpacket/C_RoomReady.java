@@ -1,13 +1,11 @@
 package guard.server.server.clientpacket;
 
-import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_PlayerReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Guardian;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Hunter;
 import guard.server.server.ClientProcess;
 import guard.server.server.model.GameRoom;
-import guard.server.server.model.instance.GameInstance;
 import guard.server.server.model.instance.GuardianInstance;
 import guard.server.server.model.instance.HunterInstance;
 import guard.server.server.model.instance.PlayerInstance;
@@ -65,18 +63,16 @@ public class C_RoomReady {
 		case C_RoomReady_Start://
 			/**
 			 * 
-			 * Server接收到HOST開始遊戲的封包。 TODO 產生玩家對應的角色模組 : Guardian或Hunter。 TODO
-			 * 傳送Start封包，遊戲使用的模組給玩家
-			 * 
-			 * Server接收到HOST開始遊戲的封包 TODO 產生玩家對應的角色模組 : Guardian或Hunter TODO
-			 * 傳送Start封包，遊戲使用的模組給玩家
+			 * Server接收到HOST開始遊戲的封包。
 			 * 
 			 * */
+			// TODO 產生玩家對應的角色模組 : Guardian或Hunter。
+			// TODO 傳送Start封包，遊戲使用的模組給玩家
 			// 檢查房間狀態
-			if(!_room.CheckReadyState()){
+			if (!_room.CheckReadyState()) {
 				return;
 			}
-			
+
 			if (_room.getGame() != null && _room.getGame().IsReady())
 				return;
 
@@ -97,7 +93,7 @@ public class C_RoomReady {
 					break;
 				}
 			}
-			//Dispatch And Spawn Player - Guardian or Hunter
+			// Dispatch And Spawn Player - Guardian or Hunter
 			_room.getGame().DispatchPlayer(_hunterList, _guardian);
 			_room.getGame().startGameTimer(0);
 			break;
