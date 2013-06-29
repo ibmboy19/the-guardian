@@ -13,11 +13,11 @@ public class C_RefreshRoom {
 		String _retPacket = String.valueOf(C_RefreshRoom);
 		String _roomInfoPacket = "";
 		for (GameRoom _room : GuardWorld.getInstance().getAllRooms()) {
-			if (_room.isVacancy()) {
+			if (_room.isVacancy() && _room.getGame().IsWaitingPlayers()) {
 				_roomInfoPacket += _room.getGameRoomInfoPacket()+";";
 			}
 		}
-		
+		System.out.println("all rooms count : "+GuardWorld.getInstance().getAllRooms().size());
 		if(_roomInfoPacket != ""){
 			_roomInfoPacket = _roomInfoPacket.substring(0, _roomInfoPacket.length()-1);
 			_retPacket += C_PacketSymbol + _roomInfoPacket;

@@ -18,17 +18,22 @@ public class C_LeaveRoom {
 		// Check IN ROOM
 
 		GameRoom room = pc.getRoom();
-		if (room == null)
+		if (room == null) {
+			System.out.println("leave null room");
 			return;
+		}
 
 		// 只有室長可以在房間上鎖時解散房間
-		if (!room.isLeader(pc) && room.IsLocked()) {
+		if (room.IsLocked() && !room.isLeader(pc)) {
+			System.out.println("try leave locked room , not leader");
 			return;
 		}
 
 		// 遊戲即將開始，不能中離
-		if (room.getGame() != null)
+		if (room.getGame().IsReady()) {
+			System.out.println("game starts in few secs..");
 			return;
+		}
 
 		room.leaveRoom(pc);
 	}

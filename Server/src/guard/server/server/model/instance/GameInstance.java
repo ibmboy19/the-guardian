@@ -109,7 +109,6 @@ public class GameInstance extends TimerTask {
 					GuardWorld.getInstance().getRoom(_hostName)
 							.get_membersList().get(0).getAccountName());
 		}
-
 	}
 
 	private GuardianInstance _guardian = null;
@@ -565,6 +564,10 @@ public class GameInstance extends TimerTask {
 	// 遊戲載入地圖完畢，準備開始的倒數時間 - at state 3
 	private final float gameStartReadyTime = 25;
 
+	public boolean IsWaitingPlayers(){
+		return gameState == GameState.Waiting;
+	}
+	
 	public boolean IsReady() {
 		return gameState == GameState.CountDown;
 	}
