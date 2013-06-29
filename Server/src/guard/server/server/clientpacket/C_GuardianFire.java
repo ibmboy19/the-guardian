@@ -54,6 +54,9 @@ public class C_GuardianFire {
 					+ C_PacketSymbol + String.valueOf(C_GuardianFire_Destroy)
 					+ C_PacketSymbol + bulletID);
 			break;
+		case C_GuardianFire_Init:
+			room.broadcastPacketToRoom(_packet);
+			break;
 		}
 
 	}

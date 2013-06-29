@@ -46,6 +46,11 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public GameRoom getRoom() {
 		return _room;
 	}
+	
+	/***/
+	private boolean _isSpawned;
+	public boolean IsSpawned(){return _isSpawned;}
+	public void SetSpawned(){_isSpawned = true;}
 
 	/** 復活次數 */
 	private int _lives;
@@ -259,7 +264,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					+ String.valueOf(C_HunterState_Stamina) + ","
 					+ String.valueOf(_stamina));
 		} else {// 耐力見底
-			_lockStamina = true;// 設置奈利用完的CD狀態
+			_lockStamina = true;// 設置耐力用完的CD狀態
 			// auto switch run walk
 			_moveState = MoveState.Walk;// 強迫更新移動狀態成走路
 			_runOrWalk = false;//
