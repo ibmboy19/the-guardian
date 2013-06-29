@@ -67,6 +67,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 			return;
 
 		this._hp = _room.getMap().getHunterHP();
+		this._stamina = this.MAX_Stamina;
 		/**
 		 * TODO Send Packet : lives hp isDead
 		 * */
@@ -74,7 +75,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 				String.valueOf(C_HunterState) + C_PacketSymbol
 						+ _pc.getAccountName() + C_PacketSymbol
 						+ String.valueOf(C_HunterState_Hp) + ","
-						+ String.valueOf(_hp));
+						+ String.valueOf(_hp) + ";"
+						+ String.valueOf(C_HunterState_Stamina) + ","
+						+ String.valueOf(_stamina));
 
 	}
 
@@ -205,7 +208,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 	// 耐力
 	public static final float MIN_Stamina = 0.0f, MAX_Stamina = 1.0f;
-	private float _stamina = 1.0f;
+	private float _stamina = MAX_Stamina;
 	private boolean _staminaConsumeFlag;
 	private float _staminaConsumeTime;
 	// 鎖耐力
@@ -244,45 +247,46 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	}
 
 	private void ConsumeStamina(float gameTime) {
-		if (_stamina != MIN_Stamina) {
+		if (_stamina != MIN_Stamina) {// 可消耗狀態
 			_stamina = MathUtil.Clamp(_stamina
 					- _room.getMap().getStaminaConsumValue(), MIN_Stamina,
-					MAX_Stamina);
-			_staminaConsumeFlag = true;
-			_staminaConsumeTime = gameTime;
+					MAX_Stamina);// 消耗耐力
+			_staminaConsumeFlag = true;// 設置消耗狀態
+			_staminaConsumeTime = gameTime;// 設置消耗時間，計算CD
 			// Send Packet
 			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
 					+ _pc.getAccountName() + C_PacketSymbol
 					+ String.valueOf(C_HunterState_Stamina) + ","
 					+ String.valueOf(_stamina));
-		} else {
-			_lockStamina = true;
+		} else {// 耐力見底
+			_lockStamina = true;// 設置奈利用完的CD狀態
 			// auto switch run walk
-			_moveState = MoveState.Walk;
-			_runOrWalk = false;
+			_moveState = MoveState.Walk;// 強迫更新移動狀態成走路
+			_runOrWalk = false;//
 		}
 	}
 
 	private void RecoveryStamina(float gameTime) {
-		if (_staminaConsumeFlag) {
+		if (_staminaConsumeFlag) {// 耐力回復CD中
 			if (gameTime - _staminaConsumeTime > _room.getMap()
 					.getStaminaRecoveryCD()) {
 				_staminaConsumeFlag = false;
 			}
-		} else if (_stamina != MAX_Stamina) {
+		} else if(_stamina != MAX_Stamina){//耐力還可回復
 			_stamina = MathUtil.Clamp(_stamina
 					+ _room.getMap().getStaminaRecoveryValue(), MIN_Stamina,
 					MAX_Stamina);
-			if (_lockStamina && _stamina >= .3f) {
-				_lockStamina = false;
-			}
 
 			// Send Packet
 			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
 					+ _pc.getAccountName() + C_PacketSymbol
 					+ String.valueOf(C_HunterState_Stamina) + ","
 					+ String.valueOf(_stamina));
-
+			if (_lockStamina) {//限制跑步狀態
+				if (_stamina >= .15f) {
+					_lockStamina = false;
+				}
+			}
 		}
 	}
 
@@ -341,7 +345,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public void Update(float gameTime) {
 		if (this.IsDead())
 			return;
-		if (!_staminaMaximize) {
+		if (!_staminaMaximize) {// 不為耐力藥水狀態下
 			switch (_moveState) {
 			case Run:
 				ConsumeStamina(gameTime);

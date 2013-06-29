@@ -229,8 +229,8 @@ public class GameRoom {
 	public synchronized void GameOver() {
 		this._game.CalcGameResult();
 		this._game.cancel();
-		this.breakup();
 		connectionDetectThread.interrupt();
+		this.breakup();
 	}
 
 	/**
@@ -238,6 +238,13 @@ public class GameRoom {
 	 */
 	public boolean isVacancy() {
 		return _membersList.size() < _maxPcCount;
+	}
+	
+	/**
+	 * 遊戲開始了嗎?
+	 * */
+	public boolean IsStartGame(){
+		return this._game != null;
 	}
 
 	public int getVacancy() {
