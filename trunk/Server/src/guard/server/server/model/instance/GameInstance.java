@@ -12,6 +12,7 @@ import static guard.server.server.clientpacket.C_HunterFire.Hit_Jail;
 import static guard.server.server.clientpacket.C_LoadMapDone.C_LoadMapDone_Done;
 import static guard.server.server.clientpacket.C_MonsterFire.C_MonsterFire_Destroy;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Start;
+import static guard.server.server.clientpacket.C_SelectPlayerSpawnPoint.C_SelectPlayerSpawnPoint_Request;
 import static guard.server.server.clientpacket.C_SelectPlayerSpawnPoint.C_SelectPlayerSpawnPoint_UpdateCheckPoint;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_BeAttacked;
 import static guard.server.server.clientpacket.C_Trap.C_Trap_BuildUp;
@@ -22,7 +23,6 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameTimeAlert;
-import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GuardianFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
@@ -186,17 +186,18 @@ public class GameInstance extends TimerTask {
 				for (HunterInstance _hunterInst : _hunterList) {
 					_hunterInst.ArriveCheckPoint(_checkPointID,
 							_checkPointIndex);
+					BroadcastPacketToRoom(String.valueOf(C_ArriveCheckPoint)
+							+ C_PacketSymbol + _hunterInst.getAccountName()
+							+ C_PacketSymbol + String.valueOf(_checkPointID)
+							+ C_PacketSymbol + String.valueOf(_checkPointIndex));
 				}
 			} else {
 				_hunter.ArriveCheckPoint(_checkPointID, _checkPointIndex);
+				BroadcastPacketToRoom(String.valueOf(C_ArriveCheckPoint)
+						+ C_PacketSymbol + _hunter.getAccountName()
+						+ C_PacketSymbol + String.valueOf(_checkPointID)
+						+ C_PacketSymbol + String.valueOf(_checkPointIndex));
 			}
-
-			// TODO Send Packet Enable CheckPoint
-			this.BroadcastPacketToRoom(String.valueOf(C_ArriveCheckPoint)
-					+ C_PacketSymbol + _hunter.getAccountName()
-					+ C_PacketSymbol + String.valueOf(_checkPointID)
-					+ C_PacketSymbol + String.valueOf(_checkPointIndex));
-
 		}
 	}
 
@@ -564,10 +565,10 @@ public class GameInstance extends TimerTask {
 	// 遊戲載入地圖完畢，準備開始的倒數時間 - at state 3
 	private final float gameStartReadyTime = 25;
 
-	public boolean IsWaitingPlayers(){
+	public boolean IsWaitingPlayers() {
 		return gameState == GameState.Waiting;
 	}
-	
+
 	public boolean IsReady() {
 		return gameState == GameState.CountDown;
 	}
@@ -619,6 +620,11 @@ public class GameInstance extends TimerTask {
 		this._guardian.getActiveChar().SendClientPacket(
 				String.valueOf(C_RequestRemaingTime) + C_PacketSymbol
 						+ String.valueOf(getRemainingGameTime()));
+		for(HunterInstance _hunterInst : _hunterList){
+			if(!_hunterInst.IsSpawned()){
+				_hunterInst.getActiveChar().SendClientPacket(String.valueOf(C_SelectPlayerSpawnPoint)+C_PacketSymbol+String.valueOf(C_SelectPlayerSpawnPoint_Request));
+			}
+		}
 	}
 
 	// 遊戲時間超過，轉換到遊戲結束狀態
