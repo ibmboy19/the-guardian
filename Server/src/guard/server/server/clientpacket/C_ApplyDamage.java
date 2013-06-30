@@ -43,17 +43,19 @@ public class C_ApplyDamage {
 				else {
 					int _damageValue = hunter.ApplyHP(-Math.abs(Integer
 							.valueOf(Integer.valueOf(_data.split(",")[2]))));
+
 					game.getGuardian().AcquireGold(Math.abs(_damageValue),
 							game.getMap().getGuardianDmgReward());
 				}
 				break;
 			case C_ApplyDamage_Stamina:
 				if (Integer.valueOf(_data.split(",")[1]) == 1) {
-					hunter.ApplyCostStamina(Math.abs(Float.valueOf(Integer
-							.valueOf(_data.split(",")[2]))));
+					hunter.ApplyCostStamina(Math.abs(Float.valueOf(_data
+							.split(",")[2])));
 				} else {
-					hunter.ApplyCostStamina(-Math.abs(Float.valueOf(Integer
-							.valueOf(_data.split(",")[2]))));
+					System.out.println("check5");
+					hunter.ApplyCostStamina(-Math.abs(Float.valueOf(_data
+							.split(",")[2])));
 				}
 				break;
 			}

@@ -46,11 +46,17 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public GameRoom getRoom() {
 		return _room;
 	}
-	
+
 	/***/
 	private boolean _isSpawned;
-	public boolean IsSpawned(){return _isSpawned;}
-	public void SetSpawned(){_isSpawned = true;}
+
+	public boolean IsSpawned() {
+		return _isSpawned;
+	}
+
+	public void SetSpawned() {
+		_isSpawned = true;
+	}
 
 	/** 復活次數 */
 	private int _lives;
@@ -128,7 +134,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// 死亡時 生命減少
 		if (IsDead()) {
 			_lives--;
-			if(this._staminaMaximize){
+			if (this._staminaMaximize) {
 				StaminaMaximizeCancel();
 			}
 
@@ -169,12 +175,12 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public void ApplyCostStamina(float _adjustValue) {
 		if (IsDead())
 			return;
-		if(this._staminaMaximize)//耐力藥水狀態下 不會增減
+		if (this._staminaMaximize)// 耐力藥水狀態下 不會增減
 			return;
 		if (_adjustValue > 0 && this._stamina == MAX_Stamina) {
 			return;
 		}
-		
+
 		float bufferStamina = this._stamina + _adjustValue;
 
 		this._stamina = MathUtil.Clamp(bufferStamina, MIN_Stamina, MAX_Stamina);
@@ -227,7 +233,8 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	// 狀態 - 耐力最大
 	private boolean _staminaMaximize = false;
 	private float _staminaMaximizeDuration, _staminaMaximizeRecordTime;
-	//最大化耐力
+
+	// 最大化耐力
 	private void StaminaMaxmize(float _staminaMaximizeTime,
 			float _staminaMaximizeRecordTime) {
 		this._staminaMaximizeDuration = _staminaMaximizeTime;
@@ -239,8 +246,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 				+ _pc.getAccountName() + C_PacketSymbol
 				+ String.valueOf(C_HunterState_Stamina) + ",2");
 	}
-	//耐力最大化失效
-	private void StaminaMaximizeCancel(){
+
+	// 耐力最大化失效
+	private void StaminaMaximizeCancel() {
 		_staminaMaximize = false;
 		_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
 				+ _pc.getAccountName() + C_PacketSymbol
@@ -291,7 +299,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					.getStaminaRecoveryCD()) {
 				_staminaConsumeFlag = false;
 			}
-		} else if(_stamina != MAX_Stamina){//耐力還可回復
+		} else if (_stamina != MAX_Stamina) {// 耐力還可回復
 			_stamina = MathUtil.Clamp(_stamina
 					+ _room.getMap().getStaminaRecoveryValue(), MIN_Stamina,
 					MAX_Stamina);
@@ -301,7 +309,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					+ _pc.getAccountName() + C_PacketSymbol
 					+ String.valueOf(C_HunterState_Stamina) + ","
 					+ String.valueOf(_stamina));
-			if (_lockStamina) {//限制跑步狀態
+			if (_lockStamina) {// 限制跑步狀態
 				if (_stamina >= .15f) {
 					_lockStamina = false;
 				}

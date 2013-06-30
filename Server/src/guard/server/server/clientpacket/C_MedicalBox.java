@@ -38,13 +38,10 @@ public class C_MedicalBox {
 			room.broadcastPacketToRoom(_packet);
 			break;
 		case C_MedicalBox_Destroy:
-			// System.out.println("destroy med box :"+_packet);
 			if (game.CheckMedicalBox(Integer.valueOf(_packet
 					.split(C_PacketSymbol)[2]))) {
-
 				new C_ApplyDamage(_client, String.valueOf(C_ApplyDamage)
 						+ C_PacketSymbol + _packet.split(C_PacketSymbol)[3]);
-
 				room.broadcastPacketToRoom(String.valueOf(C_MedicalBox)
 						+ C_PacketSymbol + String.valueOf(C_MedicalBox_Destroy)
 						+ C_PacketSymbol + _packet.split(C_PacketSymbol)[2]);
