@@ -21,7 +21,19 @@ public class TreasureInstance {
 
 		return false;*/
 	}
-
+	
+	public String getTreasurePacket(){
+		String _packet = "";
+		
+		if(_wrPcOwner instanceof HunterInstance){
+			_packet = "1," + ((HunterInstance)_wrPcOwner).getAccountName();
+		}else {
+			_packet = "0,0";
+		}
+		
+		return _packet;
+	}
+	
 	// Init Belonger must be Guardian
 	public TreasureInstance(GuardianInstance _guardian) {
 		_wrPcOwner = _guardian;
