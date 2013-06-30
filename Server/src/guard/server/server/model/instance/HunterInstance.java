@@ -128,6 +128,9 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		// 死亡時 生命減少
 		if (IsDead()) {
 			_lives--;
+			if(this._staminaMaximize){
+				StaminaMaximizeCancel();
+			}
 
 			// 更新狀態
 			_room.broadcastPacketToRoom(String.valueOf(C_HunterState)
@@ -166,9 +169,12 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public void ApplyCostStamina(float _adjustValue) {
 		if (IsDead())
 			return;
+		if(this._staminaMaximize)//耐力藥水狀態下 不會增減
+			return;
 		if (_adjustValue > 0 && this._stamina == MAX_Stamina) {
 			return;
 		}
+		
 		float bufferStamina = this._stamina + _adjustValue;
 
 		this._stamina = MathUtil.Clamp(bufferStamina, MIN_Stamina, MAX_Stamina);
@@ -221,7 +227,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	// 狀態 - 耐力最大
 	private boolean _staminaMaximize = false;
 	private float _staminaMaximizeDuration, _staminaMaximizeRecordTime;
-
+	//最大化耐力
 	private void StaminaMaxmize(float _staminaMaximizeTime,
 			float _staminaMaximizeRecordTime) {
 		this._staminaMaximizeDuration = _staminaMaximizeTime;
@@ -232,6 +238,14 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 		_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
 				+ _pc.getAccountName() + C_PacketSymbol
 				+ String.valueOf(C_HunterState_Stamina) + ",2");
+	}
+	//耐力最大化失效
+	private void StaminaMaximizeCancel(){
+		_staminaMaximize = false;
+		_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
+				+ _pc.getAccountName() + C_PacketSymbol
+				+ String.valueOf(C_HunterState_Stamina) + ",-1");
+
 	}
 
 	// 隱形狀態
@@ -360,11 +374,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 				break;
 			}
 		} else if (gameTime - _staminaMaximizeRecordTime > _staminaMaximizeDuration) {
-			_staminaMaximize = false;
-			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
-					+ _pc.getAccountName() + C_PacketSymbol
-					+ String.valueOf(C_HunterState_Stamina) + ",-1");
-
+			StaminaMaximizeCancel();
 		}
 
 		if (_invisible) {
