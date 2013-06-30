@@ -118,10 +118,11 @@ public class GameInstance extends TimerTask {
 	public GuardianInstance getGuardian() {
 		return _guardian;
 	}
-	
-	//獵人逃脫flag
+
+	// 獵人逃脫flag
 	private boolean _escapeFlag = false;
-	public void SetEscapeFlag(){
+
+	public void SetEscapeFlag() {
 		_escapeFlag = true;
 	}
 
@@ -233,7 +234,7 @@ public class GameInstance extends TimerTask {
 	}
 
 	public boolean CheckMedicalBox(int _id) {
-
+		System.out.println(_id);
 		if (_allMedicalBoxID.contains((Object) _id)) {
 			_allMedicalBoxID.remove((Object) _id);// cast to object, because of
 													// overloading
@@ -835,9 +836,7 @@ public class GameInstance extends TimerTask {
 		if (_hunterList == null || _guardian == null) {
 			return;
 		}
-		
-		
-		
+
 		switch (_map.getGameMode()) {
 		case GameMap.GameMode_Cooperation:
 
@@ -854,10 +853,13 @@ public class GameInstance extends TimerTask {
 										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
 										+ C_PacketSymbol
 										+ String.valueOf(!_treasure
-												.IsOwner(_guardian) && _escapeFlag)//win flag
+												.IsOwner(_guardian)
+												&& _escapeFlag)// win flag
 										+ C_PacketSymbol
 										+ String.valueOf(_treasure
-												.IsOwner(_guardian)));//guardian is owner
+												.IsOwner(_guardian)));// guardian
+																		// is
+																		// owner
 			}
 
 			_guardian
@@ -871,10 +873,11 @@ public class GameInstance extends TimerTask {
 									+ C_PacketSymbol
 									+ String.valueOf(PlayerInstance.PlayerType_Guardian)
 									+ C_PacketSymbol
-									+ String.valueOf(!_escapeFlag)//win flag
+									+ String.valueOf(!_escapeFlag)// win flag
 									+ C_PacketSymbol
 									+ String.valueOf(_treasure
-											.IsOwner(_guardian)));//guardian is owner?
+											.IsOwner(_guardian)));// guardian is
+																	// owner?
 
 			break;
 		case GameMap.GameMode_Greedy:
@@ -892,10 +895,13 @@ public class GameInstance extends TimerTask {
 										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
 										+ C_PacketSymbol
 										+ String.valueOf(_treasure
-												.IsOwner(_hunterInst) && _escapeFlag)//win flag
+												.IsOwner(_hunterInst)
+												&& _escapeFlag)// win flag
 										+ C_PacketSymbol
 										+ String.valueOf(_treasure
-												.IsOwner(_guardian)));//guardian is owner?
+												.IsOwner(_guardian)));// guardian
+																		// is
+																		// owner?
 			}
 
 			_guardian
@@ -909,10 +915,11 @@ public class GameInstance extends TimerTask {
 									+ C_PacketSymbol
 									+ String.valueOf(PlayerInstance.PlayerType_Guardian)
 									+ C_PacketSymbol
-									+ String.valueOf(!_escapeFlag)//win flag
+									+ String.valueOf(!_escapeFlag)// win flag
 									+ C_PacketSymbol
 									+ String.valueOf(_treasure
-											.IsOwner(_guardian)));//guardian is owner?
+											.IsOwner(_guardian)));// guardian is
+																	// owner?
 
 			break;
 		}
