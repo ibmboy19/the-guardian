@@ -1,6 +1,8 @@
 package guard.server.server.model.instance;
 
 import static guard.server.server.clientpacket.C_Chat.C_Chat_ChatInRoomSystem;
+import static guard.server.server.clientpacket.C_GameOver.C_GameOver_Result;
+import static guard.server.server.clientpacket.C_GameOver.C_GameOver_ShowHero;
 import static guard.server.server.clientpacket.C_GameTimeAlert.C_GameTimeAlert_Over;
 import static guard.server.server.clientpacket.C_GameTimeAlert.C_GameTimeAlert_Start;
 import static guard.server.server.clientpacket.C_GuardianFire.C_GuardianFire_Destroy;
@@ -620,9 +622,14 @@ public class GameInstance extends TimerTask {
 		this._guardian.getActiveChar().SendClientPacket(
 				String.valueOf(C_RequestRemaingTime) + C_PacketSymbol
 						+ String.valueOf(getRemainingGameTime()));
-		for(HunterInstance _hunterInst : _hunterList){
-			if(!_hunterInst.IsSpawned()){
-				_hunterInst.getActiveChar().SendClientPacket(String.valueOf(C_SelectPlayerSpawnPoint)+C_PacketSymbol+String.valueOf(C_SelectPlayerSpawnPoint_Request));
+		for (HunterInstance _hunterInst : _hunterList) {
+			if (!_hunterInst.IsSpawned()) {
+				_hunterInst
+						.getActiveChar()
+						.SendClientPacket(
+								String.valueOf(C_SelectPlayerSpawnPoint)
+										+ C_PacketSymbol
+										+ String.valueOf(C_SelectPlayerSpawnPoint_Request));
 			}
 		}
 	}
@@ -831,6 +838,8 @@ public class GameInstance extends TimerTask {
 						.SendClientPacket(
 								String.valueOf(C_GameOver)
 										+ C_PacketSymbol
+										+ String.valueOf(C_GameOver_Result)
+										+ C_PacketSymbol
 										+ String.valueOf(_map.getGameMode())
 										+ C_PacketSymbol
 										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
@@ -846,6 +855,8 @@ public class GameInstance extends TimerTask {
 					.getActiveChar()
 					.SendClientPacket(
 							String.valueOf(C_GameOver)
+									+ C_PacketSymbol
+									+ String.valueOf(C_GameOver_Result)
 									+ C_PacketSymbol
 									+ String.valueOf(_map.getGameMode())
 									+ C_PacketSymbol
@@ -866,6 +877,8 @@ public class GameInstance extends TimerTask {
 						.SendClientPacket(
 								String.valueOf(C_GameOver)
 										+ C_PacketSymbol
+										+ String.valueOf(C_GameOver_Result)
+										+ C_PacketSymbol
 										+ String.valueOf(_map.getGameMode())
 										+ C_PacketSymbol
 										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
@@ -882,6 +895,8 @@ public class GameInstance extends TimerTask {
 					.SendClientPacket(
 							String.valueOf(C_GameOver)
 									+ C_PacketSymbol
+									+ String.valueOf(C_GameOver_Result)
+									+ C_PacketSymbol
 									+ String.valueOf(_map.getGameMode())
 									+ C_PacketSymbol
 									+ String.valueOf(PlayerInstance.PlayerType_Guardian)
@@ -894,6 +909,9 @@ public class GameInstance extends TimerTask {
 
 			break;
 		}
+		this.BroadcastPacketToRoom(String.valueOf(C_GameOver) + C_PacketSymbol
+				+ String.valueOf(C_GameOver_ShowHero) + C_PacketSymbol
+				+ _treasure.getTreasurePacket());
 
 	}
 
