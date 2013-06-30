@@ -48,9 +48,9 @@ public class C_ApplyDamage {
 				}
 				break;
 			case C_ApplyDamage_Stamina:
-				if (Float.valueOf(_data.split(",")[0]) == 1) {
+				if (Integer.valueOf(_data.split(",")[1]) == 1) {
 					hunter.ApplyCostStamina(Math.abs(Float.valueOf(Integer
-							.valueOf(_data.split(",")[1]))));
+							.valueOf(_data.split(",")[2]))));
 				} else {
 					hunter.ApplyCostStamina(-Math.abs(Float.valueOf(Integer
 							.valueOf(_data.split(",")[2]))));

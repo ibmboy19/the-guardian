@@ -118,6 +118,12 @@ public class GameInstance extends TimerTask {
 	public GuardianInstance getGuardian() {
 		return _guardian;
 	}
+	
+	//獵人逃脫flag
+	private boolean _escapeFlag = false;
+	public void SetEscapeFlag(){
+		_escapeFlag = true;
+	}
 
 	/** 檢查點 */
 	private Map<Integer, CheckPointInstance> _allCheckPoints = Maps
@@ -829,6 +835,9 @@ public class GameInstance extends TimerTask {
 		if (_hunterList == null || _guardian == null) {
 			return;
 		}
+		
+		
+		
 		switch (_map.getGameMode()) {
 		case GameMap.GameMode_Cooperation:
 
@@ -845,10 +854,10 @@ public class GameInstance extends TimerTask {
 										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
 										+ C_PacketSymbol
 										+ String.valueOf(!_treasure
-												.IsOwner(_guardian))
+												.IsOwner(_guardian) && _escapeFlag)//win flag
 										+ C_PacketSymbol
 										+ String.valueOf(_treasure
-												.IsOwner(_guardian)));
+												.IsOwner(_guardian)));//guardian is owner
 			}
 
 			_guardian
@@ -862,11 +871,10 @@ public class GameInstance extends TimerTask {
 									+ C_PacketSymbol
 									+ String.valueOf(PlayerInstance.PlayerType_Guardian)
 									+ C_PacketSymbol
-									+ String.valueOf(_treasure
-											.IsOwner(_guardian))
+									+ String.valueOf(!_escapeFlag)//win flag
 									+ C_PacketSymbol
 									+ String.valueOf(_treasure
-											.IsOwner(_guardian)));
+											.IsOwner(_guardian)));//guardian is owner?
 
 			break;
 		case GameMap.GameMode_Greedy:
@@ -884,10 +892,10 @@ public class GameInstance extends TimerTask {
 										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
 										+ C_PacketSymbol
 										+ String.valueOf(_treasure
-												.IsOwner(_hunterInst))
+												.IsOwner(_hunterInst) && _escapeFlag)//win flag
 										+ C_PacketSymbol
 										+ String.valueOf(_treasure
-												.IsOwner(_guardian)));
+												.IsOwner(_guardian)));//guardian is owner?
 			}
 
 			_guardian
@@ -901,11 +909,10 @@ public class GameInstance extends TimerTask {
 									+ C_PacketSymbol
 									+ String.valueOf(PlayerInstance.PlayerType_Guardian)
 									+ C_PacketSymbol
-									+ String.valueOf(_treasure
-											.IsOwner(_guardian))
+									+ String.valueOf(!_escapeFlag)//win flag
 									+ C_PacketSymbol
 									+ String.valueOf(_treasure
-											.IsOwner(_guardian)));
+											.IsOwner(_guardian)));//guardian is owner?
 
 			break;
 		}

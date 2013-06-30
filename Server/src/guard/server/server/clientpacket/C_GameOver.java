@@ -30,6 +30,7 @@ public class C_GameOver {
 		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
 
 		if (game.getTreasure().IsOwner(hunter)) {
+			game.SetEscapeFlag();
 			game.GameOver();
 		}
 
