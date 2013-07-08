@@ -8,7 +8,6 @@ import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_OtherLeav
 import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_PCLeave;
 import static guard.server.server.clientpacket.C_Logout.C_Logout_BackToLobby;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Ready;
-import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_JoinRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LeaveRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
@@ -16,6 +15,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_PacketSymbol;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Guardian;
 import static guard.server.server.model.instance.PlayerInstance.PlayerType_Hunter;
+import guard.server.server.clientpacket.C_NetDelay;
 import guard.server.server.model.instance.GameInstance;
 import guard.server.server.model.instance.PlayerInstance;
 import guard.server.server.utils.collections.Lists;
@@ -180,8 +180,9 @@ public class GameRoom {
 		}
 		_membersList.add(pc);
 		pc.setRoom(this);
+		
 		// TODO Send Join Room Packet
-		for (PlayerInstance member : getMembers()) {
+		for (PlayerInstance member : _membersList) {
 			if (pc != member) {
 				// TODO 通知其他人有玩家加入
 				_packet = String.valueOf(C_JoinRoom) + C_PacketSymbol
@@ -195,8 +196,9 @@ public class GameRoom {
 						+ String.valueOf(C_JoinRoom_PCJoin) + C_PacketSymbol
 						+ getRoomInfoPacket();
 			}
-			member.SendClientPacket(_packet);
+			member.SendClientPacket(_packet);		
 		}
+		
 	}
 
 	/**
