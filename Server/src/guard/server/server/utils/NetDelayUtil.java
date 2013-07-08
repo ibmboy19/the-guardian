@@ -6,13 +6,39 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class NetDelayUtil {
+public class NetDelayUtil extends Thread{
+	private ClientProcess pc = null;
+	private int result = 0;
+	
+	public NetDelayUtil(){
+		this.start();
+	}
+	
+	@Override
+	public void run() {
+		try {
+			result = netStatus(pc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		while(!this.isInterrupted()){
+			if(result != 0){
+				this.interrupt();
+			}
+		}
+	}
+	
+	public int getResult(){
+		return result;
+	}
+	
 	/**
 	 * 網路狀態偵測
 	 * 
 	 * @throws IOException
 	 */
-	public static int netStatus(ClientProcess pc) throws IOException {
+	private int netStatus(ClientProcess pc) throws IOException {
+		@SuppressWarnings("unused")
 		String lost = "", delay = "", str = "";
 		Process p = null;
 		int type = 0;
