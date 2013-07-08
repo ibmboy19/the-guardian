@@ -7,8 +7,6 @@ import guard.server.server.model.GameRoom;
 import guard.server.server.model.instance.PlayerInstance;
 import guard.server.server.utils.NetDelayUtil;
 
-import java.io.IOException;
-
 public class C_NetDelay {
 	public C_NetDelay(ClientProcess _client) {
 		PlayerInstance pc = _client.getActiveChar();
@@ -21,11 +19,15 @@ public class C_NetDelay {
 			return;
 
 		int delay = 0;
-		try {
-			delay = NetDelayUtil.netStatus(_client);
-		} catch (IOException e) {
-			e.printStackTrace();
+		NetDelayUtil delayutil = new NetDelayUtil();
+		while(!delayutil.isInterrupted()){
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+		delay = delayutil.getResult();
 		// TODO 傳送自己的Ping值給所有人	
 		room.broadcastPacketToRoom(
 				String.valueOf(C_NetDelay) + C_PacketSymbol
