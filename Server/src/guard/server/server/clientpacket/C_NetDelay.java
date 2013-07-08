@@ -26,7 +26,7 @@ public class C_NetDelay {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// TODO 傳送自己的Ping值給所有人		
+		// TODO 傳送自己的Ping值給所有人	
 		room.broadcastPacketToRoom(
 				String.valueOf(C_NetDelay) + C_PacketSymbol
 						+ pc.getAccountName() + C_PacketSymbol

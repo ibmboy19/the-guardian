@@ -21,7 +21,7 @@ public class NetDelayUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		BufferedReader buf = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		BufferedReader buf = new BufferedReader(new InputStreamReader(p.getInputStream(),"big5"));
 		buf.readLine();
 		if ((str = buf.readLine()) != null) {
 			if (str.contains("使用")) {
@@ -66,6 +66,8 @@ public class NetDelayUtil {
 			}
 
 		}
+		buf.close();
+		p.destroy();
 		return Integer.parseInt(delay);
 
 	}

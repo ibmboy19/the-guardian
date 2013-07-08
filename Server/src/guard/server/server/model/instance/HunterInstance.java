@@ -7,6 +7,7 @@ import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Hp;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Invisible;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Life;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stamina;
+import static guard.server.server.clientpacket.C_HunterState.C_HunterState_StaminaLockFlag;
 import static guard.server.server.clientpacket.C_Projectile.C_Projectile_Request;
 import static guard.server.server.clientpacket.C_Treasure.C_Treasure_TreasureReturn;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
@@ -285,11 +286,14 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					+ _pc.getAccountName() + C_PacketSymbol
 					+ String.valueOf(C_HunterState_Stamina) + ","
 					+ String.valueOf(_stamina));
-		} else {// 耐力見底
+		} else if (!_lockStamina) {// 耐力見底
 			_lockStamina = true;// 設置耐力用完的CD狀態
 			// auto switch run walk
 			_moveState = MoveState.Walk;// 強迫更新移動狀態成走路
 			_runOrWalk = false;//
+			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
+					+ _pc.getAccountName() + C_PacketSymbol
+					+ String.valueOf(C_HunterState_StaminaLockFlag) + "," + "1");
 		}
 	}
 
@@ -312,6 +316,11 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 			if (_lockStamina) {// 限制跑步狀態
 				if (_stamina >= .15f) {
 					_lockStamina = false;
+					_pc.SendClientPacket(String.valueOf(C_HunterState)
+							+ C_PacketSymbol + _pc.getAccountName()
+							+ C_PacketSymbol
+							+ String.valueOf(C_HunterState_StaminaLockFlag)
+							+ "," + "0");
 				}
 			}
 		}
