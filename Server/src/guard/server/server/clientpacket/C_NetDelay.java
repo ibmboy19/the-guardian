@@ -19,7 +19,7 @@ public class C_NetDelay {
 			return;
 
 		int delay = 0;
-		NetDelayUtil delayutil = new NetDelayUtil();
+		NetDelayUtil delayutil = new NetDelayUtil(_client);
 		while(!delayutil.isInterrupted()){
 			try {
 				Thread.sleep(50);
