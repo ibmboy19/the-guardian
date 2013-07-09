@@ -196,7 +196,8 @@ public class GameRoom {
 						+ String.valueOf(C_JoinRoom_PCJoin) + C_PacketSymbol
 						+ getRoomInfoPacket();
 			}
-			member.SendClientPacket(_packet);		
+			member.SendClientPacket(_packet);	
+			new C_NetDelay(member.getNetConnection());
 		}
 		
 	}
