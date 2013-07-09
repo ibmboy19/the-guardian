@@ -8,11 +8,13 @@ import java.io.InputStreamReader;
 
 public class NetDelayUtil extends Thread{
 	private ClientProcess pc = null;
-	private int result = 0;
+	private int result = -1;
 	
-	public NetDelayUtil(){
+	public NetDelayUtil(ClientProcess pc){
+		this.pc = pc;
 		this.start();
 	}
+	
 	
 	@Override
 	public void run() {
@@ -22,7 +24,7 @@ public class NetDelayUtil extends Thread{
 			e.printStackTrace();
 		}
 		while(!this.isInterrupted()){
-			if(result != 0){
+			if(result != -1){
 				this.interrupt();
 			}
 		}
