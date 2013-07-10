@@ -7,10 +7,11 @@ import guard.server.server.model.instance.HunterInstance;
 import guard.server.server.model.instance.PlayerInstance;
 
 public class C_GameOver {
-	
+
 	public static final int C_GameOver_Result = 0;
 	public static final int C_GameOver_ShowHero = 1;
-	
+	public static final int C_GameOver_Terminate = 2;
+
 	public C_GameOver(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();
 		if (pc == null)
