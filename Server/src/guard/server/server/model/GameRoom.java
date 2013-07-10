@@ -1,5 +1,6 @@
 package guard.server.server.model;
 
+import static guard.server.server.clientpacket.C_GameOver.C_GameOver_Terminate;
 import static guard.server.server.clientpacket.C_JoinRoom.C_JoinRoom_OtherJoin;
 import static guard.server.server.clientpacket.C_JoinRoom.C_JoinRoom_PCJoin;
 import static guard.server.server.clientpacket.C_JoinRoom.getJoinFailedPacket;
@@ -8,6 +9,7 @@ import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_OtherLeav
 import static guard.server.server.clientpacket.C_LeaveRoom.C_LeaveRoom_PCLeave;
 import static guard.server.server.clientpacket.C_Logout.C_Logout_BackToLobby;
 import static guard.server.server.clientpacket.C_RoomReady.C_RoomReady_Ready;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_JoinRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_LeaveRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
@@ -66,7 +68,7 @@ public class GameRoom {
 		/*
 		 * if (isVacancy()) {// 人數不滿，return return; }
 		 */
-		
+
 		if (_membersList.size() < 2)
 			return false;
 
@@ -180,7 +182,7 @@ public class GameRoom {
 		}
 		_membersList.add(pc);
 		pc.setRoom(this);
-		
+
 		// TODO Send Join Room Packet
 		for (PlayerInstance member : _membersList) {
 			if (pc != member) {
@@ -196,10 +198,10 @@ public class GameRoom {
 						+ String.valueOf(C_JoinRoom_PCJoin) + C_PacketSymbol
 						+ getRoomInfoPacket();
 			}
-			member.SendClientPacket(_packet);	
+			member.SendClientPacket(_packet);
 			new C_NetDelay(member.getNetConnection());
 		}
-		
+
 	}
 
 	/**
@@ -242,11 +244,11 @@ public class GameRoom {
 	public boolean isVacancy() {
 		return _membersList.size() < _maxPcCount;
 	}
-	
+
 	/**
 	 * 遊戲開始了嗎?
 	 * */
-	public boolean IsStartGame(){
+	public boolean IsStartGame() {
 		return this._game != null;
 	}
 
@@ -407,32 +409,79 @@ public class GameRoom {
 		public void run() {
 			while (!gameIsOver()) {
 				for (PlayerInstance pc : _membersList) {
-					if (pc.getNetConnection().get_csocket().isClosed()) {
-						if (pc.isInRoom()) {
+					if (pc == null) {
+						for (PlayerInstance _member : _membersList) {
+							if (pc == _member) {
+								continue;
+							} else if (_membersList.size() == 1) {
+								_member.SendClientPacket(String
+										.valueOf(C_GameOver)
+										+ C_PacketSymbol
+										+ String.valueOf(C_GameOver_Terminate));
+							}
+						}
+						breakup();
+					} else if (pc.isInRoom()) {
+						if (pc.getNetConnection() == null
+								|| pc.getNetConnection().get_csocket() == null
+								|| pc.getNetConnection().get_csocket()
+										.isClosed()) {
 							// TODO 斷線處理
 							if (pc.getRoom().getGame().IsGaming()) {
 
 								if (pc == _leader || pc.IsGuardian()) {
 									for (PlayerInstance _member : _membersList) {
+
+										_member.SendClientPacket(String
+												.valueOf(C_GameOver)
+												+ C_PacketSymbol
+												+ String.valueOf(C_GameOver_Terminate));
+
 										_member.SendClientPacket(String
 												.valueOf(C_Logout)
 												+ C_PacketSymbol
 												+ String.valueOf(C_Logout_BackToLobby)
 												+ C_PacketSymbol
-												+ pc.getAccountName());// _member.getRoom().getGame().Logout(_member,C_Logout_BackToLobby);
+												+ pc.getAccountName());
+										System.out.println("terminate");
 									}
 									breakup();
+								} else {
+									pc.getRoom().leaveRoom(pc);
 								}
-
 							} else {
 								pc.getRoom().leaveRoom(pc);
 							}
+							GuardWorld.getInstance().RemovePlayer(pc);
 						}
-						GuardWorld.getInstance().RemovePlayer(pc);
+
+						if ((pc.getRoom() == null
+								|| pc.getRoom().getGame() == null || pc
+								.getRoom().getGame().IsGaming())
+								&& _membersList.size() == 1) {
+							for (PlayerInstance _member : _membersList) {
+
+								_member.SendClientPacket(String
+										.valueOf(C_GameOver)
+										+ C_PacketSymbol
+										+ String.valueOf(C_GameOver_Terminate));
+
+								_member.SendClientPacket(String
+										.valueOf(C_Logout)
+										+ C_PacketSymbol
+										+ String.valueOf(C_Logout_BackToLobby)
+										+ C_PacketSymbol + pc.getAccountName());
+								System.out.println("terminate");
+							}
+							breakup();
+						}
+
 					}
 				}
 			}
-			GameOver();
+			_game.cancel();
+			connectionDetectThread.interrupt();
+			breakup();
 		}
 
 		private boolean gameIsOver() {

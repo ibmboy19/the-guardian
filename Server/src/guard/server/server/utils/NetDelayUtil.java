@@ -40,7 +40,6 @@ public class NetDelayUtil extends Thread {
 										+ C_PacketSymbol
 										+ String.valueOf(result));
 				this.interrupt();
-				this.interrupt();
 			}
 		}
 

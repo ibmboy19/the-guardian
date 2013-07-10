@@ -28,12 +28,13 @@ public class GuardWorld {
 	/**
 	 * 玩家相關
 	 */
-	public boolean CheckAccountExists(String _accountName){
-		if(_allPlayers.containsKey(_accountName)){
+	public boolean CheckAccountExists(String _accountName) {
+		if (_allPlayers.containsKey(_accountName)) {
 			return true;
 		}
 		return false;
 	}
+
 	public void StorePlayer(PlayerInstance pc) {
 		if (pc == null) {
 			throw new NullPointerException();
@@ -52,7 +53,8 @@ public class GuardWorld {
 
 	public Collection<PlayerInstance> getAllPlayers() {
 		Collection<PlayerInstance> vs = _allPlayerValues;
-		return (vs != null) ? vs : (_allPlayerValues = Collections.unmodifiableCollection(_allPlayers.values()));
+		return (vs != null) ? vs : (_allPlayerValues = Collections
+				.unmodifiableCollection(_allPlayers.values()));
 	}
 
 	public PlayerInstance getPlayer(String id) {
@@ -81,15 +83,17 @@ public class GuardWorld {
 
 	public Collection<GameRoom> getAllRooms() {
 		Collection<GameRoom> vs = _allRoomValues;
-		return (vs != null) ? vs : (_allRoomValues = Collections.unmodifiableCollection(_allRooms.values()));
+		return (vs != null) ? vs : (_allRoomValues = Collections
+				.unmodifiableCollection(_allRooms.values()));
 	}
 
 	public GameRoom getRoom(String id) {
 		return _allRooms.get(id);
 	}
-	public synchronized void GameOver(String id){
+
+	public synchronized void GameOver(String id) {
 		GameRoom room = getRoom(id);
-		if(room == null){			
+		if (room == null) {
 			return;
 		}
 		room.GameOver();
