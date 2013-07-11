@@ -644,6 +644,7 @@ public class GameInstance extends TimerTask {
 	// 遊戲時間超過，轉換到遊戲結束狀態
 	public void GameOver() {
 		gameState = GameState.GameOver;
+		GuardWorld.getInstance().getRoom(_hostName).GameOver();
 		gameTimeRecord = gameTime;
 		// TODO 傳送遊戲結束封包，等待計算中的勝利結果。
 	}
@@ -768,11 +769,8 @@ public class GameInstance extends TimerTask {
 			CheckAllAutoDestroyTrap();
 			break;
 		case GameOver:// 遊戲結束
-
-			// TODO 結束遊戲，傳送封包，自行銷毀實體。
-			GuardWorld.getInstance().GameOver(
-					GuardWorld.getInstance().getRoom(_hostName)
-							.get_membersList().get(0).getAccountName());
+			
+			//C_GameOver會自動處理遊戲結束，因此不做任何事情
 
 			break;
 		}
@@ -833,9 +831,11 @@ public class GameInstance extends TimerTask {
 	/** 計算遊戲結果 */
 	public void CalcGameResult() {
 		// TODO 計算勝利結果，傳送封包。
+		System.out.println("Calc GameOver Result Func");
 		if (_hunterList == null || _guardian == null) {
 			return;
 		}
+		System.out.println("Calc Game Over Result");
 
 		switch (_map.getGameMode()) {
 		case GameMap.GameMode_Cooperation:

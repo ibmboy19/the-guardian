@@ -33,6 +33,7 @@ public class C_GameOver {
 		if (game.getTreasure().IsOwner(hunter)) {
 			game.SetEscapeFlag();
 			game.GameOver();
+			System.out.println("GameOver");
 		}
 
 	}
