@@ -94,8 +94,10 @@ public class GuardWorld {
 	public synchronized void GameOver(String id) {
 		GameRoom room = getRoom(id);
 		if (room == null) {
+			System.out.println("Game Over But Room Is Null");
 			return;
 		}
+		
 		room.GameOver();
 	}
 
