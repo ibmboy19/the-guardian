@@ -591,20 +591,20 @@ public class GameInstance extends TimerTask {
 		return gameState == GameState.GameOver;
 	}
 
-	private void GameStartCountDown() {
+	private synchronized void GameStartCountDown() {
 		gameTimeRecord = Float.NEGATIVE_INFINITY;
 		gameState = GameState.CountDown;
 	}
 
-	private void GameLoading() {
+	private synchronized void GameLoading() {
 		gameTimeRecord = gameTime;
 		gameState = GameState.Loading;
 	}
 
 	// 載入完成呼叫函式,進入遊戲，倒數N秒後開始
-	private void GameStartReady() {
+	private synchronized void GameStartReady() {
 		gameTimeRecord = gameTime;
-		gameState = GameState.GameReady;
+		
 		gameCountDown = (int) gameStartReadyTime;
 		// TODO 廣播開始遊戲封包
 		for (PlayerInstance members : GuardWorld.getInstance()
@@ -616,12 +616,14 @@ public class GameInstance extends TimerTask {
 		this._guardian.getActiveChar().SendClientPacket(
 				String.valueOf(C_RequestRemaingTime) + C_PacketSymbol
 						+ String.valueOf(getRemainingGameTime()));
+		
+		gameState = GameState.GameReady;
 	}
 
 	// 倒數完畢 開始遊戲
-	private void GameStart() {
+	private synchronized void GameStart() {
 		gameTimeRecord = gameTime;
-		gameState = GameState.GameStart;
+		
 		gameCountDown = (int) _map.getGamePlayTime();
 		// TODO 傳送遊戲開始封包
 		BroadcastPacketToRoom(String.valueOf(C_GameStart));
@@ -639,10 +641,12 @@ public class GameInstance extends TimerTask {
 										+ String.valueOf(C_SelectPlayerSpawnPoint_Request));
 			}
 		}
+		
+		gameState = GameState.GameStart;
 	}
 
 	// 遊戲時間超過，轉換到遊戲結束狀態
-	public void GameOver() {
+	public synchronized void GameOver() {
 		gameState = GameState.GameOver;
 		GuardWorld.getInstance().getRoom(_hostName).GameOver();
 		gameTimeRecord = gameTime;
