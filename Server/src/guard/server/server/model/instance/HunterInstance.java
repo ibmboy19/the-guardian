@@ -7,7 +7,6 @@ import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Hp;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Invisible;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Life;
 import static guard.server.server.clientpacket.C_HunterState.C_HunterState_Stamina;
-import static guard.server.server.clientpacket.C_HunterState.C_HunterState_StaminaLockFlag;
 import static guard.server.server.clientpacket.C_Projectile.C_Projectile_Request;
 import static guard.server.server.clientpacket.C_Treasure.C_Treasure_TreasureReturn;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
@@ -200,13 +199,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	private MoveState _moveState = MoveState.Idle;
 
 	// 切換移動方式
-	private void SwitchRunWalk(boolean _runwalkState) {
-		if (_lockStamina) {
-			if (_runOrWalk) {
-				_runOrWalk = false;
-			}
-			return;
-		}
+	private void SwitchRunWalk(boolean _runwalkState) {		
 		if (_runOrWalk != _runwalkState) {
 			this._runOrWalk = _runwalkState;
 		}
@@ -216,7 +209,7 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	public void UpdateMoveState(int _fb, int _lr, boolean _runwalkState) {
 		if (_fb == 0 && _lr == 0) {
 			_moveState = MoveState.Idle;
-		} else if (_runOrWalk && !_lockStamina) {
+		} else if (_runOrWalk /*&& !_lockStamina*/) {
 			_moveState = MoveState.Run;
 		} else {
 			_moveState = MoveState.Walk;
@@ -229,8 +222,6 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 	private float _stamina = MAX_Stamina;
 	private boolean _staminaConsumeFlag;
 	private float _staminaConsumeTime;
-	// 鎖耐力
-	private boolean _lockStamina = false;
 	// 狀態 - 耐力最大
 	private boolean _staminaMaximize = false;
 	private float _staminaMaximizeDuration, _staminaMaximizeRecordTime;
@@ -286,14 +277,10 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					+ _pc.getAccountName() + C_PacketSymbol
 					+ String.valueOf(C_HunterState_Stamina) + ","
 					+ String.valueOf(_stamina));
-		} else if (!_lockStamina) {// 耐力見底
-			_lockStamina = true;// 設置耐力用完的CD狀態
+		} else {
 			// auto switch run walk
 			_moveState = MoveState.Walk;// 強迫更新移動狀態成走路
-			_runOrWalk = false;//
-			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
-					+ _pc.getAccountName() + C_PacketSymbol
-					+ String.valueOf(C_HunterState_StaminaLockFlag) + "," + "1");
+			_runOrWalk = false;//			
 		}
 	}
 
@@ -308,21 +295,11 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 					+ _room.getMap().getStaminaRecoveryValue(), MIN_Stamina,
 					MAX_Stamina);
 
-			// Send Packet
+			// Send Packet - update Stamina
 			_pc.SendClientPacket(String.valueOf(C_HunterState) + C_PacketSymbol
 					+ _pc.getAccountName() + C_PacketSymbol
 					+ String.valueOf(C_HunterState_Stamina) + ","
-					+ String.valueOf(_stamina));
-			if (_lockStamina) {// 限制跑步狀態
-				if (_stamina >= .15f) {
-					_lockStamina = false;
-					_pc.SendClientPacket(String.valueOf(C_HunterState)
-							+ C_PacketSymbol + _pc.getAccountName()
-							+ C_PacketSymbol
-							+ String.valueOf(C_HunterState_StaminaLockFlag)
-							+ "," + "0");
-				}
-			}
+					+ String.valueOf(_stamina));			
 		}
 	}
 
