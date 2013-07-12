@@ -7,7 +7,6 @@ public class C_HunterState {
 	public static final int C_HunterState_Hp = 1;
 	public static final int C_HunterState_Stamina = 2;
 	public static final int C_HunterState_Invisible = 3;
-	public static final int C_HunterState_StaminaLockFlag = 4;
 
 	public C_HunterState(ClientProcess _client, String _packet) {
 
