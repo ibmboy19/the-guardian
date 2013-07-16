@@ -7,6 +7,7 @@ import guard.server.server.Account;
 import guard.server.server.ClientProcess;
 import guard.server.server.model.GuardWorld;
 import guard.server.server.model.instance.PlayerInstance;
+import guard.server.server.utils.LogRecorder;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -15,16 +16,13 @@ import java.security.NoSuchAlgorithmException;
  * 處理C_Login封包
  */
 public class C_Login {
-	public C_Login(ClientProcess _client, String packet) throws IOException,
-			NoSuchAlgorithmException {
+	public C_Login(ClientProcess _client, String packet) throws IOException, NoSuchAlgorithmException {
 		// 從 CLIENT 取得帳號
-
 		String accountName = packet.split(C_PacketSymbol)[1];// id
 
 		String ip = _client.getIp();
 		if (GuardWorld.getInstance().CheckAccountExists(accountName)) {
 			_client.SendClientPacket(C_Login + C_PacketSymbol + "false");
-
 			return;
 		}
 		Account account = Account.create(accountName, ip);
@@ -43,10 +41,12 @@ public class C_Login {
 
 			GuardWorld.getInstance().StorePlayer(pc);
 
-			pc.SendClientPacket(C_Login + C_PacketSymbol + "true"
-					+ C_PacketSymbol + account.getName());
+			pc.SendClientPacket(C_Login + C_PacketSymbol + "true" + C_PacketSymbol + account.getName());
 
 			System.out.format("帳號: %s 已經登入\n", accountName);
+			
+			/** 寫入紀錄*/
+			LogRecorder.writePlayerLog(_client);
 		} catch (Exception e) {
 			e.getStackTrace();
 			return;
