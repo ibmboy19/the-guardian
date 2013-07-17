@@ -1,6 +1,6 @@
 package guard.server.server.clientpacket;
 
-import static guard.server.server.clientpacket.ClientOpcodes.*;
+import static guard.server.server.clientpacket.ClientOpcodes.C_ApplyDamage;
 import static guard.server.server.clientpacket.ClientOpcodes.C_ArriveCheckPoint;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Chat;
 import static guard.server.server.clientpacket.ClientOpcodes.C_CheckGameActivePlayer;
@@ -8,6 +8,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_CreateRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameOver;
 import static guard.server.server.clientpacket.ClientOpcodes.C_GameStart;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Gold;
+import static guard.server.server.clientpacket.ClientOpcodes.C_GuardianFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_HunterInventory;
 import static guard.server.server.clientpacket.ClientOpcodes.C_JoinRoom;
@@ -16,6 +17,7 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_LoadMapDone;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Login;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Logout;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MedicalBox;
+import static guard.server.server.clientpacket.ClientOpcodes.C_MonsterFire;
 import static guard.server.server.clientpacket.ClientOpcodes.C_MoveState;
 import static guard.server.server.clientpacket.ClientOpcodes.C_NetDelay;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Portal;
@@ -25,10 +27,11 @@ import static guard.server.server.clientpacket.ClientOpcodes.C_RefreshRoom;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RequestRemaingTime;
 import static guard.server.server.clientpacket.ClientOpcodes.C_RoomReady;
 import static guard.server.server.clientpacket.ClientOpcodes.C_SelectPlayerSpawnPoint;
-import static guard.server.server.clientpacket.ClientOpcodes.C_Spawn;
+import static guard.server.server.clientpacket.ClientOpcodes.C_SwapPosition;
 import static guard.server.server.clientpacket.ClientOpcodes.C_SwitchPlayerType;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Trap;
 import static guard.server.server.clientpacket.ClientOpcodes.C_Treasure;
+import static guard.server.server.clientpacket.ClientOpcodes.C_UpgradeObject;
 import guard.server.server.ClientProcess;
 
 import java.net.SocketException;
@@ -122,9 +125,6 @@ public class ClientPacketHandler {
 				break;
 			case C_Treasure:
 				new C_Treasure(_client, packet);
-				break;
-			case C_Spawn:
-				new C_Spawn(_client, packet);
 				break;
 			case C_MedicalBox:
 				new C_MedicalBox(_client, packet);

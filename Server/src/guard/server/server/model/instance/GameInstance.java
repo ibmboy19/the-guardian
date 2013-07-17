@@ -210,14 +210,6 @@ public class GameInstance extends TimerTask {
 		}
 	}
 
-	public void EnableFinalGuardian() {
-
-		// TODO Setup Monster Data
-
-		// TODO Send Packet
-
-	}
-
 	/** 醫藥箱 */
 	private List<Integer> _allMedicalBoxID = Lists.newList();
 
@@ -856,9 +848,7 @@ public class GameInstance extends TimerTask {
 										+ C_PacketSymbol
 										+ String.valueOf(PlayerInstance.PlayerType_Hunter)
 										+ C_PacketSymbol
-										+ String.valueOf(!_treasure
-												.IsOwner(_guardian)
-												&& _escapeFlag)// win flag
+										+ String.valueOf(_escapeFlag)// win flag
 										+ C_PacketSymbol
 										+ String.valueOf(_treasure
 												.IsOwner(_guardian)));// guardian
@@ -902,8 +892,7 @@ public class GameInstance extends TimerTask {
 												.IsOwner(_hunterInst)
 												&& _escapeFlag)// win flag
 										+ C_PacketSymbol
-										+ String.valueOf(_treasure
-												.IsOwner(_guardian)));// guardian
+										+ String.valueOf(!_escapeFlag ));// guardian
 																		// is
 																		// owner?
 			}
