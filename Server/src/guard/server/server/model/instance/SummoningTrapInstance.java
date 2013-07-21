@@ -3,14 +3,15 @@ package guard.server.server.model.instance;
 public class SummoningTrapInstance extends TrapInstance {
 
 	private int _currentHp, _maxHp;
+	public int getCurrentHp(){return _currentHp;}
 	
-	/**
-	 * @return _currentHp == 0?
-	 * */
-	public boolean ApplyDamage(int _dmg){
+	
+	public void ApplyDamage(int _dmg){
 		_currentHp -= _dmg;
 		_currentHp = Math.max(_currentHp, 0);
-		
+	}
+	
+	public boolean IsDead(){
 		return _currentHp == 0;
 	}
 	

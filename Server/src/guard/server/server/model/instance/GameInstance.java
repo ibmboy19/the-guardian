@@ -100,7 +100,8 @@ public class GameInstance extends TimerTask {
 
 	/** 玩家部分 */
 	private List<HunterInstance> _hunterList = Lists.newList();
-	public int getHunterCount(){
+
+	public int getHunterCount() {
 		return _hunterList.size();
 	}
 
@@ -395,23 +396,27 @@ public class GameInstance extends TimerTask {
 		if (_trap == null)
 			return;
 		if (_trap instanceof SummoningTrapInstance) {
+			SummoningTrapInstance _strap = (SummoningTrapInstance) _trap;
+			
+			if(_strap.IsDead())return;
+			
+			_strap.ApplyDamage(_map.getBulletDamageValue());
 
-			// TODO Send Packet Hit Trap
-			BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
-					+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
-					+ String.valueOf(_slot) + C_PacketSymbol
-					+ String.valueOf(_key));
+			if (_strap.IsDead()){
+				if(_strap.SetupAutoDestroy(gameTime)){
+					// TODO Send Packet 陷阱關閉
 
-			if (((SummoningTrapInstance) _trap).ApplyDamage(_map
-					.getBulletDamageValue())
-					&& _trap.SetupAutoDestroy(gameTime)) {
-				// TODO Send Packet 陷阱關閉
-
+					BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
+							+ String.valueOf(C_Trap_Disable) + C_PacketSymbol
+							+ String.valueOf(_slot) + C_PacketSymbol
+							+ String.valueOf(_key));
+				}
+			}else {
+				// TODO Send Packet Hit Trap
 				BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
-						+ String.valueOf(C_Trap_Disable) + C_PacketSymbol
+						+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
 						+ String.valueOf(_slot) + C_PacketSymbol
 						+ String.valueOf(_key));
-
 			}
 		}
 	}
@@ -423,23 +428,27 @@ public class GameInstance extends TimerTask {
 			return;
 
 		if (_trap instanceof SummoningTrapInstance) {
+			SummoningTrapInstance _strap = (SummoningTrapInstance) _trap;
 
-			// TODO Send Packet Hit Trap
-			BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
-					+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
-					+ String.valueOf(_slot) + C_PacketSymbol
-					+ String.valueOf(_key));
+			if(_strap.IsDead())return;
+			
+			_strap.ApplyDamage(_map.getBulletDamageValue());
 
-			if (((SummoningTrapInstance) _trap).ApplyDamage(_map
-					.getBulletDamageValue())
-					&& _trap.SetupAutoDestroy(gameTime)) {
-				// TODO Send Packet 陷阱關閉
+			if (_strap.IsDead()){
+				if(_strap.SetupAutoDestroy(gameTime)){
+					// TODO Send Packet 陷阱關閉
 
+					BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
+							+ String.valueOf(C_Trap_Disable) + C_PacketSymbol
+							+ String.valueOf(_slot) + C_PacketSymbol
+							+ String.valueOf(_key));
+				}
+			}else {
+				// TODO Send Packet Hit Trap
 				BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
-						+ String.valueOf(C_Trap_Disable) + C_PacketSymbol
+						+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
 						+ String.valueOf(_slot) + C_PacketSymbol
 						+ String.valueOf(_key));
-
 			}
 		}
 
