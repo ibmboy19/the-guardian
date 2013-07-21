@@ -3,7 +3,6 @@ package guard.server.server.model;
 import guard.server.server.model.instance.TrapInstance;
 import guard.server.server.utils.collections.Maps;
 
-import java.util.Collection;
 import java.util.Map;
 
 public class TrapSlot {
