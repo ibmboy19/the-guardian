@@ -100,6 +100,9 @@ public class GameInstance extends TimerTask {
 
 	/** 玩家部分 */
 	private List<HunterInstance> _hunterList = Lists.newList();
+	public int getHunterCount(){
+		return _hunterList.size();
+	}
 
 	public void DetecteGameIsOver() {
 		boolean _isAllDead = true;
@@ -596,7 +599,7 @@ public class GameInstance extends TimerTask {
 	// 載入完成呼叫函式,進入遊戲，倒數N秒後開始
 	private synchronized void GameStartReady() {
 		gameTimeRecord = gameTime;
-		
+
 		gameCountDown = (int) gameStartReadyTime;
 		// TODO 廣播開始遊戲封包
 		for (PlayerInstance members : GuardWorld.getInstance()
@@ -608,14 +611,14 @@ public class GameInstance extends TimerTask {
 		this._guardian.getActiveChar().SendClientPacket(
 				String.valueOf(C_RequestRemaingTime) + C_PacketSymbol
 						+ String.valueOf(getRemainingGameTime()));
-		
+
 		gameState = GameState.GameReady;
 	}
 
 	// 倒數完畢 開始遊戲
 	private synchronized void GameStart() {
 		gameTimeRecord = gameTime;
-		
+
 		gameCountDown = (int) _map.getGamePlayTime();
 		// TODO 傳送遊戲開始封包
 		BroadcastPacketToRoom(String.valueOf(C_GameStart));
@@ -633,7 +636,7 @@ public class GameInstance extends TimerTask {
 										+ String.valueOf(C_SelectPlayerSpawnPoint_Request));
 			}
 		}
-		
+
 		gameState = GameState.GameStart;
 	}
 
@@ -765,8 +768,8 @@ public class GameInstance extends TimerTask {
 			CheckAllAutoDestroyTrap();
 			break;
 		case GameOver:// 遊戲結束
-			
-			//C_GameOver會自動處理遊戲結束，因此不做任何事情
+
+			// C_GameOver會自動處理遊戲結束，因此不做任何事情
 
 			break;
 		}
@@ -892,7 +895,7 @@ public class GameInstance extends TimerTask {
 												.IsOwner(_hunterInst)
 												&& _escapeFlag)// win flag
 										+ C_PacketSymbol
-										+ String.valueOf(!_escapeFlag ));// guardian
+										+ String.valueOf(!_escapeFlag));// guardian
 																		// is
 																		// owner?
 			}

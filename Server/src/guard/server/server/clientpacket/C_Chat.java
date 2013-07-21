@@ -19,7 +19,7 @@ public class C_Chat {
 	public C_Chat(ClientProcess _client, String _packet) {
 		PlayerInstance pc = _client.getActiveChar();
 
-		switch(Integer.valueOf(_packet.split(C_PacketSymbol)[1])){
+		switch (Integer.valueOf(_packet.split(C_PacketSymbol)[1])) {
 		case C_Chat_ChatInRoomNormal:
 		case C_Chat_ChatInRoomSystem:
 		case C_Chat_ChatInGame:

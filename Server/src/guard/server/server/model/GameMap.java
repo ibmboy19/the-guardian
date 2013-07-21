@@ -1,8 +1,8 @@
 package guard.server.server.model;
 
 import guard.server.server.model.GameProps.HunterItem;
-import guard.server.server.model.GameProps.Item;
 import guard.server.server.model.GameProps.Trap.Trap;
+import guard.server.server.model.instance.GameInstance;
 import guard.server.server.utils.collections.Lists;
 
 import java.util.List;
@@ -119,9 +119,12 @@ public class GameMap {
 	// 守護神獎勵
 	private final int _guardianReward;
 
-	public int getGuardianReward() {
-		return _guardianReward;
+	public int getGuardianReward(GameInstance _game) {
+		return (int) (_guardianReward*_guardianRewardBonus[_game.getHunterCount()-1]);
 	}
+	
+	//
+	private final float[] _guardianRewardBonus = {1.0f,1.7f,2.5f};
 
 	// 守護神獎勵間隔
 	private final float _guardianRewardInterval;
