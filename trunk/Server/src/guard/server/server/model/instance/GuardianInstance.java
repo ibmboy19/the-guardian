@@ -45,7 +45,7 @@ public class GuardianInstance extends WickedRoadPlayerInstance {
 
 	/** 黃金獎勵 - 定期 - guardian only */
 	public void RewardGold() {
-		_gold += _room.getMap().getGuardianReward();
+		_gold += _room.getMap().getGuardianReward(_room.getGame());
 		_pc.SendClientPacket(C_Gold + C_PacketSymbol
 				+ String.valueOf(C_Gold_Normal) + C_PacketSymbol
 				+ String.valueOf(getGold()));
