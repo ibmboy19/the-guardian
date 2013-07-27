@@ -329,7 +329,7 @@ public class GameRoom {
 		if (isLeader(pc)) {
 			// 如果是房主離開，就解散
 			breakup();
-		} else if (pc.IsGuardian()) {
+		} else if (pc.IsGuardian() && getGame().IsGaming()) {
 			breakup();
 		} else {
 			leaveMenber(pc);
@@ -455,10 +455,9 @@ public class GameRoom {
 							GuardWorld.getInstance().RemovePlayer(pc);
 						}
 
-						if ((pc.getRoom() == null
-								|| pc.getRoom().getGame() == null || pc
-								.getRoom().getGame().IsGaming())
-								&& _membersList.size() == 1) {
+						if ((pc.getRoom() == null || pc.getRoom().getGame() == null)
+								|| (pc.getRoom().getGame().IsGaming() && _membersList
+										.size() == 1)) {
 							for (PlayerInstance _member : _membersList) {
 
 								_member.SendClientPacket(String
