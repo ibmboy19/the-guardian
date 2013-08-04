@@ -170,10 +170,10 @@ public class C_CreateRoom {
 		// TODO SERVER -> CLIENT 確認封包 (ClientOpcodes.C_CreateRoom)
 
 		leader.SendClientPacket(_packet);
-		if(leader.getNetConnection() == null){
+		if (leader.getNetConnection() == null) {
 			System.out.println("leader con null");
 		}
-			
+
 		new C_NetDelay(leader.getNetConnection());
 	}
 }

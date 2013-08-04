@@ -6,20 +6,6 @@ public class TreasureInstance {
 
 	public boolean IsOwner(WickedRoadPlayerInstance _wrPcOwner) {
 		return this._wrPcOwner == _wrPcOwner;
-		/*if (this._wrPcOwner instanceof GuardianInstance) {
-			if (_wrPcOwner instanceof GuardianInstance) {
-				return true;
-			}
-		}
-
-		if (this._wrPcOwner instanceof HunterInstance) {
-			if (_wrPcOwner instanceof HunterInstance) {
-				return ((HunterInstance) (this._wrPcOwner)).getAccountName() == ((HunterInstance) (_wrPcOwner))
-						.getAccountName();
-			}
-		}
-
-		return false;*/
 	}
 	
 	public String getTreasurePacket(){

@@ -1,7 +1,5 @@
 package guard.server.server.model.instance;
 
-import guard.server.server.model.instance.TrapInstance.TrapState;
-
 public class DetonatedTrapInstance extends TrapInstance {
 
 	private int _dmgHP;

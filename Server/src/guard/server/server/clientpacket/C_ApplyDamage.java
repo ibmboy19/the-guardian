@@ -28,8 +28,7 @@ public class C_ApplyDamage {
 		if (pc.IsGuardian())
 			return;
 		HunterInstance hunter = (HunterInstance) pc.getWRPlayerInstance();
-		// type,p/n,dmg_hp; type,p/n,dmg_stamina
-		// System.out.println(_packet);
+
 		String _applyData = _packet.split(C_PacketSymbol)[1];
 		for (String _data : _applyData.split(";")) {
 			switch (Integer.valueOf(_data.split(",")[0])) {
@@ -53,7 +52,6 @@ public class C_ApplyDamage {
 					hunter.ApplyCostStamina(Math.abs(Float.valueOf(_data
 							.split(",")[2])));
 				} else {
-					System.out.println("check5");
 					hunter.ApplyCostStamina(-Math.abs(Float.valueOf(_data
 							.split(",")[2])));
 				}

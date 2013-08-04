@@ -79,7 +79,7 @@ public class GameRoom {
 		}
 		if (_isRoomReady) {
 			LockRoom();
-			// System.out.println("房間準備開始...");
+			
 			/**
 			 * TODO 分配Guardian與Hunter Step1 : 計算Guardian數量 Step2 :
 			 * 若Guardian數量不為1，計算。否則直接回傳 *
@@ -160,7 +160,7 @@ public class GameRoom {
 		_membersList.add(_leader);
 		_leader.setRoom(this);
 		connectionDetectThread.start();
-		// System.out.println("創造一間" + _maxPcCount + "人的房間");
+		
 	}
 
 	/**
@@ -330,7 +330,9 @@ public class GameRoom {
 			// 如果是房主離開，就解散
 			breakup();
 		} else if (pc.IsGuardian() && getGame().IsGaming()) {
+			
 			breakup();
+			
 		} else {
 			leaveMenber(pc);
 			// TODO 離房的封包 - 通知剩下的玩家
@@ -420,7 +422,9 @@ public class GameRoom {
 										+ String.valueOf(C_GameOver_Terminate));
 							}
 						}
-						breakup();
+											
+						if(getLeader() == pc)
+							breakup();
 					} else if (pc.isInRoom()) {
 						if (pc.getNetConnection() == null
 								|| pc.getNetConnection().get_csocket() == null
@@ -455,8 +459,7 @@ public class GameRoom {
 							GuardWorld.getInstance().RemovePlayer(pc);
 						}
 
-						if ((pc.getRoom() == null || pc.getRoom().getGame() == null)
-								|| (pc.getRoom().getGame().IsGaming() && _membersList
+						if ((pc.getRoom().getGame().IsGaming() && _membersList
 										.size() == 1)) {
 							for (PlayerInstance _member : _membersList) {
 
@@ -472,6 +475,7 @@ public class GameRoom {
 										+ C_PacketSymbol + pc.getAccountName());
 								System.out.println("terminate");
 							}
+							
 							breakup();
 						}
 
