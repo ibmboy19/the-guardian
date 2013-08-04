@@ -317,18 +317,18 @@ public class HunterInstance extends WickedRoadPlayerInstance {
 
 		// 空間不足
 		if (_hunterInventory.size() >= InventorySlotCount) {
-			// System.out.println("空間不足");
+			
 			return;
 
 		}
 		// 持有金不足
 		if (_room.getMap().getItem(_itemToBuyID).getPrice() > _gold) {
-			// System.out.println("金錢不足");
+			
 			return;
 		}
 		// 該格已有物品
 		if (_hunterInventory.containsKey(_slotKey)) {
-			// System.out.println("已有物品");
+			
 			return;
 		}
 		// 購買物品成功

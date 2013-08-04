@@ -62,7 +62,7 @@ public class C_HunterFire {
 				}
 				// 沒有該ID子彈
 				if ((_bullet = game.getHunterBullets(_packet
-						.split(C_PacketSymbol)[3])) == null) {
+						.split(C_PacketSymbol)[4])) == null) {
 					return;
 				}
 				// 已擊中過
@@ -70,11 +70,20 @@ public class C_HunterFire {
 					return;
 				}
 				System.out.println("hit player");
-				_bullet.Hit(hunter,
+				//打到的對象 hunter
+				PlayerInstance targetPC = GuardWorld.getInstance().getPlayer(_packet.split(C_PacketSymbol)[3]);
+				
+				if(targetPC == null || targetPC.IsGuardian()){
+					return;
+				}
+				
+				HunterInstance targetHunter = (HunterInstance)targetPC.getWRPlayerInstance();
+				
+				_bullet.Hit(targetHunter,
 						game.getMap().getBulletDamageValue() > 0 ? -game
 								.getMap().getBulletDamageValue() : game
 								.getMap().getBulletDamageValue());
-				if (hunter.IsDead()) {
+				if (targetHunter.IsDead()) {
 					PlayerInstance _bulletOwner = GuardWorld.getInstance()
 							.getPlayer(_bullet.getOwner());
 					if (_bulletOwner.IsHunter()) {

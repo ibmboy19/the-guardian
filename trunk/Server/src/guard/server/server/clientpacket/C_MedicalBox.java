@@ -32,7 +32,7 @@ public class C_MedicalBox {
 
 		switch (Integer.valueOf(_packet.split(C_PacketSymbol)[1])) {
 		case C_MedicalBox_Init:
-			// System.out.println(_packet);
+			
 			game.InitMedicalBox(_packet.split(C_PacketSymbol)[2]);
 			// boreadcast and spawn Medical Box
 			room.broadcastPacketToRoom(_packet);

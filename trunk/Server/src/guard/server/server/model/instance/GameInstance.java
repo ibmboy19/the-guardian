@@ -220,17 +220,12 @@ public class GameInstance extends TimerTask {
 	public void InitMedicalBox(String _idList) {
 		for (String _id : _idList.split(";")) {
 			_allMedicalBoxID.add(Integer.valueOf(_id.split("@")[0]));
-			System.out.println("init box id = " + _id.split("@")[0]);
-		}
-		PrintMedicalCount();
-	}
 
-	public void PrintMedicalCount() {
-		System.out.println("init medical box" + _allMedicalBoxID.size());
+		}
 	}
 
 	public boolean CheckMedicalBox(int _id) {
-		System.out.println(_id);
+
 		if (_allMedicalBoxID.contains((Object) _id)) {
 			_allMedicalBoxID.remove((Object) _id);// cast to object, because of
 													// overloading
@@ -255,17 +250,17 @@ public class GameInstance extends TimerTask {
 		int _slot = Integer.valueOf(_packet.split(C_PacketSymbol)[2]);
 		int _key = Integer.valueOf(_packet.split(C_PacketSymbol)[3]);
 		int _trapID = Integer.valueOf(_packet.split(C_PacketSymbol)[4]);
-		// System.out.println("Spawn Trap "+_trapID);
+
 		if (!_allTrapList.containsKey(_slot)) {
 			_allTrapList.put(_slot, new TrapSlot());
-			// System.out.println("no slot");
+
 		}
 		if (_allTrapList.get(_slot).CheckSlot(_key)) {
-			// System.out.println("no key");
+
 			return;
 		}
 		if (_map.getTrap(_trapID) == null) {
-			// System.out.println("trap not found");
+
 			return;
 		}
 		boolean _isBuild = false;
@@ -346,7 +341,6 @@ public class GameInstance extends TimerTask {
 
 		if (_trap.IsAutoDestroy()) {
 			if (_trap instanceof DetonatedTrapInstance) {
-				// System.out.println("Apply Hunter HP");
 
 				// Calc Guardian Gold
 				int _damageValue = _hunter
@@ -397,21 +391,22 @@ public class GameInstance extends TimerTask {
 			return;
 		if (_trap instanceof SummoningTrapInstance) {
 			SummoningTrapInstance _strap = (SummoningTrapInstance) _trap;
-			
-			if(_strap.IsDead())return;
-			
+
+			if (_strap.IsDead())
+				return;
+
 			_strap.ApplyDamage(_map.getBulletDamageValue());
 
-			if (_strap.IsDead()){
-				if(_strap.SetupAutoDestroy(gameTime)){
+			if (_strap.IsDead()) {
+				if (_strap.SetupAutoDestroy(gameTime)) {
 					// TODO Send Packet 陷阱關閉
 
-					BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
-							+ String.valueOf(C_Trap_Disable) + C_PacketSymbol
-							+ String.valueOf(_slot) + C_PacketSymbol
-							+ String.valueOf(_key));
+					BroadcastPacketToRoom(String.valueOf(C_Trap)
+							+ C_PacketSymbol + String.valueOf(C_Trap_Disable)
+							+ C_PacketSymbol + String.valueOf(_slot)
+							+ C_PacketSymbol + String.valueOf(_key));
 				}
-			}else {
+			} else {
 				// TODO Send Packet Hit Trap
 				BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
 						+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
@@ -430,20 +425,21 @@ public class GameInstance extends TimerTask {
 		if (_trap instanceof SummoningTrapInstance) {
 			SummoningTrapInstance _strap = (SummoningTrapInstance) _trap;
 
-			if(_strap.IsDead())return;
-			
+			if (_strap.IsDead())
+				return;
+
 			_strap.ApplyDamage(_map.getBulletDamageValue());
 
-			if (_strap.IsDead()){
-				if(_strap.SetupAutoDestroy(gameTime)){
+			if (_strap.IsDead()) {
+				if (_strap.SetupAutoDestroy(gameTime)) {
 					// TODO Send Packet 陷阱關閉
 
-					BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
-							+ String.valueOf(C_Trap_Disable) + C_PacketSymbol
-							+ String.valueOf(_slot) + C_PacketSymbol
-							+ String.valueOf(_key));
+					BroadcastPacketToRoom(String.valueOf(C_Trap)
+							+ C_PacketSymbol + String.valueOf(C_Trap_Disable)
+							+ C_PacketSymbol + String.valueOf(_slot)
+							+ C_PacketSymbol + String.valueOf(_key));
 				}
-			}else {
+			} else {
 				// TODO Send Packet Hit Trap
 				BroadcastPacketToRoom(String.valueOf(C_Trap) + C_PacketSymbol
 						+ String.valueOf(C_Trap_BeAttacked) + C_PacketSymbol
@@ -496,7 +492,7 @@ public class GameInstance extends TimerTask {
 								+ String.valueOf(_trapInstance.getSlotID())
 								+ C_PacketSymbol
 								+ String.valueOf(_trapInstance.getSlotKey()));
-						// System.out.println("Destroy trap auto");
+
 					}
 				} else if (_trapInstance.CanAutoDestroyTrap(gameTime)) {
 
@@ -509,7 +505,7 @@ public class GameInstance extends TimerTask {
 							+ String.valueOf(_trapInstance.getSlotID())
 							+ C_PacketSymbol
 							+ String.valueOf(_trapInstance.getSlotKey()));
-					// System.out.println("Destroy trap auto");
+
 				}
 			}
 		}
@@ -839,11 +835,10 @@ public class GameInstance extends TimerTask {
 	/** 計算遊戲結果 */
 	public void CalcGameResult() {
 		// TODO 計算勝利結果，傳送封包。
-		System.out.println("Calc GameOver Result Func");
+
 		if (_hunterList == null || _guardian == null) {
 			return;
 		}
-		System.out.println("Calc Game Over Result");
 
 		switch (_map.getGameMode()) {
 		case GameMap.GameMode_Cooperation:
