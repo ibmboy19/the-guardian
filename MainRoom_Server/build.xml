@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project name="Wicked Road" default="all" basedir=".">
+    <description>
+      The Guardian
+
+    </description>
+ 	
+    <!-- 相關資料目錄 -->
+ 	<property name="class.dir" value="bin" />
+	<property name="server.src.dir" value="src" />
+    <property name="lib.dir" value="lib" />
+    <property name="etc.dir" value="config" />
+
+	<!-- 封裝檔案名稱 -->
+	<property name="server.jar.file" value="guardianserver.jar" />
+	
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+ 			<include name="**/*.jar" />
+        </fileset>
+    </path>
+
+	<!-- 在 mf 檔內設定相關 class path -->
+	<pathconvert property="mf.classpath" pathsep=" ">
+		<path refid="classpath" />
+		<mapper>
+			<chainedmapper>
+				<flattenmapper />
+				<globmapper from="*" to="${lib.dir}/*" />
+			</chainedmapper>
+		</mapper>
+	</pathconvert>
+
+    <!-- 設定主要任務 -->
+    <target name="all" depends="clean,compile_server,jar_server" />
+
+    <!-- 清除既有的編譯檔案 -->
+    <target name="clean">
+        <delete dir="${class.dir}" />
+    </target>
+
+    <!-- Server 完整編譯(包含除錯訊息) -->
+    <target name="compile_server">
+        <mkdir dir="${class.dir}" />
+		<javac includeantruntime="true" debug="on" optimize="true" deprecation="true" source="1.7" target="1.7" encoding="UTF-8" destdir="${class.dir}">
+			<src path="${server.src.dir}" />
+			<classpath refid="classpath" />
+			<compilerarg value="-Xlint:unchecked"/>
+		</javac>
+    </target>
+
+     <!-- Server 最簡編譯(不包含任何除錯訊息) -->
+    <target name="compile_server_mini">
+        <mkdir dir="${class.dir}" />
+		<javac includeantruntime="true" debug="off" optimize="true" deprecation="true" source="1.7" target="1.7" encoding="UTF-8" destdir="${class.dir}">
+			<src path="${server.src.dir}" />
+			<classpath refid="classpath" />
+			<compilerarg value="-Xlint:unchecked"/>
+		</javac>
+    </target>
+
+   <!-- Server 封裝成 jar -->
+	<target name="jar_server" depends="copy_c3p0_config">
+		<jar basedir="${class.dir}" jarfile="${server.jar.file}">
+			<manifest>
+				<attribute name="Class-Path" value="${mf.classpath}" />
+				<attribute name="Main-Class" value="guard.server.Server" />
+				<attribute name="Created-By" value="NTUE_DTD" />
+				<attribute name="Specification-Title" value="NTUE_DTD" />
+				<attribute name="Specification-Vendor" value="NTUE_DTD" />
+			</manifest>
+		</jar>
+		<delete dir="${class.dir}" />
+	</target>
+	
+	<!-- 複製 c3p0 的設定檔到 class 根目錄 -->
+	<target name="copy_c3p0_config">
+		<copy todir="${class.dir}" file="${etc.dir}/c3p0-config.xml" overwrite="true" />
+	</target>
+</project>
